@@ -12,16 +12,16 @@ from app.api.routes.health import (
     router as health_router,
 )
 
-from app.api.routes.invoice import (
-    router as invoice_router,
-)
-
 from app.api.routes.inventory import (
     router as inventory_router,
 )
 
 from app.api.routes.inventory_location import (
     router as inventory_location_router,
+)
+
+from app.api.routes.invoice import (
+    router as invoice_router,
 )
 
 from app.api.routes.product import (
@@ -40,8 +40,16 @@ from app.api.routes.purchase_return import (
     router as purchase_return_router,
 )
 
+from app.api.routes.payment import (
+    router as payment_router,
+)
+
 from app.api.routes.retailer import (
     router as retailer_router,
+)
+
+from app.api.routes.sales_return import (
+    router as sales_return_router,
 )
 
 from app.api.routes.stock_movement import (
@@ -106,4 +114,12 @@ api_router.include_router(
 
 api_router.include_router(
     invoice_router
+)
+
+api_router.include_router(
+    sales_return_router
+)
+
+api_router.include_router(
+    payment_router
 )
