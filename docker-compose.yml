@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: digibills-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: digibills
+      POSTGRES_USER: digibills
+      POSTGRES_PASSWORD: digibills_dev_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - digibills_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  digibills_postgres_data:
