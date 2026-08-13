@@ -167,6 +167,7 @@ def create_invoice_endpoint(
             invoice_discount=request.discount_amount,
             notes=request.notes,
             employee_id=None,
+            user_id=current_user.id,
         )
 
         items = get_invoice_items(
