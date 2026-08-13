@@ -4,13 +4,18 @@ from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class InvoiceItem(Base):
     __tablename__ = "invoice_items"
+
+    invoice: Mapped["Invoice"] = relationship(
+        "Invoice",
+        back_populates="items",
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,

@@ -123,3 +123,11 @@ api_router.include_router(
 api_router.include_router(
     payment_router
 )
+
+from app.api.routes.warranty import (
+    router as warranty_router,
+)
+
+api_router.include_router(
+    warranty_router
+)
