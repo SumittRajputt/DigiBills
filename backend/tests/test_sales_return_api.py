@@ -523,3 +523,274 @@ def test_process_sales_return_api_rejects_second_processing(
     assert response.json()["detail"] == (
         "Only requested sales returns can be processed."
     )
+
+
+def test_create_sales_return_api_rejects_duplicate_requested_return(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    first_response = create_sales_return(client, context)
+
+    assert first_response.status_code == 201
+
+    response = client.post(
+        "/sales-returns",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_id": context["invoice"].invoice_id,
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "A requested sales return already exists for this invoice."
+    )
+
+
+def test_add_sales_return_item_api_unknown_return(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = client.post(
+        "/sales-returns/SR-DOES-NOT-EXIST/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Sales return not found."
+
+
+def test_process_sales_return_api_unknown_return(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = client.post(
+        "/sales-returns/SR-DOES-NOT-EXIST/process",
+        headers=auth_headers(context["token"]),
+        json={
+            "refund_method": "cash",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Sales return not found."
+
+
+def test_add_sales_return_item_api_rejects_invalid_condition(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+            "condition": "unknown_condition",
+            "return_to_inventory": True,
+            "restocking_fee": "0.00",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Invalid return condition."
+    )
+
+
+def test_add_sales_return_item_api_rejects_excess_restocking_fee(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+            "condition": "good",
+            "return_to_inventory": True,
+            "restocking_fee": "1500.01",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Restocking fee cannot exceed return amount."
+    )
+
+
+def test_add_sales_return_item_api_rejects_negative_restocking_fee(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+            "condition": "good",
+            "return_to_inventory": True,
+            "restocking_fee": "-1.00",
+        },
+    )
+
+    # Pydantic validates the request before the service is called.
+    assert response.status_code == 422
+
+
+def test_add_sales_return_item_api_rejects_item_from_wrong_invoice(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    other_invoice = create_invoice(
+        db=db,
+        retailer=context["retailer"],
+        customer=context["customer"],
+        location=context["location"],
+        items=[
+            InvoiceItemCreateRequest(
+                sku=context["variant"].sku,
+                quantity=1,
+            )
+        ],
+    )
+
+    other_invoice_item = other_invoice.items[0]
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(other_invoice_item.id),
+            "quantity": 1,
+            "condition": "good",
+            "return_to_inventory": True,
+            "restocking_fee": "0.00",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Invoice item does not belong to this invoice."
+    )
+
+
+def test_add_sales_return_item_api_rejects_after_processing(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    item_response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+            "condition": "good",
+            "return_to_inventory": True,
+            "restocking_fee": "0.00",
+        },
+    )
+
+    assert item_response.status_code == 200
+
+    process_response = client.post(
+        f"/sales-returns/{return_id}/process",
+        headers=auth_headers(context["token"]),
+        json={
+            "refund_method": "cash",
+        },
+    )
+
+    assert process_response.status_code == 200
+
+    response = client.post(
+        f"/sales-returns/{return_id}/items",
+        headers=auth_headers(context["token"]),
+        json={
+            "invoice_item_id": str(context["invoice_item"].id),
+            "quantity": 1,
+            "condition": "good",
+            "return_to_inventory": True,
+            "restocking_fee": "0.00",
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == (
+        "Items can only be added to a requested sales return."
+    )
+
+
+def test_create_sales_return_api_requires_authentication(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = client.post(
+        "/sales-returns",
+        json={
+            "invoice_id": context["invoice"].invoice_id,
+        },
+    )
+
+    assert response.status_code in (401, 403)
+
+
+def test_get_sales_return_api_requires_authentication(
+    client,
+    db,
+):
+    context = create_sales_return_api_context(db)
+
+    response = create_sales_return(client, context)
+
+    return_id = response.json()["return_id"]
+
+    response = client.get(
+        f"/sales-returns/{return_id}",
+    )
+
+    assert response.status_code in (401, 403)
