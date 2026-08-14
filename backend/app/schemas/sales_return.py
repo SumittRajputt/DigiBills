@@ -29,6 +29,9 @@ class SalesReturnItemCreateRequest(BaseModel):
 
 class SalesReturnCreateRequest(BaseModel):
     invoice_id: str = Field(min_length=1)
+    product_unit_ids: list[str] = Field(
+        default_factory=list,
+    )
     reason: Optional[str] = None
     notes: Optional[str] = None
 
