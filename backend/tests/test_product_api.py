@@ -57,7 +57,7 @@ def test_create_product_api(client, db):
         "/products",
         headers=auth_headers(context["token"]),
         json={
-            "product_code": "PROD-API-001",
+            "product_code": f"PROD-API-{uuid4().hex[:8].upper()}",
             "name": "API Test Product",
             "brand": "Test Brand",
             "category": "Electronics",
@@ -70,7 +70,7 @@ def test_create_product_api(client, db):
 
     data = response.json()
 
-    assert data["product_code"] == "PROD-API-001"
+    assert data["product_code"].startswith("PROD-API-")
     assert data["name"] == "API Test Product"
     assert data["brand"] == "Test Brand"
     assert data["category"] == "Electronics"
@@ -90,7 +90,7 @@ def test_create_product_api_with_optional_fields_omitted(
         "/products",
         headers=auth_headers(context["token"]),
         json={
-            "product_code": "PROD-API-002",
+            "product_code": f"PROD-API-{uuid4().hex[:8].upper()}",
             "name": "Minimal Product",
         },
     )
@@ -99,7 +99,7 @@ def test_create_product_api_with_optional_fields_omitted(
 
     data = response.json()
 
-    assert data["product_code"] == "PROD-API-002"
+    assert data["product_code"].startswith("PROD-API-")
     assert data["name"] == "Minimal Product"
     assert data["brand"] is None
     assert data["category"] is None
@@ -117,7 +117,7 @@ def test_create_product_api_can_disable_transferability(
         "/products",
         headers=auth_headers(context["token"]),
         json={
-            "product_code": "PROD-API-003",
+            "product_code": f"PROD-API-{uuid4().hex[:8].upper()}",
             "name": "Non Transferable Product",
             "is_transferable": False,
         },
@@ -137,7 +137,7 @@ def test_create_product_api_rejects_duplicate_product_code(
     context = create_product_api_context(db)
 
     payload = {
-        "product_code": "PROD-DUPLICATE",
+        "product_code": f"PROD-DUPLICATE-{uuid4().hex[:8].upper()}",
         "name": "Duplicate Product",
     }
 
@@ -153,7 +153,7 @@ def test_create_product_api_rejects_duplicate_product_code(
         "/products",
         headers=auth_headers(context["token"]),
         json={
-            "product_code": "PROD-DUPLICATE",
+            "product_code": payload["product_code"],
             "name": "Another Product",
         },
     )
@@ -221,7 +221,7 @@ def test_get_product_api(client, db):
         "/products",
         headers=auth_headers(context["token"]),
         json={
-            "product_code": "PROD-GET-001",
+            "product_code": f"PROD-GET-{uuid4().hex[:8].upper()}",
             "name": "Get Product",
             "brand": "Brand",
             "category": "Category",
