@@ -67,10 +67,17 @@ def purchase_order_to_response(order):
     )
 
 
-def purchase_order_item_to_response(item):
+def purchase_order_item_to_response(
+    item,
+    purchase_order_id=None,
+):
     return PurchaseOrderItemResponse(
         id=str(item.id),
-        purchase_order_id=str(item.purchase_order_id),
+        purchase_order_id=(
+            purchase_order_id
+            if purchase_order_id is not None
+            else str(item.purchase_order_id)
+        ),
         product_variant_id=str(item.product_variant_id),
         product_name=item.product_name,
         sku=item.sku,
@@ -238,7 +245,7 @@ def add_purchase_order_item_endpoint(
             tax_rate=request.tax_rate,
         )
 
-        return purchase_order_item_to_response(item)
+        return purchase_order_item_to_response(item, order.purchase_order_id)
 
     except ValueError as exc:
         raise HTTPException(
@@ -446,7 +453,7 @@ def receive_purchase_order_item_endpoint(
             performed_by_user_id=current_user.id,
         )
 
-        return purchase_order_item_to_response(item)
+        return purchase_order_item_to_response(item, order.purchase_order_id)
 
     except ValueError as exc:
         raise HTTPException(
