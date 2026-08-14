@@ -182,7 +182,7 @@ def approve_product_transfer_endpoint(
         transfer = approve_product_transfer(
             db=db,
             transfer=transfer,
-            rejected_by_user_id=current_user.id,
+            approved_by_user_id=current_user.id,
         )
 
         return transfer_to_response(transfer)
