@@ -10,10 +10,14 @@ from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
 from app.models.invoice import Invoice
 from app.models.invoice_item import InvoiceItem
+from app.models.invoice_item_unit import InvoiceItemUnit
 from app.models.product_variant import ProductVariant
+from app.models.product_unit import ProductUnit
+from app.models.product_ownership import ProductOwnership
 from app.models.retailer import Retailer
 from app.models.sales_return import SalesReturn
 from app.models.sales_return_item import SalesReturnItem
+from app.models.sales_return_item_unit import SalesReturnItemUnit
 from app.models.stock_movement import StockMovement
 from app.services.stock_movement_service import create_stock_movement
 
@@ -192,6 +196,7 @@ def add_sales_return_item(
     return_to_inventory: bool,
     restocking_fee: Decimal,
     reason: Optional[str] = None,
+    product_unit_ids: Optional[list[str]] = None,
 ) -> SalesReturnItem:
     if sales_return.status != "requested":
         raise ValueError(
@@ -207,6 +212,8 @@ def add_sales_return_item(
         raise ValueError(
             "Restocking fee cannot be negative."
         )
+
+    product_unit_ids = product_unit_ids or []
 
     invoice_item = get_invoice_item(
         db,
@@ -248,6 +255,17 @@ def add_sales_return_item(
             "Invalid return condition."
         )
 
+    product_variant = db.execute(
+        select(ProductVariant).where(
+            ProductVariant.id == invoice_item.product_variant_id
+        )
+    ).scalar_one_or_none()
+
+    if product_variant is None:
+        raise ValueError(
+            f"Product variant not found for SKU {invoice_item.sku}."
+        )
+
     existing_items_statement = select(
         SalesReturnItem
     ).where(
@@ -270,6 +288,117 @@ def add_sales_return_item(
         raise ValueError(
             "Return quantity cannot exceed sold quantity."
         )
+
+    selected_units: list[ProductUnit] = []
+
+    if product_variant.requires_serial_number:
+
+        if len(product_unit_ids) != quantity:
+            raise ValueError(
+                f"SKU '{invoice_item.sku}' requires exactly "
+                f"{quantity} product unit IDs."
+            )
+
+        if len(product_unit_ids) != len(set(product_unit_ids)):
+            raise ValueError(
+                "Duplicate product unit IDs are not allowed."
+            )
+
+        parsed_unit_ids = []
+
+        for product_unit_id in product_unit_ids:
+            try:
+                parsed_id = uuid.UUID(product_unit_id)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid product unit ID: {product_unit_id}"
+                )
+
+            parsed_unit_ids.append(parsed_id)
+
+        selected_units = list(
+            db.execute(
+                select(ProductUnit).where(
+                    ProductUnit.id.in_(parsed_unit_ids)
+                )
+            ).scalars().all()
+        )
+
+        if len(selected_units) != len(parsed_unit_ids):
+            raise ValueError(
+                "One or more product units were not found."
+            )
+
+        units_by_id = {
+            unit.id: unit
+            for unit in selected_units
+        }
+
+        selected_units = []
+
+        for parsed_id in parsed_unit_ids:
+            product_unit = units_by_id[parsed_id]
+
+            if product_unit.product_variant_id != invoice_item.product_variant_id:
+                raise ValueError(
+                    f"Product unit '{product_unit.serial_number}' "
+                    "does not belong to this invoice item product variant."
+                )
+
+            sold_mapping = db.execute(
+                select(InvoiceItemUnit).where(
+                    InvoiceItemUnit.invoice_item_id == invoice_item.id,
+                    InvoiceItemUnit.product_unit_id == product_unit.id,
+                )
+            ).scalar_one_or_none()
+
+            if sold_mapping is None:
+                raise ValueError(
+                    f"Product unit '{product_unit.serial_number}' "
+                    "was not sold on this invoice item."
+                )
+
+            existing_return_mapping = db.execute(
+                select(SalesReturnItemUnit)
+                .join(
+                    SalesReturnItem,
+                    SalesReturnItem.id
+                    == SalesReturnItemUnit.sales_return_item_id,
+                )
+                .where(
+                    SalesReturnItem.invoice_item_id == invoice_item.id,
+                    SalesReturnItemUnit.product_unit_id == product_unit.id,
+                )
+            ).scalar_one_or_none()
+
+            if existing_return_mapping is not None:
+                raise ValueError(
+                    f"Product unit '{product_unit.serial_number}' "
+                    "has already been returned."
+                )
+
+            ownership = db.execute(
+                select(ProductOwnership).where(
+                    ProductOwnership.product_unit_id == product_unit.id,
+                    ProductOwnership.customer_id == sales_return.customer_id,
+                    ProductOwnership.ownership_status == "active",
+                )
+            ).scalar_one_or_none()
+
+            if ownership is None:
+                raise ValueError(
+                    f"Product unit '{product_unit.serial_number}' "
+                    "does not have active ownership for this customer."
+                )
+
+            selected_units.append(product_unit)
+
+    else:
+
+        if product_unit_ids:
+            raise ValueError(
+                f"SKU '{invoice_item.sku}' does not use serial number tracking."
+            )
 
     unit_price = invoice_item.unit_price
 
@@ -303,6 +432,15 @@ def add_sales_return_item(
     )
 
     db.add(sales_return_item)
+    db.flush()
+
+    for product_unit in selected_units:
+        db.add(
+            SalesReturnItemUnit(
+                sales_return_item_id=sales_return_item.id,
+                product_unit_id=product_unit.id,
+            )
+        )
 
     sales_return.return_amount = (
         (sales_return.return_amount or Decimal("0.00"))
@@ -319,7 +457,6 @@ def add_sales_return_item(
     db.refresh(sales_return)
 
     return sales_return_item
-
 
 def process_sales_return(
     db: Session,
@@ -376,6 +513,74 @@ def process_sales_return(
         )
 
     for item in items:
+
+        product_variant = db.execute(
+            select(ProductVariant).where(
+                ProductVariant.id == item.product_variant_id
+            )
+        ).scalar_one_or_none()
+
+        if product_variant is None:
+            raise ValueError(
+                f"Product variant not found for SKU {item.sku}."
+            )
+
+        return_unit_mappings = list(
+            db.execute(
+                select(SalesReturnItemUnit).where(
+                    SalesReturnItemUnit.sales_return_item_id
+                    == item.id
+                )
+            ).scalars().all()
+        )
+
+        if product_variant.requires_serial_number:
+
+            if len(return_unit_mappings) != item.quantity:
+                raise ValueError(
+                    f"SKU '{item.sku}' requires exactly "
+                    f"{item.quantity} serialized return units."
+                )
+
+            for return_unit_mapping in return_unit_mappings:
+
+                product_unit = db.execute(
+                    select(ProductUnit).where(
+                        ProductUnit.id
+                        == return_unit_mapping.product_unit_id
+                    )
+                ).scalar_one_or_none()
+
+                if product_unit is None:
+                    raise ValueError(
+                        "Returned product unit was not found."
+                    )
+
+                ownership = db.execute(
+                    select(ProductOwnership).where(
+                        ProductOwnership.product_unit_id
+                        == product_unit.id,
+                        ProductOwnership.customer_id
+                        == sales_return.customer_id,
+                        ProductOwnership.ownership_status
+                        == "active",
+                    )
+                ).scalar_one_or_none()
+
+                if ownership is None:
+                    raise ValueError(
+                        f"Product unit '{product_unit.serial_number}' "
+                        "does not have active ownership for this customer."
+                    )
+
+                ownership.ownership_status = "released"
+                ownership.released_at = datetime.now(timezone.utc)
+
+                if item.return_to_inventory:
+                    product_unit.status = "in_stock"
+                else:
+                    product_unit.status = "returned"
+
         if not item.return_to_inventory:
             continue
 
@@ -389,17 +594,6 @@ def process_sales_return(
         if inventory_item is None:
             raise ValueError(
                 f"Inventory item not found for SKU {item.sku}."
-            )
-
-        product_variant = db.execute(
-            select(ProductVariant).where(
-                ProductVariant.id == item.product_variant_id
-            )
-        ).scalar_one_or_none()
-
-        if product_variant is None:
-            raise ValueError(
-                f"Product variant not found for SKU {item.sku}."
             )
 
         create_stock_movement(

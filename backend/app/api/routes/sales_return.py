@@ -158,6 +158,7 @@ def create_sales_return_endpoint(
             retailer=retailer,
             invoice=invoice,
             reason=request.reason,
+        product_unit_ids=request.product_unit_ids,
             notes=request.notes,
         )
 
@@ -230,6 +231,7 @@ def add_sales_return_item_endpoint(
             return_to_inventory=request.return_to_inventory,
             restocking_fee=request.restocking_fee,
             reason=request.reason,
+        product_unit_ids=request.product_unit_ids,
         )
 
         db.refresh(sales_return)

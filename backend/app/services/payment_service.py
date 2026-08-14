@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.invoice import Invoice
 from app.models.payment import Payment
+from app.services.audit_log_service import create_audit_log
 
 
 def generate_payment_id() -> str:
@@ -100,6 +101,8 @@ def create_payment(
     payment_method: str,
     transaction_reference: Optional[str] = None,
     notes: Optional[str] = None,
+    retailer_id: Optional[uuid.UUID] = None,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Payment:
     if invoice.status != "active":
         raise ValueError(
@@ -170,6 +173,21 @@ def create_payment(
 
     invoice.updated_at = datetime.now(timezone.utc)
 
+    create_audit_log(
+        db=db,
+        retailer_id=retailer_id,
+        user_id=user_id,
+        action="PAYMENT_CREATED",
+        entity_type="payment",
+        entity_id=payment.id,
+        description=(
+            f"Payment {payment.payment_id} created for "
+            f"invoice {invoice.invoice_id} "
+            f"amount {payment.amount:.2f} "
+            f"via {payment.payment_method}."
+        ),
+    )
+
     db.commit()
     db.refresh(payment)
     db.refresh(invoice)
@@ -182,6 +200,8 @@ def refund_payment(
     payment: Payment,
     refund_amount: Decimal,
     notes: Optional[str] = None,
+    retailer_id: Optional[uuid.UUID] = None,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Payment:
     if payment.payment_status != "completed":
         raise ValueError(
@@ -253,6 +273,20 @@ def refund_payment(
 
     invoice.updated_at = datetime.now(timezone.utc)
 
+    create_audit_log(
+        db=db,
+        retailer_id=retailer_id,
+        user_id=user_id,
+        action="PAYMENT_REFUNDED",
+        entity_type="payment",
+        entity_id=payment.id,
+        description=(
+            f"Payment {payment.payment_id} refunded "
+            f"amount {refund_amount:.2f}. "
+            f"Refund status: {payment.refund_status}."
+        ),
+    )
+
     db.commit()
     db.refresh(payment)
     db.refresh(invoice)
@@ -263,6 +297,8 @@ def refund_payment(
 def cancel_payment(
     db: Session,
     payment: Payment,
+    retailer_id: Optional[uuid.UUID] = None,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Payment:
     if payment.payment_status != "completed":
         raise ValueError(
@@ -301,6 +337,18 @@ def cancel_payment(
         invoice.payment_status = "paid"
 
     invoice.updated_at = datetime.now(timezone.utc)
+
+    create_audit_log(
+        db=db,
+        retailer_id=retailer_id,
+        user_id=user_id,
+        action="PAYMENT_CANCELLED",
+        entity_type="payment",
+        entity_id=payment.id,
+        description=(
+            f"Payment {payment.payment_id} cancelled."
+        ),
+    )
 
     db.commit()
     db.refresh(payment)

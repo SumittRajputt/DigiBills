@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 class InvoiceItemCreateRequest(BaseModel):
     sku: str = Field(min_length=1, max_length=100)
     quantity: int = Field(gt=0)
+    product_unit_ids: list[str] = Field(
+        default_factory=list,
+    )
     unit_price: Optional[Decimal] = Field(
         default=None,
         gt=0,

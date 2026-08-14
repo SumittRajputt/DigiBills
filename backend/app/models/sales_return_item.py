@@ -4,13 +4,19 @@ from decimal import Decimal
 from typing import Optional
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class SalesReturnItem(Base):
     __tablename__ = "sales_return_items"
+
+    unit_mappings: Mapped[list["SalesReturnItemUnit"]] = relationship(
+        "SalesReturnItemUnit",
+        back_populates="sales_return_item",
+        cascade="all, delete-orphan",
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,

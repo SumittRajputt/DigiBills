@@ -16,18 +16,27 @@ class OwnershipHistory(Base):
         default=uuid.uuid4,
     )
 
-    product_variant_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("product_variants.id", ondelete="RESTRICT"),
+    product_unit_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "product_units.id",
+            ondelete="RESTRICT",
+        ),
         nullable=False,
     )
 
     from_customer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        ForeignKey("customers.id", ondelete="SET NULL"),
+        ForeignKey(
+            "customers.id",
+            ondelete="SET NULL",
+        ),
         nullable=True,
     )
 
     to_customer_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("customers.id", ondelete="RESTRICT"),
+        ForeignKey(
+            "customers.id",
+            ondelete="RESTRICT",
+        ),
         nullable=False,
     )
 

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -16,13 +16,19 @@ class ProductOwnership(Base):
         default=uuid.uuid4,
     )
 
-    product_variant_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("product_variants.id", ondelete="RESTRICT"),
+    product_unit_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "product_units.id",
+            ondelete="RESTRICT",
+        ),
         nullable=False,
     )
 
     customer_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("customers.id", ondelete="RESTRICT"),
+        ForeignKey(
+            "customers.id",
+            ondelete="RESTRICT",
+        ),
         nullable=False,
     )
 

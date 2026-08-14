@@ -12,6 +12,12 @@ from app.core.database import Base
 class InvoiceItem(Base):
     __tablename__ = "invoice_items"
 
+    unit_mappings: Mapped[list["InvoiceItemUnit"]] = relationship(
+        "InvoiceItemUnit",
+        back_populates="invoice_item",
+        cascade="all, delete-orphan",
+    )
+
     invoice: Mapped["Invoice"] = relationship(
         "Invoice",
         back_populates="items",

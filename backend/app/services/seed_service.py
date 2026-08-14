@@ -140,7 +140,6 @@ ROLE_PERMISSIONS: Dict[str, List[str]] = {
     "retailer_owner": [
         permission["name"]
         for permission in PERMISSIONS
-        if permission["name"] != "audit_log.view"
     ],
     "retailer_manager": [
         "retailer.view",

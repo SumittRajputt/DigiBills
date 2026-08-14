@@ -11,9 +11,15 @@ from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
 from app.models.invoice import Invoice
 from app.models.invoice_item import InvoiceItem
+from app.models.invoice_item_unit import InvoiceItemUnit
 from app.models.product import Product
+from app.models.product_unit import ProductUnit
 from app.models.product_variant import ProductVariant
 from app.models.retailer import Retailer
+from app.services.audit_log_service import create_audit_log
+from app.services.product_ownership_service import (
+    assign_product_ownership,
+)
 from app.services.stock_movement_service import create_stock_movement
 
 
@@ -110,9 +116,7 @@ def get_variant_with_product(
         )
     )
 
-    return db.execute(
-        statement
-    ).first()
+    return db.execute(statement).first()
 
 
 def get_inventory_item(
@@ -133,6 +137,72 @@ def get_inventory_item(
     ).scalar_one_or_none()
 
 
+def get_product_units(
+    db: Session,
+    product_unit_ids: list[str],
+    product_variant_id: uuid.UUID,
+) -> list[ProductUnit]:
+
+    if len(product_unit_ids) != len(set(product_unit_ids)):
+        raise ValueError(
+            "Duplicate product unit IDs are not allowed."
+        )
+
+    parsed_ids = []
+
+    for product_unit_id in product_unit_ids:
+        try:
+            parsed_id = uuid.UUID(product_unit_id)
+        except ValueError:
+            raise ValueError(
+                f"Invalid product unit ID: {product_unit_id}"
+            )
+
+        parsed_ids.append(parsed_id)
+
+    if not parsed_ids:
+        return []
+
+    statement = select(ProductUnit).where(
+        ProductUnit.id.in_(parsed_ids)
+    )
+
+    units = list(
+        db.execute(statement).scalars().all()
+    )
+
+    if len(units) != len(parsed_ids):
+        raise ValueError(
+            "One or more product units were not found."
+        )
+
+    units_by_id = {
+        unit.id: unit
+        for unit in units
+    }
+
+    ordered_units = []
+
+    for parsed_id in parsed_ids:
+        unit = units_by_id[parsed_id]
+
+        if unit.product_variant_id != product_variant_id:
+            raise ValueError(
+                f"Product unit '{unit.serial_number}' "
+                "does not belong to this product variant."
+            )
+
+        if unit.status != "in_stock":
+            raise ValueError(
+                f"Product unit '{unit.serial_number}' "
+                "is not available for sale."
+            )
+
+        ordered_units.append(unit)
+
+    return ordered_units
+
+
 def create_invoice(
     db: Session,
     retailer: Retailer,
@@ -143,6 +213,7 @@ def create_invoice(
     invoice_discount: Decimal = Decimal("0.00"),
     notes: Optional[str] = None,
     employee_id: Optional[uuid.UUID] = None,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Invoice:
 
     if retailer.status != "active":
@@ -232,6 +303,35 @@ def create_invoice(
                 f"requested: {request_item.quantity}."
             )
 
+        product_unit_ids = getattr(
+            request_item,
+            "product_unit_ids",
+            [],
+        )
+
+        if variant.requires_serial_number:
+
+            if len(product_unit_ids) != request_item.quantity:
+                raise ValueError(
+                    f"SKU '{sku}' requires exactly "
+                    f"{request_item.quantity} product unit IDs."
+                )
+
+            product_units = get_product_units(
+                db=db,
+                product_unit_ids=product_unit_ids,
+                product_variant_id=variant.id,
+            )
+
+        else:
+
+            if product_unit_ids:
+                raise ValueError(
+                    f"SKU '{sku}' does not use serial number tracking."
+                )
+
+            product_units = []
+
         unit_price = (
             request_item.unit_price
             if request_item.unit_price is not None
@@ -288,6 +388,7 @@ def create_invoice(
                 "tax_rate": tax_rate,
                 "tax_amount": tax_amount,
                 "line_total": line_total,
+                "product_units": product_units,
             }
         )
 
@@ -344,6 +445,25 @@ def create_invoice(
         )
 
         db.add(invoice_item)
+        db.flush()
+
+        for product_unit in prepared["product_units"]:
+
+            invoice_item_unit = InvoiceItemUnit(
+                invoice_item_id=invoice_item.id,
+                product_unit_id=product_unit.id,
+            )
+
+            db.add(invoice_item_unit)
+
+            assign_product_ownership(
+                db=db,
+                invoice=invoice,
+                invoice_item=invoice_item,
+                customer=customer,
+                product_unit=product_unit,
+                source="invoice",
+            )
 
         create_stock_movement(
             db=db,
@@ -353,13 +473,27 @@ def create_invoice(
             inventory_item=prepared["inventory_item"],
             movement_type="sale",
             quantity=prepared["quantity"],
-            performed_by_user_id=employee_id,
+            performed_by_user_id=user_id,
             unit_cost=variant.purchase_cost,
             reference_type="invoice",
             reference_id=invoice.id,
             notes=f"Sold against invoice {invoice.invoice_id}",
             commit=False,
         )
+
+    create_audit_log(
+        db=db,
+        retailer_id=retailer.id,
+        user_id=user_id,
+        action="INVOICE_CREATED",
+        entity_type="invoice",
+        entity_id=invoice.id,
+        description=(
+            f"Invoice {invoice.invoice_id} created "
+            f"for customer {customer.customer_id} "
+            f"amount {invoice.total_amount:.2f}."
+        ),
+    )
 
     db.commit()
     db.refresh(invoice)
@@ -371,6 +505,7 @@ def get_invoice_items(
     db: Session,
     invoice_id: uuid.UUID,
 ) -> list[InvoiceItem]:
+
     statement = (
         select(InvoiceItem)
         .where(

@@ -8,6 +8,9 @@ from pydantic import BaseModel, Field
 class SalesReturnItemCreateRequest(BaseModel):
     invoice_item_id: str = Field(min_length=1)
     quantity: int = Field(gt=0)
+    product_unit_ids: list[str] = Field(
+        default_factory=list,
+    )
     condition: str = Field(
         default="good",
         min_length=1,

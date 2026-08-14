@@ -98,6 +98,8 @@ def create_payment_endpoint(
             payment_method=request.payment_method,
             transaction_reference=request.transaction_reference,
             notes=request.notes,
+            retailer_id=retailer.id,
+            user_id=current_user.id,
         )
 
         return payment_to_response(payment)
@@ -279,6 +281,8 @@ def refund_payment_endpoint(
             payment=payment,
             refund_amount=request.refund_amount,
             notes=request.notes,
+            retailer_id=retailer.id,
+            user_id=current_user.id,
         )
 
         return payment_to_response(payment)
@@ -350,6 +354,8 @@ def cancel_payment_endpoint(
         payment = cancel_payment(
             db=db,
             payment=payment,
+            retailer_id=retailer.id,
+            user_id=current_user.id,
         )
 
         return payment_to_response(payment)

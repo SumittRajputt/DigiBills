@@ -14,6 +14,7 @@ from app.models.purchase_order_item import PurchaseOrderItem
 from app.models.retailer import Retailer
 from app.models.supplier import Supplier
 from app.models.user import User
+from app.services.audit_log_service import create_audit_log
 from app.services.stock_movement_service import (
     create_stock_movement,
 )
@@ -138,6 +139,21 @@ def create_purchase_order(
     )
 
     db.add(purchase_order)
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        retailer_id=retailer.id,
+        user_id=created_by_user.id,
+        action="PURCHASE_ORDER_CREATED",
+        entity_type="purchase_order",
+        entity_id=purchase_order.id,
+        description=(
+            f"Purchase order {purchase_order.purchase_order_id} "
+            f"created for supplier {supplier.supplier_id}."
+        ),
+    )
+
     db.commit()
     db.refresh(purchase_order)
 
@@ -219,6 +235,23 @@ def add_purchase_order_item(
         + purchase_order.tax_amount
     )
 
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        retailer_id=purchase_order.retailer_id,
+        user_id=purchase_order.created_by_user_id,
+        action="PURCHASE_ORDER_ITEM_ADDED",
+        entity_type="purchase_order_item",
+        entity_id=item.id,
+        description=(
+            f"Item {item.sku} added to purchase order "
+            f"{purchase_order.purchase_order_id}. "
+            f"Quantity {item.ordered_quantity}, "
+            f"unit cost {item.unit_cost:.2f}."
+        ),
+    )
+
     db.commit()
     db.refresh(item)
     db.refresh(purchase_order)
@@ -260,7 +293,24 @@ def update_purchase_order_status(
             "Cancelled purchase orders cannot be reopened."
         )
 
+    previous_status = purchase_order.status
+
     purchase_order.status = status
+
+    db.flush()
+
+    create_audit_log(
+        db=db,
+        retailer_id=purchase_order.retailer_id,
+        user_id=purchase_order.created_by_user_id,
+        action="PURCHASE_ORDER_STATUS_CHANGED",
+        entity_type="purchase_order",
+        entity_id=purchase_order.id,
+        description=(
+            f"Purchase order {purchase_order.purchase_order_id} "
+            f"status changed from {previous_status} to {status}."
+        ),
+    )
 
     db.commit()
     db.refresh(purchase_order)
@@ -380,6 +430,23 @@ def receive_purchase_order_item(
             purchase_order.status = (
                 "partially_received"
             )
+
+        db.flush()
+
+        create_audit_log(
+            db=db,
+            retailer_id=retailer.id,
+            user_id=performed_by_user_id,
+            action="PURCHASE_ORDER_RECEIVED",
+            entity_type="purchase_order",
+            entity_id=purchase_order.id,
+            description=(
+                f"Purchase order {purchase_order.purchase_order_id} "
+                f"received quantity {received_quantity} of "
+                f"SKU {purchase_order_item.sku}. "
+                f"Status: {purchase_order.status}."
+            ),
+        )
 
         db.commit()
 

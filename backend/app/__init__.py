@@ -35,3 +35,6 @@ from app.models.purchase_return import PurchaseReturn
 from app.models.purchase_return_item import PurchaseReturnItem
 
 from app.models.audit_log import AuditLog
+from app.models.invoice_item_unit import InvoiceItemUnit
+
+from app.models.sales_return_item_unit import SalesReturnItemUnit
