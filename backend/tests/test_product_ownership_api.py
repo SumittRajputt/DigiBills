@@ -266,3 +266,341 @@ def test_create_product_ownership_api_rejects_wrong_variant(
         "does not belong to the product variant"
         in response.json()["detail"]
     )
+
+
+def test_get_product_ownership_api(client, db):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    create_response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": str(invoice_item.id),
+            "product_unit_id": str(unit.id),
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    ownership_id = create_response.json()["id"]
+
+    response = client.get(
+        f"/product-ownerships/{ownership_id}",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == ownership_id
+    assert data["product_unit_id"] == str(unit.id)
+    assert data["customer_id"] == str(customer.id)
+    assert data["ownership_status"] == "active"
+    assert data["source"] == "invoice"
+
+
+def test_get_product_ownership_api_not_found(client, db):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.get(
+        f"/product-ownerships/{uuid4()}",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Product ownership not found."
+
+
+def test_get_product_ownership_by_serial_api_not_found(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.get(
+        "/product-ownerships/serial/UNKNOWN-SERIAL",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 404
+    assert (
+        response.json()["detail"]
+        == "Active ownership not found for this serial number."
+    )
+
+
+def test_create_product_ownership_api_rejects_duplicate(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    payload = {
+        "invoice_id": invoice.invoice_id,
+        "invoice_item_id": str(invoice_item.id),
+        "product_unit_id": str(unit.id),
+    }
+
+    first_response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json=payload,
+    )
+
+    assert first_response.status_code == 201
+
+    second_response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json=payload,
+    )
+
+    assert second_response.status_code == 409
+    assert "is not available for ownership assignment" in (
+        second_response.json()["detail"]
+    )
+
+
+def test_create_product_ownership_api_invalid_invoice(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": "INV-NOT-FOUND",
+            "invoice_item_id": str(invoice_item.id),
+            "product_unit_id": str(unit.id),
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Invoice not found."
+
+
+def test_create_product_ownership_api_invalid_invoice_item(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": str(uuid4()),
+            "product_unit_id": str(unit.id),
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Invoice item not found."
+
+
+def test_create_product_ownership_api_invalid_product_unit(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": str(invoice_item.id),
+            "product_unit_id": str(uuid4()),
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Product unit not found."
+
+
+def test_create_product_ownership_api_invalid_invoice_item_uuid(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": "not-a-uuid",
+            "product_unit_id": str(unit.id),
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Invoice item not found."
+
+
+def test_create_product_ownership_api_invalid_product_unit_uuid(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.post(
+        "/product-ownerships",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": str(invoice_item.id),
+            "product_unit_id": "not-a-uuid",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Product unit not found."
+
+
+def test_get_product_ownership_api_invalid_uuid(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    token = create_user_token(user)
+
+    response = client.get(
+        "/product-ownerships/not-a-uuid",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Product ownership not found."
+
+
+def test_create_product_ownership_api_requires_authentication(
+    client,
+    db,
+):
+    (
+        user,
+        customer,
+        invoice,
+        invoice_item,
+        unit,
+    ) = create_ownership_api_context(db)
+
+    response = client.post(
+        "/product-ownerships",
+        json={
+            "invoice_id": invoice.invoice_id,
+            "invoice_item_id": str(invoice_item.id),
+            "product_unit_id": str(unit.id),
+        },
+    )
+
+    assert response.status_code in (401, 403)
