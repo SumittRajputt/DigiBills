@@ -30,9 +30,25 @@ class Invoice(Base):
         nullable=False,
     )
 
-    retailer_id: Mapped[uuid.UUID] = mapped_column(
+    retailer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         ForeignKey("retailers.id", ondelete="RESTRICT"),
-        nullable=False,
+        nullable=True,
+    )
+
+    subscription_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("subscriptions.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
+    billing_period_start: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    billing_period_end: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     employee_id: Mapped[Optional[uuid.UUID]] = mapped_column(

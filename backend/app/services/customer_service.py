@@ -37,6 +37,19 @@ def get_customer_by_customer_id(
     ).scalar_one_or_none()
 
 
+def get_all_customers(
+    db: Session,
+) -> list[Customer]:
+    statement = (
+        select(Customer)
+        .order_by(Customer.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
 def get_customer_by_user_id(
     db: Session,
     user_id: uuid.UUID,

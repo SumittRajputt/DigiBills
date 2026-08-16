@@ -249,3 +249,18 @@ def transfer_warranty(
     db.refresh(warranty)
 
     return warranty
+
+
+def get_all_warranties(
+    db: Session,
+) -> list[Warranty]:
+    statement = (
+        select(Warranty)
+        .order_by(
+            Warranty.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

@@ -87,3 +87,15 @@ def create_retailer(
     db.refresh(retailer)
 
     return retailer
+
+def get_all_retailers(
+    db: Session,
+) -> list[Retailer]:
+    statement = (
+        select(Retailer)
+        .order_by(Retailer.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

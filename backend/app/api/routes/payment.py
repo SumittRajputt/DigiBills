@@ -13,6 +13,7 @@ from app.services.invoice_service import get_invoice_by_reference
 from app.services.payment_service import (
     cancel_payment,
     create_payment,
+    get_all_payments,
     get_invoice_payments,
     get_payment_by_reference,
     refund_payment,
@@ -111,6 +112,24 @@ def create_payment_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[PaymentDetailResponse],
+)
+def list_payments(
+    current_user: User = Depends(
+        require_permission("invoice.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    payments = get_all_payments(db)
+
+    return [
+        payment_to_response(payment)
+        for payment in payments
+    ]
 
 
 @router.get(

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -40,3 +40,4 @@ class UserResponse(BaseModel):
     email: Optional[str] = None
     status: str
     is_phone_verified: bool
+    roles: List[str] = []

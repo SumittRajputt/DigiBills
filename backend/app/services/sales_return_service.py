@@ -628,3 +628,18 @@ def process_sales_return(
     db.refresh(sales_return)
 
     return sales_return
+
+
+def get_all_sales_returns(
+    db: Session,
+) -> list[SalesReturn]:
+    statement = (
+        select(SalesReturn)
+        .order_by(
+            SalesReturn.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

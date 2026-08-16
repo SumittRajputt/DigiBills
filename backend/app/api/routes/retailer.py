@@ -19,6 +19,7 @@ from app.services.retailer_service import (
     create_retailer,
     get_retailer_by_owner,
     get_retailer_by_retailer_id,
+    get_all_retailers,
 )
 
 
@@ -81,6 +82,24 @@ def create_retailer_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[RetailerResponse],
+)
+def list_retailers(
+    current_user: User = Depends(
+        require_permission("retailer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    retailers = get_all_retailers(db)
+
+    return [
+        retailer_to_response(retailer)
+        for retailer in retailers
+    ]
 
 
 @router.get(

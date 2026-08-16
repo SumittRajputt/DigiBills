@@ -8,3 +8,5 @@ __pycache__/
 *.log
 .pytest_cache/
 .mypy_cache/
+web/node_modules/
+web/dist/

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.invoice import Invoice
 from app.models.payment import Payment
+from app.models.subscription import Subscription
 from app.services.audit_log_service import create_audit_log
 
 
@@ -94,6 +95,19 @@ def get_completed_payment_total(
     return total
 
 
+def get_all_payments(
+    db: Session,
+) -> list[Payment]:
+    statement = (
+        select(Payment)
+        .order_by(Payment.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
 def create_payment(
     db: Session,
     invoice: Invoice,
@@ -168,6 +182,40 @@ def create_payment(
 
     if new_paid_total >= invoice.total_amount:
         invoice.payment_status = "paid"
+
+        # Subscription invoices activate the corresponding
+        # billing period only after the invoice is fully paid.
+        if invoice.subscription_id is not None:
+            subscription = db.execute(
+                select(Subscription)
+                .where(
+                    Subscription.id == invoice.subscription_id
+                )
+                .with_for_update()
+            ).scalar_one_or_none()
+
+            if subscription is None:
+                raise ValueError(
+                    "Subscription not found for invoice."
+                )
+
+            if (
+                invoice.billing_period_start is not None
+                and invoice.billing_period_end is not None
+            ):
+                subscription.current_period_start = (
+                    invoice.billing_period_start
+                )
+                subscription.current_period_end = (
+                    invoice.billing_period_end
+                )
+                subscription.status = "active"
+                subscription.auto_renew = True
+                subscription.cancelled_at = None
+                subscription.updated_at = (
+                    datetime.now(timezone.utc)
+                )
+
     else:
         invoice.payment_status = "partial"
 
@@ -187,6 +235,132 @@ def create_payment(
             f"via {payment.payment_method}."
         ),
     )
+
+    db.commit()
+    db.refresh(payment)
+    db.refresh(invoice)
+
+    return payment
+
+
+def create_subscription_payment(
+    db: Session,
+    invoice: Invoice,
+    amount: Decimal,
+    payment_method: str,
+    transaction_reference: Optional[str] = None,
+    notes: Optional[str] = None,
+    customer_id: Optional[uuid.UUID] = None,
+) -> Payment:
+    if invoice.status != "active":
+        raise ValueError(
+            "Only active invoices can receive payments."
+        )
+
+    if invoice.subscription_id is None:
+        raise ValueError(
+            "This invoice is not a subscription invoice."
+        )
+
+    if customer_id is None:
+        raise ValueError(
+            "Customer ID is required."
+        )
+
+    if invoice.customer_id != customer_id:
+        raise ValueError(
+            "Invoice does not belong to this customer."
+        )
+
+    amount = Decimal(amount)
+
+    if amount <= Decimal("0.00"):
+        raise ValueError(
+            "Payment amount must be greater than zero."
+        )
+
+    payment_method = payment_method.strip().lower()
+
+    if not payment_method:
+        raise ValueError(
+            "Payment method is required."
+        )
+
+    already_paid = get_completed_payment_total(
+        db,
+        invoice.id,
+    )
+
+    remaining_amount = (
+        invoice.total_amount - already_paid
+    )
+
+    if remaining_amount <= Decimal("0.00"):
+        raise ValueError(
+            "Invoice is already fully paid."
+        )
+
+    if amount > remaining_amount:
+        raise ValueError(
+            f"Payment amount cannot exceed "
+            f"remaining invoice amount of "
+            f"{remaining_amount:.2f}."
+        )
+
+    payment = Payment(
+        payment_id=generate_payment_id(),
+        invoice_id=invoice.id,
+        amount=amount,
+        payment_method=payment_method,
+        payment_status="completed",
+        transaction_reference=transaction_reference,
+        paid_at=datetime.now(timezone.utc),
+        refund_amount=Decimal("0.00"),
+        refund_status=None,
+        notes=notes,
+    )
+
+    db.add(payment)
+    db.flush()
+
+    new_paid_total = already_paid + amount
+
+    if new_paid_total >= invoice.total_amount:
+        invoice.payment_status = "paid"
+
+        subscription = db.execute(
+            select(Subscription)
+            .where(
+                Subscription.id == invoice.subscription_id
+            )
+            .with_for_update()
+        ).scalar_one_or_none()
+
+        if subscription is None:
+            raise ValueError(
+                "Subscription not found for invoice."
+            )
+
+        if (
+            invoice.billing_period_start is not None
+            and invoice.billing_period_end is not None
+        ):
+            subscription.current_period_start = (
+                invoice.billing_period_start
+            )
+            subscription.current_period_end = (
+                invoice.billing_period_end
+            )
+            subscription.status = "active"
+            subscription.auto_renew = True
+            subscription.cancelled_at = None
+            subscription.updated_at = (
+                datetime.now(timezone.utc)
+            )
+    else:
+        invoice.payment_status = "partial"
+
+    invoice.updated_at = datetime.now(timezone.utc)
 
     db.commit()
     db.refresh(payment)

@@ -400,3 +400,32 @@ def process_purchase_return(
     except Exception:
         db.rollback()
         raise
+
+def get_all_purchase_returns(
+    db: Session,
+) -> list[PurchaseReturn]:
+    statement = (
+        select(PurchaseReturn)
+        .order_by(
+            PurchaseReturn.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
+def get_all_purchase_returns(
+    db: Session,
+) -> list[PurchaseReturn]:
+    statement = (
+        select(PurchaseReturn)
+        .order_by(
+            PurchaseReturn.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

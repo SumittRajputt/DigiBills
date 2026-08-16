@@ -203,6 +203,114 @@ def get_product_units(
     return ordered_units
 
 
+def get_all_invoices(
+    db: Session,
+) -> list[Invoice]:
+    statement = (
+        select(Invoice)
+        .order_by(Invoice.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
+def create_subscription_invoice(
+    db: Session,
+    subscription,
+    plan,
+    billing_period_start: datetime,
+    billing_period_end: datetime,
+) -> Invoice:
+    """
+    Create an invoice for a monthly or yearly subscription period.
+
+    Subscription invoices are intentionally separate from retail
+    product invoices and therefore do not touch inventory.
+    """
+
+    if subscription.customer_id is None:
+        raise ValueError(
+            "Only customer subscriptions can generate invoices."
+        )
+
+    if subscription.status not in {
+        "trialing",
+        "active",
+    }:
+        raise ValueError(
+            "Subscription is not active."
+        )
+
+    if plan.billing_type not in {
+        "monthly",
+        "yearly",
+    }:
+        raise ValueError(
+            "Subscription invoice requires a monthly or yearly plan."
+        )
+
+    if billing_period_end <= billing_period_start:
+        raise ValueError(
+            "Billing period end must be after billing period start."
+        )
+
+    # Idempotency: never create two invoices for the same
+    # subscription billing period.
+    existing = db.execute(
+        select(Invoice).where(
+            Invoice.subscription_id == subscription.id,
+            Invoice.billing_period_start
+            == billing_period_start,
+            Invoice.billing_period_end
+            == billing_period_end,
+        )
+    ).scalar_one_or_none()
+
+    if existing is not None:
+        return existing
+
+    if plan.billing_type == "monthly":
+        amount = money(Decimal(plan.monthly_price))
+    else:
+        amount = money(Decimal(plan.yearly_price))
+
+    if amount <= 0:
+        raise ValueError(
+            "Subscription plan price must be greater than zero."
+        )
+
+    now = datetime.now(timezone.utc)
+
+    invoice = Invoice(
+        invoice_id=generate_invoice_id(),
+        retailer_id=None,
+        employee_id=None,
+        customer_id=subscription.customer_id,
+        invoice_number=None,
+        invoice_date=now,
+        subtotal=amount,
+        discount_amount=Decimal("0.00"),
+        tax_amount=Decimal("0.00"),
+        total_amount=amount,
+        payment_status="unpaid",
+        status="active",
+        subscription_id=subscription.id,
+        billing_period_start=billing_period_start,
+        billing_period_end=billing_period_end,
+        notes=(
+            f"Subscription renewal for "
+            f"{subscription.subscription_id}"
+        ),
+    )
+
+    db.add(invoice)
+    db.flush()
+
+    return invoice
+
+
 def create_invoice(
     db: Session,
     retailer: Retailer,

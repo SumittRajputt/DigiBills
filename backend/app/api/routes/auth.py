@@ -10,6 +10,7 @@ from app.schemas.auth import (
     TokenResponse,
     UserResponse,
 )
+from app.services.authorization_service import get_user_roles
 from app.services.auth_service import (
     authenticate_user,
     create_user_token,
@@ -89,13 +90,20 @@ def login(
 )
 def get_me(
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
+    roles = get_user_roles(
+        db=db,
+        user_id=current_user.id,
+    )
+
     return UserResponse(
         id=str(current_user.id),
         phone_number=current_user.phone_number,
         email=current_user.email,
         status=current_user.status,
         is_phone_verified=current_user.is_phone_verified,
+        roles=[role.name for role in roles],
     )
 
 

@@ -67,3 +67,18 @@ def get_audit_log_for_retailer(
     return db.execute(
         statement
     ).scalar_one_or_none()
+
+
+def get_all_audit_logs(
+    db: Session,
+) -> List[AuditLog]:
+    statement = (
+        select(AuditLog)
+        .order_by(
+            AuditLog.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

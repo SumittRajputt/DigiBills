@@ -10,6 +10,7 @@ from app.schemas.customer import (
 )
 from app.services.customer_service import (
     create_customer,
+    get_all_customers,
     get_customer_by_user_id,
 )
 
@@ -62,6 +63,24 @@ def create_customer_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[CustomerResponse],
+)
+def list_customers(
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    customers = get_all_customers(db)
+
+    return [
+        customer_to_response(customer)
+        for customer in customers
+    ]
 
 
 @router.get(

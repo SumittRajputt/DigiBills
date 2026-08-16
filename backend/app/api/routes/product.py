@@ -11,6 +11,7 @@ from app.schemas.product import (
 from app.services.product_service import (
     create_product,
     get_product_by_code,
+    get_all_products,
 )
 
 
@@ -65,6 +66,24 @@ def create_product_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[ProductResponse],
+)
+def list_products(
+    current_user: User = Depends(
+        require_permission("product.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    products = get_all_products(db)
+
+    return [
+        product_to_response(product)
+        for product in products
+    ]
 
 
 @router.get(

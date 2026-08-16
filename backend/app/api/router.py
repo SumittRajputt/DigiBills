@@ -3,6 +3,12 @@ from fastapi import APIRouter
 from app.api.routes.audit_log import (
     router as audit_log_router,
 )
+from app.api.routes.admin_dashboard import (
+    router as admin_dashboard_router,
+)
+from app.api.routes.admin_purchase_return import (
+    router as admin_purchase_return_router,
+)
 from app.api.routes.auth import (
     router as auth_router,
 )
@@ -48,6 +54,9 @@ from app.api.routes.purchase_return import (
 from app.api.routes.retailer import (
     router as retailer_router,
 )
+from app.api.routes.role import (
+    router as role_router,
+)
 from app.api.routes.sales_return import (
     router as sales_return_router,
 )
@@ -57,8 +66,14 @@ from app.api.routes.stock_movement import (
 from app.api.routes.supplier import (
     router as supplier_router,
 )
+from app.api.routes.subscription import (
+    router as subscription_router,
+)
 from app.api.routes.warranty import (
     router as warranty_router,
+)
+from app.api.routes.user import (
+    router as user_router,
 )
 
 
@@ -79,6 +94,10 @@ api_router.include_router(
 
 api_router.include_router(
     retailer_router
+)
+
+api_router.include_router(
+    role_router
 )
 
 api_router.include_router(
@@ -116,6 +135,10 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    subscription_router
+)
+
+api_router.include_router(
     purchase_order_router
 )
 
@@ -140,5 +163,17 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    admin_dashboard_router
+)
+
+api_router.include_router(
+    admin_purchase_return_router
+)
+
+api_router.include_router(
     warranty_router
+)
+
+api_router.include_router(
+    user_router
 )

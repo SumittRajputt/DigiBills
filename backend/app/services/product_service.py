@@ -37,6 +37,19 @@ def get_product_by_code(
     ).scalar_one_or_none()
 
 
+def get_all_products(
+    db: Session,
+) -> list[Product]:
+    statement = (
+        select(Product)
+        .order_by(Product.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
 def create_product(
     db: Session,
     name: str,

@@ -16,6 +16,7 @@ from app.services.invoice_service import (
     get_invoice_by_reference,
     get_invoice_items,
     get_location_for_retailer,
+    get_all_invoices,
 )
 from app.services.retailer_service import get_retailer_by_owner
 
@@ -30,7 +31,16 @@ def invoice_to_response(invoice):
     return InvoiceResponse(
         id=str(invoice.id),
         invoice_id=invoice.invoice_id,
-        retailer_id=str(invoice.retailer_id),
+        retailer_id=(
+            str(invoice.retailer_id)
+            if invoice.retailer_id
+            else None
+        ),
+        subscription_id=(
+            str(invoice.subscription_id)
+            if invoice.subscription_id
+            else None
+        ),
         employee_id=(
             str(invoice.employee_id)
             if invoice.employee_id
@@ -73,7 +83,16 @@ def invoice_detail_to_response(invoice, items):
     return InvoiceDetailResponse(
         id=str(invoice.id),
         invoice_id=invoice.invoice_id,
-        retailer_id=str(invoice.retailer_id),
+        retailer_id=(
+            str(invoice.retailer_id)
+            if invoice.retailer_id
+            else None
+        ),
+        subscription_id=(
+            str(invoice.subscription_id)
+            if invoice.subscription_id
+            else None
+        ),
         employee_id=(
             str(invoice.employee_id)
             if invoice.employee_id
@@ -187,6 +206,24 @@ def create_invoice_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[InvoiceResponse],
+)
+def list_invoices(
+    current_user: User = Depends(
+        require_permission("invoice.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    invoices = get_all_invoices(db)
+
+    return [
+        invoice_to_response(invoice)
+        for invoice in invoices
+    ]
 
 
 @router.get(

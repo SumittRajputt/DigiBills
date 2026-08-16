@@ -16,6 +16,7 @@ from app.services.retailer_service import get_retailer_by_owner
 from app.services.sales_return_service import (
     add_sales_return_item,
     create_sales_return,
+    get_all_sales_returns,
     get_invoice_by_reference,
     get_sales_return_by_reference,
     get_sales_return_items,
@@ -322,6 +323,25 @@ def process_sales_return_endpoint(
             detail=str(exc),
         )
 
+
+
+
+@router.get(
+    "",
+    response_model=list[SalesReturnResponse],
+)
+def get_all_sales_returns_endpoint(
+    current_user: User = Depends(
+        require_permission("sales_return.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    sales_returns = get_all_sales_returns(db)
+
+    return [
+        sales_return_to_response(sales_return)
+        for sales_return in sales_returns
+    ]
 
 @router.get(
     "/{return_id}",

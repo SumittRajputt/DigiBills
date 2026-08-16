@@ -38,6 +38,14 @@ ROLES: List[Dict[str, str]] = [
 
 PERMISSIONS: List[Dict[str, str]] = [
     {
+        "name": "user.view",
+        "description": "View platform user information.",
+    },
+    {
+        "name": "user.manage",
+        "description": "Manage platform users and their roles.",
+    },
+    {
         "name": "retailer.view",
         "description": "View retailer information.",
     },
@@ -129,6 +137,18 @@ PERMISSIONS: List[Dict[str, str]] = [
         "name": "audit_log.view",
         "description": "View retailer audit logs.",
     },
+    {
+        "name": "subscription.view",
+        "description": "View subscription plans and subscription status.",
+    },
+    {
+        "name": "subscription.manage",
+        "description": "Create and manage subscriptions.",
+    },
+    {
+        "name": "subscription.cancel",
+        "description": "Cancel subscriptions.",
+    },
 ]
 
 
@@ -186,6 +206,9 @@ ROLE_PERMISSIONS: Dict[str, List[str]] = {
     ],
     "customer": [
         "invoice.view",
+        "subscription.view",
+        "subscription.manage",
+        "subscription.cancel",
     ],
 }
 

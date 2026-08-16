@@ -57,7 +57,8 @@ class InvoiceItemResponse(BaseModel):
 class InvoiceResponse(BaseModel):
     id: str
     invoice_id: str
-    retailer_id: str
+    retailer_id: Optional[str]
+    subscription_id: Optional[str]
     employee_id: Optional[str]
     customer_id: str
     invoice_number: Optional[str]
