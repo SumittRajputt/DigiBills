@@ -228,13 +228,15 @@ export default function AdminReturns() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-returns-page">
+      <div className="admin-returns-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ADMINISTRATION</span>
+          </div>
           <h1>Returns & Refunds</h1>
           <p>
-            Monitor customer returns, supplier returns,
-            and payment refunds across DigiBills.
+            Monitor customer returns, supplier returns, and payment refunds across DigiBills.
           </p>
         </div>
 
@@ -249,7 +251,7 @@ export default function AdminReturns() {
         </button>
       </div>
 
-      <div className="stats-grid three">
+      <div className="returns-stats-grid">
         <MiniStat
           icon={<RotateCcw />}
           title="Sales Returns"
@@ -265,15 +267,22 @@ export default function AdminReturns() {
         />
 
         <MiniStat
+          icon={<Clock />}
+          title="Pending Returns"
+          value={salesRequested + purchaseRequested}
+          tone="orange"
+        />
+
+        <MiniStat
           icon={<Wallet />}
           title="Total Refunds"
           value={formatAmount(totalRefundAmount)}
-          tone="orange"
+          tone="purple"
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="returns-panel">
+        <div className="returns-panel-header">
           <div>
             <h3>
               {tab === "sales"
@@ -292,8 +301,8 @@ export default function AdminReturns() {
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="returns-toolbar">
+            <div className="returns-search">
               <Search size={16} />
 
               <input
@@ -328,13 +337,7 @@ export default function AdminReturns() {
           </div>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            padding: "0 20px 16px",
-          }}
-        >
+        <div className="returns-tabs">
           <TabButton
             active={tab === "sales"}
             onClick={() => {
@@ -478,8 +481,8 @@ function SalesReturnsTable({
   }
 
   return (
-    <div className="table-scroll">
-      <table className="data-table">
+    <div className="returns-table-wrap">
+      <table className="returns-table">
         <thead>
           <tr>
             <th>Return ID</th>
@@ -548,8 +551,8 @@ function PurchaseReturnsTable({
   }
 
   return (
-    <div className="table-scroll">
-      <table className="data-table">
+    <div className="returns-table-wrap">
+      <table className="returns-table">
         <thead>
           <tr>
             <th>Return ID</th>
@@ -614,8 +617,8 @@ function RefundsTable({
   }
 
   return (
-    <div className="table-scroll">
-      <table className="data-table">
+    <div className="returns-table-wrap">
+      <table className="returns-table">
         <thead>
           <tr>
             <th>Payment ID</th>
@@ -674,15 +677,8 @@ function TabButton({
   return (
     <button
       type="button"
+      className={`returns-tab ${active ? "active" : ""}`}
       onClick={onClick}
-      style={{
-        border: "1px solid #d0d5dd",
-        borderRadius: "8px",
-        padding: "8px 14px",
-        cursor: "pointer",
-        fontWeight: 600,
-        background: active ? "#f2f4f7" : "white",
-      }}
     >
       {children}
     </button>
@@ -863,7 +859,7 @@ function DetailsModal({
       onClick={onClose}
     >
       <div
-        className="user-details-modal"
+        className="returns-details-modal"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="modal-header">

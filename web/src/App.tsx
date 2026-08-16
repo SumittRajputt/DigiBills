@@ -31,6 +31,7 @@ import AdminPayments from "./pages/AdminPayments";
 import AdminWarranty from "./pages/AdminWarranty";
 import AdminReports from "./pages/AdminReports";
 import AdminReturns from "./pages/AdminReturns";
+import AdminSettings from "./pages/AdminSettings";
 import { apiFetch } from "./api";
 
 type Role = "super_admin" | "retailer_owner" | "customer";
@@ -165,6 +166,10 @@ function App() {
                 <Route
                   path="reports"
                   element={<AdminReports />}
+                />
+                <Route
+                  path="settings"
+                  element={<AdminSettings />}
                 />
               </Routes>
             </DashboardFrame>
@@ -483,7 +488,8 @@ function DashboardFrame({
                       (item === "Payments" && location.pathname === "/admin/payments") ||
                       (item === "Returns & Refunds" && location.pathname === "/admin/returns") ||
                       (item === "Warranty" && location.pathname === "/admin/warranty") ||
-                      (item === "Reports & Analytics" && location.pathname === "/admin/reports")
+                      (item === "Reports & Analytics" && location.pathname === "/admin/reports") ||
+                      (item === "System Settings" && location.pathname === "/admin/settings")
                     )) ||
                   (role !== "super_admin" &&
                     index === 0 &&
@@ -514,6 +520,11 @@ function DashboardFrame({
                     item === "Reports & Analytics"
                   ) {
                     navigate("/admin/reports");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "System Settings"
+                  ) {
+                    navigate("/admin/settings");
                   } else if (
                     role === "super_admin" &&
                     item === "Audit Logs"

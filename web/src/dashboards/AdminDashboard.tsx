@@ -1,5 +1,7 @@
 import {
   Activity,
+  ArrowDownRight,
+  ArrowUpRight,
   BadgeIndianRupee,
   BarChart3,
   ClipboardCheck,
@@ -63,7 +65,12 @@ type AdminDashboardData = {
   recent_activity: RecentActivityItem[];
 };
 
-const paymentColors = ["#1769ff", "#6f4fd8", "#18a66d", "#9ca8ba"];
+const paymentColors = [
+  "#1769ff",
+  "#7352d6",
+  "#12a878",
+  "#e89413",
+];
 
 function money(value: string) {
   return `₹${Number(value).toLocaleString("en-IN", {
@@ -83,22 +90,22 @@ function shortMoney(value: string) {
     return `₹${(amount / 100000).toFixed(2)} L`;
   }
 
+  if (amount >= 1000) {
+    return `₹${(amount / 1000).toFixed(1)} K`;
+  }
+
   return money(value);
 }
 
 function formatDate(value: string) {
-  const date = new Date(value);
-
-  return date.toLocaleDateString("en-IN", {
+  return new Date(value).toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "short",
   });
 }
 
 function formatActivityTime(value: string) {
-  const date = new Date(value);
-
-  return date.toLocaleString("en-IN", {
+  return new Date(value).toLocaleString("en-IN", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -106,31 +113,77 @@ function formatActivityTime(value: string) {
   });
 }
 
-function Stat({
+function StatCard({
   icon,
   title,
   value,
-  tone = "blue",
+  subtitle,
+  tone,
 }: {
   icon: React.ReactNode;
   title: string;
   value: string;
-  tone?: string;
+  subtitle: string;
+  tone: string;
 }) {
   return (
-    <div className="stat-card">
-      <div className={`stat-icon ${tone}`}>{icon}</div>
+    <div className="admin-kpi">
+      <div className="admin-kpi-top">
+        <div className={`admin-kpi-icon ${tone}`}>
+          {icon}
+        </div>
 
-      <div>
-        <span>{title}</span>
-        <strong>{value}</strong>
+        <span className="admin-kpi-menu">•••</span>
+      </div>
+
+      <div className="admin-kpi-title">{title}</div>
+
+      <div className="admin-kpi-value">{value}</div>
+
+      <div className="admin-kpi-subtitle">
+        {subtitle}
       </div>
     </div>
   );
 }
 
+function SectionHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: string;
+}) {
+  return (
+    <div className="admin-section-header">
+      <div>
+        <h2>{title}</h2>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+
+      {action && (
+        <button className="admin-text-button">
+          {action}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <div className="admin-empty-state">
+      {text}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
-  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [data, setData] =
+    useState<AdminDashboardData | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -140,9 +193,10 @@ export default function AdminDashboard() {
         setLoading(true);
         setError("");
 
-        const result = await apiFetch<AdminDashboardData>(
-          "/admin/dashboard"
-        );
+        const result =
+          await apiFetch<AdminDashboardData>(
+            "/admin/dashboard"
+          );
 
         setData(result);
       } catch (err) {
@@ -161,11 +215,15 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <section className="dashboard">
-        <div className="welcome-row">
-          <div>
-            <h1>Welcome back, Super Admin! 👋</h1>
-            <p>Loading your dashboard...</p>
+      <section className="admin-dashboard">
+        <div className="admin-loading">
+          <div className="admin-loading-bar large" />
+          <div className="admin-loading-bar" />
+          <div className="admin-loading-grid">
+            <div />
+            <div />
+            <div />
+            <div />
           </div>
         </div>
       </section>
@@ -174,247 +232,376 @@ export default function AdminDashboard() {
 
   if (error || !data) {
     return (
-      <section className="dashboard">
-        <div className="welcome-row">
+      <section className="admin-dashboard">
+        <div className="admin-error">
+          <div className="admin-error-icon">!</div>
           <div>
-            <h1>Welcome back, Super Admin! 👋</h1>
-            <p className="negative">
-              {error || "Dashboard data unavailable."}
-            </p>
+            <h2>Unable to load dashboard</h2>
+            <p>{error || "Dashboard data unavailable."}</p>
           </div>
         </div>
       </section>
     );
   }
 
-  const salesData = data.sales_overview.map((item) => ({
-    date: formatDate(item.date),
-    sales: Number(item.amount),
-  }));
+  const salesData = data.sales_overview.map(
+    (item) => ({
+      date: formatDate(item.date),
+      sales: Number(item.amount),
+    })
+  );
 
-  const paymentData = data.payment_methods.map((item) => ({
-    name: item.method,
-    value: Number(item.percentage),
-  }));
+  const paymentData = data.payment_methods.map(
+    (item) => ({
+      name: item.method,
+      value: Number(item.percentage),
+    })
+  );
 
   const maxRetailerSales = Math.max(
-    ...data.top_retailers.map((item) => Number(item.sales)),
+    ...data.top_retailers.map(
+      (item) => Number(item.sales)
+    ),
     1
   );
 
+  const activeRate =
+    data.total_retailers > 0
+      ? Math.round(
+          (data.active_retailers /
+            data.total_retailers) *
+            100
+        )
+      : 0;
+
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="admin-dashboard">
+
+      {/* PAGE HEADER */}
+      <div className="admin-page-header">
         <div>
-          <h1>Welcome back, Super Admin! 👋</h1>
-          <p>Here's what's happening across DigiBills.</p>
+          <div className="admin-eyebrow">
+            PLATFORM OVERVIEW
+          </div>
+
+          <h1>Dashboard</h1>
+
+          <p>
+            Monitor your DigiBills business performance,
+            payments and platform activity.
+          </p>
         </div>
 
-        <button className="date-filter">
-          ▣ All Time⌄
-        </button>
+        <div className="admin-header-actions">
+          <button className="admin-filter-button">
+            <span>Period</span>
+            <strong>All time</strong>
+            <span>⌄</span>
+          </button>
+
+          <button className="admin-export-button">
+            Export report
+          </button>
+        </div>
       </div>
 
-      <div className="stats-grid six">
-        <Stat
-          icon={<Store />}
-          title="Total Retailers"
-          value={data.total_retailers.toLocaleString("en-IN")}
+      {/* KPI ROW */}
+      <div className="admin-kpi-grid">
+
+        <StatCard
+          icon={<BadgeIndianRupee />}
+          title="Total Revenue"
+          value={shortMoney(data.total_sales)}
+          subtitle="Gross sales generated"
           tone="blue"
         />
 
-        <Stat
-          icon={<Users />}
-          title="Active Retailers"
-          value={data.active_retailers.toLocaleString("en-IN")}
+        <StatCard
+          icon={<BadgeIndianRupee />}
+          title="Payments Collected"
+          value={shortMoney(
+            data.payments_collected
+          )}
+          subtitle="Successfully collected"
           tone="green"
         />
 
-        <Stat
-          icon={<ClipboardCheck />}
-          title="Pending Approvals"
-          value={data.pending_approvals.toLocaleString("en-IN")}
+        <StatCard
+          icon={<BadgeIndianRupee />}
+          title="Outstanding"
+          value={shortMoney(
+            data.outstanding_amount
+          )}
+          subtitle="Awaiting payment"
           tone="orange"
         />
 
-        <Stat
-          icon={<Users />}
-          title="Total Customers"
-          value={data.total_customers.toLocaleString("en-IN")}
-          tone="purple"
-        />
-
-        <Stat
+        <StatCard
           icon={<FileText />}
           title="Total Invoices"
-          value={data.total_invoices.toLocaleString("en-IN")}
+          value={data.total_invoices.toLocaleString(
+            "en-IN"
+          )}
+          subtitle="Invoices generated"
           tone="purple"
         />
 
-        <Stat
-          icon={<BarChart3 />}
-          title="Total Sales"
-          value={shortMoney(data.total_sales)}
-          tone="cyan"
-        />
       </div>
 
-      <div className="stats-grid four">
-        <Stat
-          icon={<BadgeIndianRupee />}
-          title="Payments Collected"
-          value={shortMoney(data.payments_collected)}
-          tone="blue"
-        />
+      {/* SECONDARY METRICS */}
+      <div className="admin-secondary-metrics">
 
-        <Stat
-          icon={<BadgeIndianRupee />}
-          title="Refunds"
-          value={shortMoney(data.refunds)}
-          tone="purple"
-        />
+        <div className="admin-secondary-item">
+          <span>Total retailers</span>
+          <strong>
+            {data.total_retailers}
+          </strong>
+        </div>
 
-        <Stat
-          icon={<RotateCcw />}
-          title="Returns"
-          value={shortMoney(data.returns)}
-          tone="red"
-        />
+        <div className="admin-secondary-item">
+          <span>Active retailers</span>
+          <strong>
+            {data.active_retailers}
+          </strong>
+        </div>
 
-        <Stat
-          icon={<BadgeIndianRupee />}
-          title="Outstanding Amount"
-          value={shortMoney(data.outstanding_amount)}
-          tone="orange"
-        />
+        <div className="admin-secondary-item">
+          <span>Customers</span>
+          <strong>
+            {data.total_customers}
+          </strong>
+        </div>
+
+        <div className="admin-secondary-item">
+          <span>Pending approvals</span>
+          <strong>
+            {data.pending_approvals}
+          </strong>
+        </div>
+
+        <div className="admin-secondary-item">
+          <span>Refunds</span>
+          <strong>
+            {shortMoney(data.refunds)}
+          </strong>
+        </div>
+
+        <div className="admin-secondary-item">
+          <span>Returns</span>
+          <strong>
+            {shortMoney(data.returns)}
+          </strong>
+        </div>
+
       </div>
 
-      <div className="panel-grid admin-grid">
-        <div className="panel chart-panel">
-          <PanelHeader title="Sales Overview" />
+      {/* ANALYTICS */}
+      <div className="admin-main-grid">
+
+        {/* REVENUE */}
+        <div className="admin-panel admin-revenue-panel">
+
+          <SectionHeader
+            title="Revenue overview"
+            subtitle="Sales performance over time"
+            action="View report →"
+          />
+
+          <div className="admin-chart-summary">
+            <strong>
+              {shortMoney(data.total_sales)}
+            </strong>
+
+            <span>
+              Total revenue
+            </span>
+          </div>
 
           {salesData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={230}>
-              <AreaChart data={salesData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                />
+            <div className="admin-chart">
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+              >
+                <AreaChart
+                  data={salesData}
+                  margin={{
+                    top: 10,
+                    right: 10,
+                    left: 8,
+                    bottom: 0,
+                  }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="adminRevenueGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#1769ff"
+                        stopOpacity={0.22}
+                      />
 
-                <XAxis dataKey="date" />
+                      <stop
+                        offset="100%"
+                        stopColor="#1769ff"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
 
-                <YAxis
-                  tickFormatter={(value) =>
-                    `₹${Number(value).toLocaleString("en-IN")}`
-                  }
-                />
+                  <CartesianGrid
+                    stroke="#edf1f6"
+                    vertical={false}
+                    strokeDasharray="4 4"
+                  />
 
-                <Tooltip
-                  formatter={(value) => money(String(value))}
-                />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{
+                      fontSize: 10,
+                      fill: "#8994a5",
+                    }}
+                    dy={8}
+                  />
 
-                <Area
-                  type="monotone"
-                  dataKey="sales"
-                  stroke="#1769ff"
-                  fill="#eaf2ff"
-                  strokeWidth={3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    width={48}
+                    tick={{
+                      fontSize: 9,
+                      fill: "#8994a5",
+                    }}
+                    tickFormatter={(value) =>
+                      shortMoney(String(value))
+                    }
+                  />
+
+                  <Tooltip
+                    contentStyle={{
+                      border: "1px solid #e5eaf1",
+                      borderRadius: 10,
+                      boxShadow:
+                        "0 10px 30px rgba(15,35,65,.10)",
+                      fontSize: 11,
+                    }}
+                    formatter={(value) =>
+                      money(String(value))
+                    }
+                    labelStyle={{
+                      color: "#172033",
+                      fontWeight: 600,
+                    }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="sales"
+                    stroke="#1769ff"
+                    fill="url(#adminRevenueGradient)"
+                    strokeWidth={2.5}
+                    dot={false}
+                    activeDot={{
+                      r: 5,
+                      strokeWidth: 3,
+                      stroke: "#fff",
+                      fill: "#1769ff",
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
             <EmptyState text="No sales data available." />
           )}
         </div>
 
-        <div className="panel">
-          <PanelHeader title="Sales by Top Retailers" />
+        {/* PAYMENT METHODS */}
+        <div className="admin-panel admin-payment-panel">
 
-          {data.top_retailers.length > 0 ? (
-            <div className="rank-list">
-              {data.top_retailers.map((retailer, index) => {
-                const sales = Number(retailer.sales);
-
-                return (
-                  <div
-                    className="rank"
-                    key={retailer.business_name}
-                  >
-                    <b>{index + 1}</b>
-
-                    <div className="rank-body">
-                      <span>{retailer.business_name}</span>
-
-                      <div className="progress">
-                        <i
-                          style={{
-                            width: `${Math.max(
-                              5,
-                              (sales / maxRetailerSales) * 100
-                            )}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <strong>
-                      {shortMoney(retailer.sales)}
-                    </strong>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState text="No retailer sales data available." />
-          )}
-        </div>
-
-        <div className="panel donut-panel">
-          <PanelHeader title="Payment Methods" />
+          <SectionHeader
+            title="Payment methods"
+            subtitle="Collection distribution"
+          />
 
           {paymentData.length > 0 ? (
-            <div className="donut-wrap">
-              <ResponsiveContainer
-                width="52%"
-                height={190}
-              >
-                <PieChart>
-                  <Pie
-                    data={paymentData}
-                    dataKey="value"
-                    innerRadius={55}
-                    outerRadius={82}
-                    paddingAngle={2}
-                  >
-                    {paymentData.map((_, index) => (
-                      <Cell
-                        key={index}
-                        fill={
-                          paymentColors[
-                            index % paymentColors.length
-                          ]
-                        }
-                      />
-                    ))}
-                  </Pie>
+            <>
+              <div className="admin-donut">
 
-                  <Tooltip
-                    formatter={(value) =>
-                      `${Number(value).toFixed(2)}%`
-                    }
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+                <ResponsiveContainer
+                  width="100%"
+                  height={210}
+                >
+                  <PieChart>
+                    <Pie
+                      data={paymentData}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={62}
+                      outerRadius={84}
+                      paddingAngle={3}
+                      stroke="#fff"
+                      strokeWidth={3}
+                    >
+                      {paymentData.map(
+                        (_, index) => (
+                          <Cell
+                            key={index}
+                            fill={
+                              paymentColors[
+                                index %
+                                  paymentColors.length
+                              ]
+                            }
+                          />
+                        )
+                      )}
+                    </Pie>
 
-              <div className="legend">
+                    <Tooltip
+                      contentStyle={{
+                        border:
+                          "1px solid #e5eaf1",
+                        borderRadius: 10,
+                        fontSize: 11,
+                      }}
+                      formatter={(value) =>
+                        `${Number(value).toFixed(
+                          2
+                        )}%`
+                      }
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                <div className="admin-donut-center">
+                  <strong>100%</strong>
+                  <span>Payments</span>
+                </div>
+
+              </div>
+
+              <div className="admin-payment-list">
                 {data.payment_methods.map(
                   (payment, index) => (
-                    <div key={payment.method}>
-                      <i
+                    <div
+                      className="admin-payment-row"
+                      key={payment.method}
+                    >
+                      <span
+                        className="admin-payment-dot"
                         style={{
                           background:
                             paymentColors[
-                              index % paymentColors.length
+                              index %
+                                paymentColors.length
                             ],
                         }}
                       />
@@ -423,85 +610,263 @@ export default function AdminDashboard() {
                         {payment.method}
                       </span>
 
-                      <b>
+                      <strong>
                         {Number(
                           payment.percentage
-                        ).toFixed(2)}
+                        ).toFixed(1)}
                         %
-                      </b>
+                      </strong>
                     </div>
                   )
                 )}
               </div>
-            </div>
+            </>
           ) : (
             <EmptyState text="No payment data available." />
           )}
         </div>
 
-        <div className="panel activity">
-          <PanelHeader title="Recent Activity" />
+      </div>
 
-          {data.recent_activity.length > 0 ? (
-            data.recent_activity.map(
-              (activity, index) => (
-                <div
-                  className="activity-row"
-                  key={`${activity.created_at}-${index}`}
-                >
-                  <span
-                    className={`activity-dot a${
-                      index % 5
-                    }`}
-                  >
-                    <Activity size={13} />
-                  </span>
+      {/* LOWER GRID */}
+      <div className="admin-lower-grid">
 
-                  <div>
-                    <b>
-                      {activity.description ||
-                        activity.action}
-                    </b>
+        {/* RETAILERS */}
+        <div className="admin-panel">
 
-                    <small>
-                      {formatActivityTime(
-                        activity.created_at
-                      )}
-                    </small>
-                  </div>
-                </div>
-              )
-            )
+          <SectionHeader
+            title="Top retailers"
+            subtitle="Highest revenue contributors"
+            action="View all →"
+          />
+
+          {data.top_retailers.length > 0 ? (
+            <div className="admin-retailer-table">
+
+              <div className="admin-table-head">
+                <span>#</span>
+                <span>Retailer</span>
+                <span>Revenue</span>
+                <span>Status</span>
+              </div>
+
+              {data.top_retailers.map(
+                (retailer, index) => {
+                  const sales = Number(
+                    retailer.sales
+                  );
+
+                  const percentage =
+                    Math.max(
+                      5,
+                      (sales /
+                        maxRetailerSales) *
+                        100
+                    );
+
+                  return (
+                    <div
+                      className="admin-retailer-row"
+                      key={retailer.business_name}
+                    >
+                      <span className="admin-rank">
+                        {index + 1}
+                      </span>
+
+                      <div className="admin-retailer-name">
+                        <strong>
+                          {retailer.business_name}
+                        </strong>
+
+                        <div className="admin-progress">
+                          <i
+                            style={{
+                              width: `${percentage}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <strong>
+                        {shortMoney(
+                          retailer.sales
+                        )}
+                      </strong>
+
+                      <span className="admin-status">
+                        Active
+                      </span>
+                    </div>
+                  );
+                }
+              )}
+
+            </div>
           ) : (
-            <EmptyState text="No recent activity." />
+            <EmptyState text="No retailer sales data available." />
           )}
         </div>
+
+        {/* PLATFORM HEALTH */}
+        <div className="admin-panel">
+
+          <SectionHeader
+            title="Platform health"
+            subtitle="Current business status"
+          />
+
+          <div className="admin-health">
+
+            <div className="admin-health-row">
+              <div className="admin-health-icon blue">
+                <Store size={16} />
+              </div>
+
+              <div>
+                <strong>
+                  Retailer activity
+                </strong>
+
+                <span>
+                  {activeRate}% of retailers active
+                </span>
+              </div>
+
+              <b className="admin-health-good">
+                Healthy
+              </b>
+            </div>
+
+            <div className="admin-health-row">
+              <div className="admin-health-icon purple">
+                <Users size={16} />
+              </div>
+
+              <div>
+                <strong>
+                  Customer base
+                </strong>
+
+                <span>
+                  {data.total_customers} registered
+                  customers
+                </span>
+              </div>
+
+              <b className="admin-health-good">
+                Active
+              </b>
+            </div>
+
+            <div className="admin-health-row">
+              <div className="admin-health-icon orange">
+                <ClipboardCheck size={16} />
+              </div>
+
+              <div>
+                <strong>
+                  Pending approvals
+                </strong>
+
+                <span>
+                  {data.pending_approvals} awaiting
+                  review
+                </span>
+              </div>
+
+              <b
+                className={
+                  data.pending_approvals > 0
+                    ? "admin-health-warning"
+                    : "admin-health-good"
+                }
+              >
+                {data.pending_approvals > 0
+                  ? "Review"
+                  : "Clear"}
+              </b>
+            </div>
+
+            <div className="admin-health-row">
+              <div className="admin-health-icon red">
+                <RotateCcw size={16} />
+              </div>
+
+              <div>
+                <strong>
+                  Returns & refunds
+                </strong>
+
+                <span>
+                  {shortMoney(data.returns)} returns
+                  · {shortMoney(data.refunds)} refunds
+                </span>
+              </div>
+
+              <b className="admin-health-neutral">
+                Monitor
+              </b>
+            </div>
+
+          </div>
+        </div>
+
       </div>
+
+      {/* ACTIVITY */}
+      <div className="admin-panel admin-activity-panel">
+
+        <SectionHeader
+          title="Recent activity"
+          subtitle="Latest actions across DigiBills"
+          action="View audit logs →"
+        />
+
+        {data.recent_activity.length > 0 ? (
+          <div className="admin-activity-list">
+
+            {data.recent_activity
+              .slice(0, 8)
+              .map((activity, index) => (
+                <div
+                  className="admin-activity-row"
+                  key={`${activity.created_at}-${index}`}
+                >
+                  <div
+                    className={`admin-activity-icon activity-${index % 4}`}
+                  >
+                    <Activity size={14} />
+                  </div>
+
+                  <div className="admin-activity-content">
+                    <strong>
+                      {activity.description ||
+                        activity.action}
+                    </strong>
+
+                    <span>
+                      {activity.entity_type.replace(
+                        /_/g,
+                        " "
+                      )}
+                    </span>
+                  </div>
+
+                  <time>
+                    {formatActivityTime(
+                      activity.created_at
+                    )}
+                  </time>
+                </div>
+              ))}
+
+          </div>
+        ) : (
+          <EmptyState text="No recent activity." />
+        )}
+
+      </div>
+
     </section>
-  );
-}
-
-function PanelHeader({
-  title,
-}: {
-  title: string;
-}) {
-  return (
-    <div className="panel-header">
-      <h3>{title}</h3>
-      <button>All Time⌄</button>
-    </div>
-  );
-}
-
-function EmptyState({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <div className="empty-state">
-      <span>{text}</span>
-    </div>
   );
 }

@@ -221,8 +221,8 @@ export default function AdminUsers() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-users-page">
+      <div className="admin-users-header">
         <div>
           <h1>Users</h1>
           <p>
@@ -232,7 +232,7 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="stats-grid three">
+      <div className="user-stats-grid">
         <div className="stat-card">
           <div className="stat-icon blue">
             <Users />
@@ -267,12 +267,12 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="panel">
-        <div className="panel-header">
+      <div className="users-panel">
+        <div className="users-panel-header">
           <h3>User Directory</h3>
 
           <div className="retailer-filters">
-            <div className="table-search">
+            <div className="users-search">
               <Search size={15} />
 
               <input
@@ -328,8 +328,8 @@ export default function AdminUsers() {
         {!loading &&
           !error &&
           filteredUsers.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="users-table-wrap">
+              <table className="users-table">
                 <thead>
                   <tr>
                     <th>User</th>
@@ -484,134 +484,148 @@ export default function AdminUsers() {
               </button>
             </div>
 
-            <div className="user-details-grid">
-              <div>
-                <span>Email</span>
-                <strong>
-                  {selectedUser.email ||
-                    "No email"}
-                </strong>
+            <div className="users-modal-section">
+              <div className="users-modal-section-title">
+                <span>1.</span>
+                <div>
+                  <h3>User Information</h3>
+                  <p>Contact and account verification details.</p>
+                </div>
               </div>
 
-              <div>
-                <span>Phone</span>
-                <strong>
-                  {selectedUser.phone_number}
-                </strong>
-              </div>
+              <div className="users-info-grid">
+                <div className="users-info-card">
+                  <span>Email</span>
+                  <strong>
+                    {selectedUser.email || "No email"}
+                  </strong>
+                </div>
 
-              <div>
-                <span>Status</span>
-                <strong>
-                  {selectedUser.status}
-                </strong>
-              </div>
+                <div className="users-info-card">
+                  <span>Phone</span>
+                  <strong>{selectedUser.phone_number}</strong>
+                </div>
 
-              <div>
-                <span>Phone Verification</span>
-                <strong>
-                  {selectedUser.is_phone_verified
-                    ? "Verified"
-                    : "Not verified"}
-                </strong>
+                <div className="users-info-card">
+                  <span>Status</span>
+                  <strong>
+                    <em className={`users-status ${selectedUser.status}`}>
+                      {formatRole(selectedUser.status)}
+                    </em>
+                  </strong>
+                </div>
+
+                <div className="users-info-card">
+                  <span>Phone Verification</span>
+                  <strong>
+                    <em
+                      className={`users-status ${
+                        selectedUser.is_phone_verified
+                          ? "verified"
+                          : "not-verified"
+                      }`}
+                    >
+                      {selectedUser.is_phone_verified
+                        ? "Verified"
+                        : "Not verified"}
+                    </em>
+                  </strong>
+                </div>
               </div>
             </div>
 
-            <div className="role-management">
-              <div className="role-management-header">
+            <div className="users-modal-section users-roles-section">
+              <div className="users-modal-section-title">
+                <span>2.</span>
                 <div>
                   <h3>Roles</h3>
-                  <p>
-                    Roles control what this user
-                    can access.
-                  </p>
+                  <p>Roles control what this user can access.</p>
                 </div>
               </div>
 
-              <div className="current-roles">
-                {selectedUser.roles.length ===
-                0 ? (
-                  <span className="action-muted">
+              <div className="users-current-roles">
+                {selectedUser.roles.length === 0 ? (
+                  <div className="users-empty-role">
                     No roles assigned.
-                  </span>
+                  </div>
                 ) : (
-                  selectedUser.roles.map(
-                    (role) => (
-                      <div
-                        className="role-management-item"
-                        key={role}
-                      >
-                        <span>
-                          {formatRole(role)}
+                  selectedUser.roles.map((role) => (
+                    <div
+                      className="users-role-card"
+                      key={role}
+                    >
+                      <div className="users-role-name">
+                        <span className="users-role-icon">
+                          <UserRound size={16} />
                         </span>
-
-                        <button
-                          type="button"
-                          className="danger-button"
-                          disabled={savingRole}
-                          onClick={() =>
-                            removeRole(role)
-                          }
-                        >
-                          <Trash2 size={14} />
-                          Remove
-                        </button>
+                        <strong>{formatRole(role)}</strong>
                       </div>
-                    )
-                  )
+
+                      <button
+                        type="button"
+                        className="users-remove-button"
+                        disabled={savingRole}
+                        onClick={() => removeRole(role)}
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </button>
+                    </div>
+                  ))
                 )}
               </div>
 
-              <div className="add-role-row">
-                <select
-                  value={selectedRole}
-                  onChange={(event) =>
-                    setSelectedRole(
-                      event.target.value
-                    )
-                  }
-                  disabled={
-                    rolesLoading || savingRole
-                  }
-                >
-                  <option value="">
-                    {rolesLoading
-                      ? "Loading roles..."
-                      : "Select a role"}
-                  </option>
-
-                  {availableRoles.map((role) => (
-                    <option
-                      value={role.name}
-                      key={role.id}
-                    >
-                      {formatRole(role.name)}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  className="primary-button"
-                  disabled={
-                    !selectedRole ||
-                    savingRole ||
-                    rolesLoading
-                  }
-                  onClick={addRole}
-                >
-                  <Plus size={15} />
-                  {savingRole
-                    ? "Saving..."
-                    : "Add Role"}
-                </button>
-              </div>
-
-              {roleError && (
-                <div className="table-state negative">
-                  {roleError}
+              <div className="users-add-role">
+                <div className="users-add-role-heading">
+                  <strong>Add New Role</strong>
+                  <span>Assign another access role to this user.</span>
                 </div>
-              )}
+
+                <div className="users-add-role-controls">
+                  <select
+                    value={selectedRole}
+                    onChange={(event) =>
+                      setSelectedRole(event.target.value)
+                    }
+                    disabled={rolesLoading || savingRole}
+                  >
+                    <option value="">
+                      {rolesLoading
+                        ? "Loading roles..."
+                        : "Select a role"}
+                    </option>
+
+                    {availableRoles.map((role) => (
+                      <option
+                        value={role.name}
+                        key={role.id}
+                      >
+                        {formatRole(role.name)}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    className="users-add-role-button"
+                    disabled={
+                      !selectedRole ||
+                      savingRole ||
+                      rolesLoading
+                    }
+                    onClick={addRole}
+                  >
+                    <Plus size={15} />
+                    {savingRole ? "Saving..." : "Add Role"}
+                  </button>
+                </div>
+
+                {roleError && (
+                  <div className="users-role-error">
+                    {roleError}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

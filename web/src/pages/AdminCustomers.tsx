@@ -92,8 +92,8 @@ export default function AdminCustomers() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-customers-page">
+      <div className="admin-customers-header">
         <div>
           <h1>Customers</h1>
           <p>
@@ -102,7 +102,7 @@ export default function AdminCustomers() {
         </div>
       </div>
 
-      <div className="stats-grid three">
+      <div className="customer-stats-grid">
         <MiniStat
           icon={<Users />}
           title="Total Customers"
@@ -125,8 +125,8 @@ export default function AdminCustomers() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="customers-panel">
+        <div className="customers-panel-header">
           <div>
             <h3>All Customers</h3>
             <span>
@@ -134,8 +134,8 @@ export default function AdminCustomers() {
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="customers-toolbar">
+            <div className="customers-search">
               <Search size={16} />
 
               <input
@@ -183,8 +183,8 @@ export default function AdminCustomers() {
         {!loading &&
           !error &&
           filteredCustomers.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="customers-table-wrap">
+              <table className="customers-table">
                 <thead>
                   <tr>
                     <th>Customer</th>
@@ -210,8 +210,8 @@ export default function AdminCustomers() {
                         }}
                       >
                         <td>
-                          <div className="retailer-cell">
-                            <div className="retailer-avatar">
+                          <div className="customer-cell">
+                            <div className="customer-avatar">
                               {customer.full_name
                                 .charAt(0)
                                 .toUpperCase()}
@@ -234,7 +234,7 @@ export default function AdminCustomers() {
                         </td>
 
                         <td>
-                          <div className="contact-cell">
+                          <div className="customer-contact">
                             <span>
                               {customer.phone_number}
                             </span>

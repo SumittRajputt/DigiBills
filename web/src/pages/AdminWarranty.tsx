@@ -100,12 +100,15 @@ export default function AdminWarranty() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-warranty-page">
+      <div className="admin-warranty-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ADMINISTRATION</span>
+          </div>
           <h1>Warranties</h1>
           <p>
-            Monitor product warranties across DigiBills.
+            Monitor product warranties and coverage records across DigiBills.
           </p>
         </div>
 
@@ -119,7 +122,7 @@ export default function AdminWarranty() {
         </button>
       </div>
 
-      <div className="stats-grid four">
+      <div className="warranty-stats-grid">
         <MiniStat
           icon={<ShieldCheck />}
           title="Total Warranties"
@@ -149,17 +152,17 @@ export default function AdminWarranty() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="warranty-panel">
+        <div className="warranty-panel-header">
           <div>
             <h3>All Warranties</h3>
             <span>
-              {filteredWarranties.length} warranties
+              {filteredWarranties.length} of {warranties.length} warranties
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="warranty-toolbar">
+            <div className="warranty-search">
               <Search size={16} />
 
               <input
@@ -208,8 +211,8 @@ export default function AdminWarranty() {
         {!loading &&
           !error &&
           filteredWarranties.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="warranty-table-wrap">
+              <table className="warranty-table">
                 <thead>
                   <tr>
                     <th>Warranty ID</th>
@@ -280,7 +283,7 @@ export default function AdminWarranty() {
           }
         >
           <div
-            className="user-details-modal"
+            className="warranty-details-modal"
             onClick={(event) =>
               event.stopPropagation()
             }

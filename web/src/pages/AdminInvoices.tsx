@@ -138,18 +138,20 @@ export default function AdminInvoices() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-invoices-page">
+      <div className="admin-invoices-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ADMINISTRATION</span>
+          </div>
           <h1>Invoices</h1>
           <p>
-            Manage all invoices generated on
-            DigiBills.
+            Manage invoices, payment status and billing records across DigiBills.
           </p>
         </div>
       </div>
 
-      <div className="stats-grid four">
+      <div className="invoice-stats-grid">
         <MiniStat
           icon={<Receipt />}
           title="Total Invoices"
@@ -179,17 +181,17 @@ export default function AdminInvoices() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="invoices-panel">
+        <div className="invoices-panel-header">
           <div>
-            <h3>All Invoices</h3>
+            <h3>Invoice Directory</h3>
             <span>
-              {filteredInvoices.length} invoices
+              {filteredInvoices.length} of {invoices.length} invoices
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="invoices-toolbar">
+            <div className="invoices-search">
               <Search size={16} />
 
               <input
@@ -263,8 +265,8 @@ export default function AdminInvoices() {
         {!loading &&
           !error &&
           filteredInvoices.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="invoices-table-wrap">
+              <table className="invoices-table">
                 <thead>
                   <tr>
                     <th>Invoice</th>
@@ -292,8 +294,8 @@ export default function AdminInvoices() {
                         }}
                       >
                         <td>
-                          <div className="retailer-cell">
-                            <div className="retailer-avatar">
+                          <div className="invoice-cell">
+                            <div className="invoice-avatar">
                               #
                             </div>
 
@@ -368,7 +370,7 @@ export default function AdminInvoices() {
           }
         >
           <div
-            className="user-details-modal"
+            className="invoice-details-modal"
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -393,102 +395,110 @@ export default function AdminInvoices() {
               </button>
             </div>
 
-            <div className="user-details-grid">
-              <div>
-                <span>Invoice ID</span>
-                <strong>
-                  {selectedInvoice.invoice_id}
-                </strong>
+            <div className="invoice-details-content">
+
+              <div className="invoice-detail-group">
+                <div className="invoice-detail-heading">
+                  <span className="section-number">1.</span>
+                  <div>
+                    <h3>Invoice Information</h3>
+                    <p>Core identification and ownership details.</p>
+                  </div>
+                </div>
+
+                <div className="invoice-detail-grid">
+                  <div className="invoice-detail-card">
+                    <span>Invoice ID</span>
+                    <strong>{selectedInvoice.invoice_id}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Invoice Number</span>
+                    <strong>{selectedInvoice.invoice_number || "—"}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Retailer</span>
+                    <strong>{selectedInvoice.retailer_id}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Customer</span>
+                    <strong>{selectedInvoice.customer_id}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Invoice Date</span>
+                    <strong>{formatDate(selectedInvoice.invoice_date)}</strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Invoice Number</span>
-                <strong>
-                  {selectedInvoice.invoice_number ||
-                    "—"}
-                </strong>
+              <div className="invoice-detail-group">
+                <div className="invoice-detail-heading">
+                  <span className="section-number">2.</span>
+                  <div>
+                    <h3>Financial Summary</h3>
+                    <p>Breakdown of the invoice amount.</p>
+                  </div>
+                </div>
+
+                <div className="invoice-amount-grid">
+                  <div className="invoice-detail-card">
+                    <span>Subtotal</span>
+                    <strong>{formatMoney(selectedInvoice.subtotal)}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Discount</span>
+                    <strong>{formatMoney(selectedInvoice.discount_amount)}</strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Tax</span>
+                    <strong>{formatMoney(selectedInvoice.tax_amount)}</strong>
+                  </div>
+
+                  <div className="invoice-total-card">
+                    <span>Total Amount</span>
+                    <strong>{formatMoney(selectedInvoice.total_amount)}</strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Retailer</span>
-                <strong>
-                  {selectedInvoice.retailer_id}
-                </strong>
+              <div className="invoice-detail-group">
+                <div className="invoice-detail-heading">
+                  <span className="section-number">3.</span>
+                  <div>
+                    <h3>Payment & Status</h3>
+                    <p>Current payment and invoice state.</p>
+                  </div>
+                </div>
+
+                <div className="invoice-detail-grid">
+                  <div className="invoice-detail-card">
+                    <span>Payment Status</span>
+                    <strong className={`invoice-status-value ${selectedInvoice.payment_status}`}>
+                      {selectedInvoice.payment_status}
+                    </strong>
+                  </div>
+
+                  <div className="invoice-detail-card">
+                    <span>Invoice Status</span>
+                    <strong className={`invoice-status-value ${selectedInvoice.status}`}>
+                      {selectedInvoice.status}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Customer</span>
-                <strong>
-                  {selectedInvoice.customer_id}
-                </strong>
-              </div>
-
-              <div>
-                <span>Invoice Date</span>
-                <strong>
-                  {formatDate(
-                    selectedInvoice.invoice_date
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Subtotal</span>
-                <strong>
-                  {formatMoney(
-                    selectedInvoice.subtotal
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Discount</span>
-                <strong>
-                  {formatMoney(
-                    selectedInvoice.discount_amount
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Tax</span>
-                <strong>
-                  {formatMoney(
-                    selectedInvoice.tax_amount
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Total</span>
-                <strong>
-                  {formatMoney(
-                    selectedInvoice.total_amount
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Payment Status</span>
-                <strong>
-                  {selectedInvoice.payment_status}
-                </strong>
-              </div>
-
-              <div>
-                <span>Status</span>
-                <strong>
-                  {selectedInvoice.status}
-                </strong>
-              </div>
-
-              <div>
+              <div className="invoice-notes">
                 <span>Notes</span>
-                <strong>
-                  {selectedInvoice.notes ||
-                    "No notes"}
-                </strong>
+                <p>
+                  {selectedInvoice.notes || "No notes available for this invoice."}
+                </p>
               </div>
+
             </div>
           </div>
         </div>

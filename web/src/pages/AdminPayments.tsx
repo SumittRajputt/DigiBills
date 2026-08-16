@@ -149,18 +149,20 @@ export default function AdminPayments() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-payments-page">
+      <div className="admin-payments-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ADMINISTRATION</span>
+          </div>
           <h1>Payments</h1>
           <p>
-            Manage all payments processed on
-            DigiBills.
+            Manage payment transactions, refunds and payment records across DigiBills.
           </p>
         </div>
       </div>
 
-      <div className="stats-grid four">
+      <div className="payment-stats-grid">
         <MiniStat
           icon={<CreditCard />}
           title="Total Payments"
@@ -190,17 +192,17 @@ export default function AdminPayments() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="payments-panel">
+        <div className="payments-panel-header">
           <div>
-            <h3>All Payments</h3>
+            <h3>Payment Directory</h3>
             <span>
-              {filteredPayments.length} payments
+              {filteredPayments.length} of {payments.length} payments
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="payments-toolbar">
+            <div className="payments-search">
               <Search size={16} />
 
               <input
@@ -274,8 +276,8 @@ export default function AdminPayments() {
         {!loading &&
           !error &&
           filteredPayments.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="payments-table-wrap">
+              <table className="payments-table">
                 <thead>
                   <tr>
                     <th>Payment</th>
@@ -303,8 +305,8 @@ export default function AdminPayments() {
                         }}
                       >
                         <td>
-                          <div className="retailer-cell">
-                            <div className="retailer-avatar">
+                          <div className="payment-cell">
+                            <div className="payment-avatar">
                               ₹
                             </div>
 
@@ -390,7 +392,7 @@ export default function AdminPayments() {
           }
         >
           <div
-            className="user-details-modal"
+            className="payment-details-modal"
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -415,94 +417,126 @@ export default function AdminPayments() {
               </button>
             </div>
 
-            <div className="user-details-grid">
-              <div>
-                <span>Payment ID</span>
-                <strong>
-                  {selectedPayment.payment_id}
-                </strong>
+            <div className="payment-details-content">
+
+              <div className="payment-detail-group">
+                <div className="payment-detail-heading">
+                  <span className="section-number">1.</span>
+                  <div>
+                    <h3>Payment Information</h3>
+                    <p>Core payment identification and billing details.</p>
+                  </div>
+                </div>
+
+                <div className="payment-detail-grid">
+                  <div className="payment-detail-card">
+                    <span>Payment ID</span>
+                    <strong>{selectedPayment.payment_id}</strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Invoice ID</span>
+                    <strong>{selectedPayment.invoice_id}</strong>
+                  </div>
+
+                  <div className="payment-detail-card payment-amount-card">
+                    <span>Amount</span>
+                    <strong>{formatMoney(selectedPayment.amount)}</strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Payment Method</span>
+                    <strong>{selectedPayment.payment_method.toUpperCase()}</strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Payment Status</span>
+                    <strong className={`payment-status-value ${selectedPayment.payment_status}`}>
+                      {selectedPayment.payment_status}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Invoice ID</span>
-                <strong>
-                  {selectedPayment.invoice_id}
-                </strong>
+              <div className="payment-detail-group">
+                <div className="payment-detail-heading">
+                  <span className="section-number">2.</span>
+                  <div>
+                    <h3>Transaction Details</h3>
+                    <p>Reference information associated with this payment.</p>
+                  </div>
+                </div>
+
+                <div className="payment-detail-grid">
+                  <div className="payment-detail-card payment-detail-wide">
+                    <span>Transaction Reference</span>
+                    <strong>
+                      {selectedPayment.transaction_reference || "No transaction reference"}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Amount</span>
-                <strong>
-                  {formatMoney(
-                    selectedPayment.amount
-                  )}
-                </strong>
+              <div className="payment-detail-group">
+                <div className="payment-detail-heading">
+                  <span className="section-number">3.</span>
+                  <div>
+                    <h3>Refund Information</h3>
+                    <p>Refund amount and current refund status.</p>
+                  </div>
+                </div>
+
+                <div className="payment-detail-grid">
+                  <div className="payment-detail-card">
+                    <span>Refund Amount</span>
+                    <strong>
+                      {formatMoney(selectedPayment.refund_amount)}
+                    </strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Refund Status</span>
+                    <strong className={`payment-status-value ${selectedPayment.refund_status || "none"}`}>
+                      {selectedPayment.refund_status || "No refund"}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Payment Method</span>
-                <strong>
-                  {selectedPayment.payment_method.toUpperCase()}
-                </strong>
+              <div className="payment-detail-group">
+                <div className="payment-detail-heading">
+                  <span className="section-number">4.</span>
+                  <div>
+                    <h3>Timeline</h3>
+                    <p>Important payment record timestamps.</p>
+                  </div>
+                </div>
+
+                <div className="payment-detail-grid">
+                  <div className="payment-detail-card">
+                    <span>Paid At</span>
+                    <strong>{formatDateTime(selectedPayment.paid_at)}</strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Created</span>
+                    <strong>{formatDateTime(selectedPayment.created_at)}</strong>
+                  </div>
+
+                  <div className="payment-detail-card">
+                    <span>Last Updated</span>
+                    <strong>{formatDateTime(selectedPayment.updated_at)}</strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Payment Status</span>
-                <strong>
-                  {selectedPayment.payment_status}
-                </strong>
-              </div>
-
-              <div>
-                <span>Transaction Reference</span>
-                <strong>
-                  {selectedPayment.transaction_reference ||
-                    "—"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Refund Amount</span>
-                <strong>
-                  {formatMoney(
-                    selectedPayment.refund_amount
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Refund Status</span>
-                <strong>
-                  {selectedPayment.refund_status ||
-                    "—"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Paid At</span>
-                <strong>
-                  {formatDateTime(
-                    selectedPayment.paid_at
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Created</span>
-                <strong>
-                  {formatDateTime(
-                    selectedPayment.created_at
-                  )}
-                </strong>
-              </div>
-
-              <div>
+              <div className="payment-notes">
                 <span>Notes</span>
-                <strong>
-                  {selectedPayment.notes ||
-                    "No notes"}
-                </strong>
+                <p>
+                  {selectedPayment.notes || "No notes available for this payment."}
+                </p>
               </div>
+
             </div>
           </div>
         </div>

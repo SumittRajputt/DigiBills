@@ -1,4 +1,15 @@
-import { Search, Plus, CheckCircle, Clock, XCircle } from "lucide-react";
+import {
+  Building2,
+  CheckCircle2,
+  Clock3,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../api";
 
@@ -18,18 +29,26 @@ type Retailer = {
   updated_at: string;
 };
 
+type Status = "all" | "active" | "pending" | "rejected";
+
 export default function AdminRetailers() {
   const [retailers, setRetailers] = useState<Retailer[]>([]);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState<Status>("all");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState("");
   const [actionError, setActionError] = useState("");
 
-  async function loadRetailers() {
+  async function loadRetailers(showRefresh = false) {
     try {
-      setLoading(true);
+      if (showRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
       setError("");
 
       const result = await apiFetch<Retailer[]>("/retailers");
@@ -42,6 +61,7 @@ export default function AdminRetailers() {
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
 
@@ -68,6 +88,19 @@ export default function AdminRetailers() {
     });
   }, [retailers, search, status]);
 
+  const counts = {
+    all: retailers.length,
+    active: retailers.filter(
+      (retailer) => retailer.status === "active"
+    ).length,
+    pending: retailers.filter(
+      (retailer) => retailer.status === "pending"
+    ).length,
+    rejected: retailers.filter(
+      (retailer) => retailer.status === "rejected"
+    ).length,
+  };
+
   async function approveRetailer(retailerId: string) {
     try {
       setActionLoading(retailerId);
@@ -77,7 +110,7 @@ export default function AdminRetailers() {
         method: "POST",
       });
 
-      await loadRetailers();
+      await loadRetailers(true);
     } catch (err) {
       setActionError(
         err instanceof Error
@@ -109,7 +142,7 @@ export default function AdminRetailers() {
         }),
       });
 
-      await loadRetailers();
+      await loadRetailers(true);
     } catch (err) {
       setActionError(
         err instanceof Error
@@ -121,130 +154,169 @@ export default function AdminRetailers() {
     }
   }
 
-  const counts = {
-    all: retailers.length,
-    active: retailers.filter((r) => r.status === "active").length,
-    pending: retailers.filter((r) => r.status === "pending").length,
-    rejected: retailers.filter((r) => r.status === "rejected").length,
-  };
-
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard retailers-page">
+      <header className="retailers-header">
         <div>
+          <div className="page-eyebrow">
+            <ShieldCheck size={14} />
+            Administration
+          </div>
+
           <h1>Retailers</h1>
-          <p>Manage all retailers registered on DigiBills.</p>
+
+          <p>
+            Manage retailer accounts, approvals and
+            business information across DigiBills.
+          </p>
         </div>
 
-        <button className="primary-button">
-          <Plus size={17} />
-          Add Retailer
+        <button
+          type="button"
+          className="retailers-refresh"
+          onClick={() => loadRetailers(true)}
+          disabled={refreshing}
+        >
+          <RefreshCw
+            size={15}
+            className={refreshing ? "spin" : ""}
+          />
+          {refreshing ? "Refreshing..." : "Refresh"}
         </button>
-      </div>
+      </header>
 
-      <div className="stats-grid four">
-        <MiniStat
-          icon={<CheckCircle />}
-          title="Total Retailers"
+      <div className="retailer-stats">
+        <RetailerStat
+          icon={<Building2 />}
+          label="Total retailers"
           value={counts.all}
           tone="blue"
         />
 
-        <MiniStat
-          icon={<CheckCircle />}
-          title="Active"
+        <RetailerStat
+          icon={<CheckCircle2 />}
+          label="Active"
           value={counts.active}
           tone="green"
         />
 
-        <MiniStat
-          icon={<Clock />}
-          title="Pending"
+        <RetailerStat
+          icon={<Clock3 />}
+          label="Pending review"
           value={counts.pending}
           tone="orange"
         />
 
-        <MiniStat
+        <RetailerStat
           icon={<XCircle />}
-          title="Rejected"
+          label="Rejected"
           value={counts.rejected}
           tone="red"
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <section className="retailers-panel">
+        <div className="retailers-panel-header">
           <div>
-            <h3>All Retailers</h3>
-            <span>{filteredRetailers.length} retailers</span>
+            <h2>Retailer directory</h2>
+            <p>
+              {filteredRetailers.length} of {retailers.length}{" "}
+              retailers
+            </p>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
-              <Search size={16} />
-              <input
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Search retailers..."
-              />
-            </div>
-
-            <select
-              value={status}
-              onChange={(event) =>
-                setStatus(event.target.value)
-              }
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
-            </select>
+          <div className="retailer-filter-summary">
+            {status === "all"
+              ? "All retailers"
+              : `${status.charAt(0).toUpperCase()}${status.slice(1)} retailers`}
           </div>
         </div>
 
+        <div className="retailers-toolbar">
+          <div className="retailer-search">
+            <Search size={17} />
+
+            <input
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+              placeholder="Search by retailer, ID, phone or email..."
+            />
+          </div>
+
+          <select
+            value={status}
+            onChange={(event) =>
+              setStatus(event.target.value as Status)
+            }
+            className="retailer-status-filter"
+          >
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        {actionError && (
+          <div className="retailer-alert error">
+            <XCircle size={16} />
+            {actionError}
+          </div>
+        )}
+
         {loading && (
-          <div className="table-state">
-            Loading retailers...
+          <div className="retailer-table-state">
+            <RefreshCw size={20} className="spin" />
+            <strong>Loading retailers</strong>
+            <span>
+              Fetching the latest retailer information...
+            </span>
           </div>
         )}
 
         {!loading && error && (
-          <div className="table-state negative">
-            {error}
+          <div className="retailer-table-state error">
+            <XCircle size={22} />
+            <strong>Unable to load retailers</strong>
+            <span>{error}</span>
+
+            <button
+              type="button"
+              onClick={() => loadRetailers()}
+            >
+              Try again
+            </button>
           </div>
         )}
 
         {!loading &&
           !error &&
           filteredRetailers.length === 0 && (
-            <div className="table-state">
-              No retailers found.
+            <div className="retailer-table-state">
+              <Search size={22} />
+              <strong>No retailers found</strong>
+              <span>
+                Try changing your search or status filter.
+              </span>
             </div>
           )}
-
-        {actionError && (
-          <div className="table-state negative">
-            {actionError}
-          </div>
-        )}
 
         {!loading &&
           !error &&
           filteredRetailers.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="retailers-table-wrap">
+              <table className="retailers-table">
                 <thead>
                   <tr>
                     <th>Retailer</th>
-                    <th>Business Type</th>
+                    <th>Business</th>
                     <th>Contact</th>
                     <th>Location</th>
                     <th>Status</th>
                     <th>Created</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
 
@@ -252,39 +324,58 @@ export default function AdminRetailers() {
                   {filteredRetailers.map((retailer) => (
                     <tr key={retailer.id}>
                       <td>
-                        <div className="retailer-cell">
+                        <div className="retailer-identity">
                           <div className="retailer-avatar">
                             {retailer.business_name
                               .charAt(0)
                               .toUpperCase()}
                           </div>
 
-                          <div>
+                          <div className="retailer-identity-text">
                             <strong>
                               {retailer.business_name}
                             </strong>
-                            <small>
+
+                            <span>
                               {retailer.retailer_id}
-                            </small>
+                            </span>
                           </div>
                         </div>
                       </td>
 
-                      <td>{retailer.business_type}</td>
+                      <td>
+                        <div className="retailer-business">
+                          <strong>
+                            {retailer.business_type}
+                          </strong>
+                          <span>Registered business</span>
+                        </div>
+                      </td>
 
                       <td>
-                        <div className="contact-cell">
+                        <div className="retailer-contact">
                           <span>
+                            <Phone size={13} />
                             {retailer.phone_number}
                           </span>
+
                           {retailer.email && (
-                            <small>{retailer.email}</small>
+                            <span>
+                              <Mail size={13} />
+                              {retailer.email}
+                            </span>
                           )}
                         </div>
                       </td>
 
                       <td>
-                        {retailer.address || "—"}
+                        <div className="retailer-location">
+                          <MapPin size={14} />
+                          <span>
+                            {retailer.address ||
+                              "Address not provided"}
+                          </span>
+                        </div>
                       </td>
 
                       <td>
@@ -294,68 +385,56 @@ export default function AdminRetailers() {
                       </td>
 
                       <td>
-                        {new Date(
-                          retailer.created_at
-                        ).toLocaleDateString(
-                          "en-IN",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )}
+                        <div className="retailer-date">
+                          {formatDate(retailer.created_at)}
+                        </div>
                       </td>
 
                       <td>
-                        <div className="table-actions">
-                          {retailer.status === "pending" && (
-                            <>
-                              <button
-                                type="button"
-                                className="action-button approve"
-                                disabled={
-                                  actionLoading === retailer.retailer_id
-                                }
-                                onClick={() =>
-                                  approveRetailer(
-                                    retailer.retailer_id
-                                  )
-                                }
-                              >
-                                {actionLoading === retailer.retailer_id
-                                  ? "..."
-                                  : "Approve"}
-                              </button>
+                        {retailer.status === "pending" ? (
+                          <div className="retailer-actions">
+                            <button
+                              type="button"
+                              className="retailer-action approve"
+                              disabled={
+                                actionLoading ===
+                                retailer.retailer_id
+                              }
+                              onClick={() =>
+                                approveRetailer(
+                                  retailer.retailer_id
+                                )
+                              }
+                            >
+                              {actionLoading ===
+                              retailer.retailer_id
+                                ? "..."
+                                : "Approve"}
+                            </button>
 
-                              <button
-                                type="button"
-                                className="action-button reject"
-                                disabled={
-                                  actionLoading === retailer.retailer_id
-                                }
-                                onClick={() =>
-                                  rejectRetailer(
-                                    retailer.retailer_id
-                                  )
-                                }
-                              >
-                                Reject
-                              </button>
-                            </>
-                          )}
-
-                          {retailer.status === "active" && (
-                            <span className="action-muted">
-                              Approved
-                            </span>
-                          )}
-
-                          {retailer.status === "rejected" && (
-                            <span className="action-muted">
-                              Rejected
-                            </span>
-                          )}
-                        </div>
+                            <button
+                              type="button"
+                              className="retailer-action reject"
+                              disabled={
+                                actionLoading ===
+                                retailer.retailer_id
+                              }
+                              onClick={() =>
+                                rejectRetailer(
+                                  retailer.retailer_id
+                                )
+                              }
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="retailer-action-muted">
+                            {retailer.status === "active"
+                              ? "Approved"
+                              : "Rejected"}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -363,30 +442,30 @@ export default function AdminRetailers() {
               </table>
             </div>
           )}
-      </div>
+      </section>
     </section>
   );
 }
 
-function MiniStat({
+function RetailerStat({
   icon,
-  title,
+  label,
   value,
   tone,
 }: {
   icon: React.ReactNode;
-  title: string;
+  label: string;
   value: number;
   tone: string;
 }) {
   return (
-    <div className="stat-card">
-      <div className={`stat-icon ${tone}`}>
+    <div className="retailer-stat">
+      <div className={`retailer-stat-icon ${tone}`}>
         {icon}
       </div>
 
       <div>
-        <span>{title}</span>
+        <span>{label}</span>
         <strong>{value.toLocaleString("en-IN")}</strong>
       </div>
     </div>
@@ -397,9 +476,23 @@ function StatusBadge({ status }: { status: string }) {
   const normalized = status.toLowerCase();
 
   return (
-    <span className={`status-badge ${normalized}`}>
-      <span className="status-dot" />
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+    <span
+      className={`retailer-status-badge ${normalized}`}
+    >
+      <span />
+      {status.charAt(0).toUpperCase() +
+        status.slice(1)}
     </span>
+  );
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString(
+    "en-IN",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }
   );
 }

@@ -95,18 +95,20 @@ export default function AdminAuditLogs() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard audit-logs-page">
+      <div className="audit-logs-header">
         <div>
+          <div className="page-eyebrow">
+            <span>SECURITY & ACTIVITY</span>
+          </div>
           <h1>Audit Logs</h1>
           <p>
-            Monitor important actions and system activity
-            across DigiBills.
+            Monitor important actions and system activity across DigiBills.
           </p>
         </div>
       </div>
 
-      <div className="stats-grid three">
+      <div className="audit-stats-grid">
         <MiniStat
           icon={<Activity />}
           title="Total Events"
@@ -133,17 +135,17 @@ export default function AdminAuditLogs() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="panel audit-panel">
+        <div className="audit-panel-header">
           <div>
             <h3>System Activity</h3>
             <span>
-              {filteredLogs.length} audit events
+              Showing {filteredLogs.length} of {logs.length} audit events
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="audit-toolbar">
+            <div className="audit-search">
               <Search size={16} />
 
               <input
@@ -197,8 +199,8 @@ export default function AdminAuditLogs() {
         {!loading &&
           !error &&
           filteredLogs.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="audit-table-wrap">
+              <table className="audit-table">
                 <thead>
                   <tr>
                     <th>Action</th>
@@ -304,7 +306,7 @@ function AuditLogModal({
       onClick={onClose}
     >
       <div
-        className="user-details-modal"
+        className="audit-details-modal"
         onClick={(event) =>
           event.stopPropagation()
         }

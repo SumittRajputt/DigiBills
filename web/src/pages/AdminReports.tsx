@@ -137,8 +137,8 @@ export default function AdminReports() {
 
   if (loading) {
     return (
-      <section className="dashboard">
-        <div className="welcome-row">
+      <section className="dashboard admin-reports-page">
+        <div className="reports-header">
           <div>
             <h1>Reports & Analytics</h1>
             <p>Loading business reports...</p>
@@ -180,17 +180,19 @@ export default function AdminReports() {
 
   return (
     <section className="dashboard">
-      <div className="welcome-row">
+      <div className="reports-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ANALYTICS</span>
+          </div>
           <h1>Reports & Analytics</h1>
           <p>
-            Business performance and financial insights
-            across DigiBills.
+            Business performance and financial insights across DigiBills.
           </p>
         </div>
       </div>
 
-      <div className="stats-grid six">
+      <div className="reports-kpi-grid">
         <Stat
           icon={<TrendingUp />}
           title="Total Sales"
@@ -238,9 +240,7 @@ export default function AdminReports() {
           value={shortMoney(data.sales_returns)}
           tone="red"
         />
-      </div>
 
-      <div className="stats-grid three">
         <Stat
           icon={<RotateCcw />}
           title="Purchase Returns"
@@ -249,10 +249,13 @@ export default function AdminReports() {
         />
       </div>
 
-      <div className="panel-grid admin-grid">
-        <div className="panel chart-panel">
-          <div className="panel-header">
-            <h3>Sales Trend</h3>
+      <div className="reports-grid">
+        <div className="panel reports-sales-panel">
+          <div className="reports-panel-header">
+            <div>
+              <h3>Sales Trend</h3>
+              <span>Revenue performance over time</span>
+            </div>
           </div>
 
           {salesTrendData.length > 0 ? (
@@ -260,7 +263,7 @@ export default function AdminReports() {
               width="100%"
               height={280}
             >
-              <BarChart data={salesTrendData}>
+              <BarChart data={salesTrendData} className="reports-chart">
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -294,9 +297,12 @@ export default function AdminReports() {
           )}
         </div>
 
-        <div className="panel">
-          <div className="panel-header">
-            <h3>Payment Methods</h3>
+        <div className="panel reports-payment-panel">
+          <div className="reports-panel-header">
+            <div>
+              <h3>Payment Methods</h3>
+              <span>Collection breakdown by method</span>
+            </div>
           </div>
 
           {paymentData.length > 0 ? (
@@ -304,7 +310,7 @@ export default function AdminReports() {
               width="100%"
               height={280}
             >
-              <PieChart>
+              <PieChart className="reports-chart">
                 <Pie
                   data={paymentData}
                   dataKey="amount"
@@ -341,9 +347,12 @@ export default function AdminReports() {
           )}
         </div>
 
-        <div className="panel">
-          <div className="panel-header">
-            <h3>Retailer Performance</h3>
+        <div className="panel reports-retailer-panel">
+          <div className="reports-panel-header">
+            <div>
+              <h3>Retailer Performance</h3>
+              <span>Top retailers by sales contribution</span>
+            </div>
           </div>
 
           {data.retailer_performance.length > 0 ? (

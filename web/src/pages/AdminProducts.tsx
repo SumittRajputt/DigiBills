@@ -91,17 +91,20 @@ export default function AdminProducts() {
   }
 
   return (
-    <section className="dashboard">
-      <div className="welcome-row">
+    <section className="dashboard admin-products-page">
+      <div className="admin-products-header">
         <div>
+          <div className="page-eyebrow">
+            <span>ADMINISTRATION</span>
+          </div>
           <h1>Products</h1>
           <p>
-            Manage all products registered on DigiBills.
+            Manage product catalog, status and transfer settings across DigiBills.
           </p>
         </div>
       </div>
 
-      <div className="stats-grid three">
+      <div className="product-stats-grid">
         <MiniStat
           icon={<Package />}
           title="Total Products"
@@ -124,17 +127,17 @@ export default function AdminProducts() {
         />
       </div>
 
-      <div className="panel retailer-table-panel">
-        <div className="table-toolbar">
+      <div className="products-panel">
+        <div className="products-panel-header">
           <div>
-            <h3>All Products</h3>
+            <h3>Product Directory</h3>
             <span>
-              {filteredProducts.length} products
+              {filteredProducts.length} of {products.length} products
             </span>
           </div>
 
-          <div className="table-controls">
-            <div className="table-search">
+          <div className="products-toolbar">
+            <div className="products-search">
               <Search size={16} />
 
               <input
@@ -182,8 +185,8 @@ export default function AdminProducts() {
         {!loading &&
           !error &&
           filteredProducts.length > 0 && (
-            <div className="table-scroll">
-              <table className="data-table">
+            <div className="products-table-wrap">
+              <table className="products-table">
                 <thead>
                   <tr>
                     <th>Product</th>
@@ -205,8 +208,8 @@ export default function AdminProducts() {
                       style={{ cursor: "pointer" }}
                     >
                       <td>
-                        <div className="retailer-cell">
-                          <div className="retailer-avatar">
+                        <div className="product-cell">
+                          <div className="product-avatar">
                             {product.name
                               .charAt(0)
                               .toUpperCase()}
@@ -275,7 +278,7 @@ export default function AdminProducts() {
           }
         >
           <div
-            className="user-details-modal"
+            className="product-details-modal"
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -300,76 +303,99 @@ export default function AdminProducts() {
               </button>
             </div>
 
-            <div className="user-details-grid">
-              <div>
-                <span>Name</span>
-                <strong>
-                  {selectedProduct.name}
-                </strong>
+            <div className="product-details-content">
+
+              <div className="product-detail-group">
+                <div className="product-detail-heading">
+                  <span className="section-number">1.</span>
+                  <div>
+                    <h3>Product Information</h3>
+                    <p>Core information registered for this product.</p>
+                  </div>
+                </div>
+
+                <div className="product-detail-grid">
+                  <div className="product-detail-card">
+                    <span>Product Name</span>
+                    <strong>{selectedProduct.name}</strong>
+                  </div>
+
+                  <div className="product-detail-card">
+                    <span>Product Code</span>
+                    <strong>{selectedProduct.product_code}</strong>
+                  </div>
+
+                  <div className="product-detail-card">
+                    <span>Brand</span>
+                    <strong>{selectedProduct.brand || "—"}</strong>
+                  </div>
+
+                  <div className="product-detail-card">
+                    <span>Category</span>
+                    <strong>{selectedProduct.category || "—"}</strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Product Code</span>
-                <strong>
-                  {selectedProduct.product_code}
-                </strong>
+              <div className="product-detail-group">
+                <div className="product-detail-heading">
+                  <span className="section-number">2.</span>
+                  <div>
+                    <h3>Product Status</h3>
+                    <p>Current availability and transfer configuration.</p>
+                  </div>
+                </div>
+
+                <div className="product-detail-grid">
+                  <div className="product-detail-card">
+                    <span>Status</span>
+                    <strong className={`product-status-value ${selectedProduct.status}`}>
+                      {selectedProduct.status}
+                    </strong>
+                  </div>
+
+                  <div className="product-detail-card">
+                    <span>Transferable</span>
+                    <strong className={selectedProduct.is_transferable ? "product-transfer-yes" : "product-transfer-no"}>
+                      {selectedProduct.is_transferable ? "Yes" : "No"}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Brand</span>
-                <strong>
-                  {selectedProduct.brand || "—"}
-                </strong>
+              <div className="product-detail-group">
+                <div className="product-detail-heading">
+                  <span className="section-number">3.</span>
+                  <div>
+                    <h3>Record Information</h3>
+                    <p>Product creation and update history.</p>
+                  </div>
+                </div>
+
+                <div className="product-detail-grid">
+                  <div className="product-detail-card">
+                    <span>Created</span>
+                    <strong>
+                      {formatDate(selectedProduct.created_at)}
+                    </strong>
+                  </div>
+
+                  <div className="product-detail-card">
+                    <span>Last Updated</span>
+                    <strong>
+                      {formatDate(selectedProduct.updated_at)}
+                    </strong>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <span>Category</span>
-                <strong>
-                  {selectedProduct.category || "—"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Status</span>
-                <strong>
-                  {selectedProduct.status}
-                </strong>
-              </div>
-
-              <div>
-                <span>Transferable</span>
-                <strong>
-                  {selectedProduct.is_transferable
-                    ? "Yes"
-                    : "No"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Created</span>
-                <strong>
-                  {formatDate(
-                    selectedProduct.created_at
-                  )}
-                </strong>
-              </div>
-
-              <div>
-                <span>Updated</span>
-                <strong>
-                  {formatDate(
-                    selectedProduct.updated_at
-                  )}
-                </strong>
-              </div>
-
-              <div>
+              <div className="product-detail-description">
                 <span>Description</span>
-                <strong>
-                  {selectedProduct.description ||
-                    "No description"}
-                </strong>
+                <p>
+                  {selectedProduct.description || "No description available for this product."}
+                </p>
               </div>
+
             </div>
           </div>
         </div>
