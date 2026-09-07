@@ -7,6 +7,7 @@ from app.models.user import User
 from app.schemas.retailer import (
     RetailerCreateRequest,
     RetailerResponse,
+    RetailerUpdateRequest,
 )
 from app.schemas.retailer_approval import (
     RetailerRejectRequest,
@@ -20,6 +21,7 @@ from app.services.retailer_service import (
     get_retailer_by_owner,
     get_retailer_by_retailer_id,
     get_all_retailers,
+    update_retailer,
 )
 
 
@@ -122,6 +124,47 @@ def get_my_retailer(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Retailer not found for this user.",
         )
+
+    return retailer_to_response(retailer)
+
+
+@router.put(
+    "/me",
+    response_model=RetailerResponse,
+)
+def update_my_retailer(
+    request: RetailerUpdateRequest,
+    current_user: User = Depends(
+        require_permission("retailer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    if retailer.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer is not active.",
+        )
+
+    retailer = update_retailer(
+        db=db,
+        retailer=retailer,
+        business_name=request.business_name,
+        business_type=request.business_type,
+        phone_number=request.phone_number,
+        email=request.email,
+        address=request.address,
+    )
 
     return retailer_to_response(retailer)
 

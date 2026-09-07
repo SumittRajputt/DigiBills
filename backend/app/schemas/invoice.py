@@ -49,6 +49,7 @@ class InvoiceItemResponse(BaseModel):
     unit_cost: Optional[Decimal]
     discount_amount: Decimal
     tax_rate: Decimal
+    taxable_amount: Decimal
     tax_amount: Decimal
     line_total: Decimal
     created_at: datetime
@@ -63,9 +64,11 @@ class InvoiceResponse(BaseModel):
     customer_id: str
     invoice_number: Optional[str]
     invoice_date: datetime
+    item_names: list[str] = []
     subtotal: Decimal
     discount_amount: Decimal
     tax_amount: Decimal
+    customer_bill_charge: Decimal
     total_amount: Decimal
     payment_status: str
     status: str

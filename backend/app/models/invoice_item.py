@@ -75,6 +75,14 @@ class InvoiceItem(Base):
         nullable=False,
     )
 
+    # GST-exclusive taxable value snapshot.
+    # unit_price and line_total are GST-inclusive.
+    taxable_amount: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=0,
+        nullable=False,
+    )
+
     tax_amount: Mapped[Decimal] = mapped_column(
         Numeric(14, 2),
         default=0,

@@ -1,9 +1,14 @@
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
 class RegisterRequest(BaseModel):
+    full_name: str = Field(
+        min_length=2,
+        max_length=150,
+    )
+
     phone_number: str = Field(
         min_length=10,
         max_length=20,
@@ -16,14 +21,33 @@ class RegisterRequest(BaseModel):
         max_length=72,
     )
 
-
-class LoginRequest(BaseModel):
-    phone_number: str = Field(
-        min_length=10,
-        max_length=20,
+    confirm_password: str = Field(
+        min_length=8,
+        max_length=72,
     )
 
-    password: str = Field(
+    @model_validator(mode="after")
+    def passwords_match(self):
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match.")
+        return self
+
+
+class LoginRequest(BaseModel):
+    phone_number: str
+    password: str
+    account_type: str = Field(
+        pattern="^(retailer|customer|employee|salesman)$"
+    )
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(
+        min_length=8,
+        max_length=72,
+    )
+
+    new_password: str = Field(
         min_length=8,
         max_length=72,
     )
@@ -31,7 +55,7 @@ class LoginRequest(BaseModel):
 
 class TokenResponse(BaseModel):
     access_token: str
-    token_type: str = "bearer"
+    token_type: str
 
 
 class UserResponse(BaseModel):
@@ -40,4 +64,4 @@ class UserResponse(BaseModel):
     email: Optional[str] = None
     status: str
     is_phone_verified: bool
-    roles: List[str] = []
+    roles: list[str]

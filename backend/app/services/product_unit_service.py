@@ -51,9 +51,26 @@ def get_product_variant_by_id(
         statement
     ).scalar_one_or_none()
 
+def get_product_units_by_variant(
+    db: Session,
+    product_variant_id: uuid.UUID,
+) -> list[ProductUnit]:
+    statement = (
+        select(ProductUnit)
+        .where(
+            ProductUnit.product_variant_id == product_variant_id,
+            ProductUnit.status == "in_stock",
+        )
+        .order_by(ProductUnit.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
 
 def create_product_unit(
     db: Session,
+
     product_variant_id: str,
     serial_number: str,
     status: str = "in_stock",

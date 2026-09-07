@@ -8,11 +8,13 @@ from app.schemas.product import (
     ProductCreateRequest,
     ProductResponse,
 )
+from app.services.retailer_service import get_retailer_by_owner
 from app.services.product_service import (
     create_product,
     get_product_by_code,
     get_all_products,
 )
+from app.services.plan_limit_service import PlanLimitExceededError
 
 
 router = APIRouter(
@@ -48,9 +50,27 @@ def create_product_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    if retailer.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer is not active.",
+        )
+
     try:
         product = create_product(
             db=db,
+            retailer_id=retailer.id,
             name=request.name,
             product_code=request.product_code,
             brand=request.brand,
@@ -60,6 +80,12 @@ def create_product_endpoint(
         )
 
         return product_to_response(product)
+
+    except PlanLimitExceededError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )
 
     except ValueError as exc:
         raise HTTPException(
@@ -78,7 +104,21 @@ def list_products(
     ),
     db: Session = Depends(get_db),
 ):
-    products = get_all_products(db)
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    products = get_all_products(
+        db,
+        retailer_id=retailer.id,
+    )
 
     return [
         product_to_response(product)
@@ -97,9 +137,21 @@ def get_product_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
     product = get_product_by_code(
         db,
         product_code,
+        retailer_id=retailer.id,
     )
 
     if product is None:

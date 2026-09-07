@@ -6,16 +6,19 @@ from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
+from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
 from app.models.user import User
 from app.schemas.inventory import (
     InventoryItemCreateRequest,
     InventoryItemResponse,
+    InventoryItemUpdateRequest,
 )
 from app.services.inventory_service import (
     check_reorder_status,
     create_inventory_item,
     get_inventory_item,
+    update_inventory_tax_rate,
 )
 from app.services.product_variant_service import (
     get_variant_by_sku,
@@ -43,6 +46,7 @@ def inventory_to_response(item):
         reorder_level=item.reorder_level,
         reorder_quantity=item.reorder_quantity,
         average_cost=item.average_cost,
+        tax_rate=item.tax_rate,
         last_stocked_at=item.last_stocked_at,
         updated_at=item.updated_at,
     )
@@ -131,6 +135,7 @@ def create_inventory_endpoint(
             reorder_level=request.reorder_level,
             reorder_quantity=request.reorder_quantity,
             average_cost=request.average_cost,
+            tax_rate=request.tax_rate,
         )
 
         return inventory_to_response(
@@ -140,6 +145,74 @@ def create_inventory_endpoint(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
+
+
+@router.put(
+    "/{inventory_id}/tax-rate",
+    response_model=InventoryItemResponse,
+)
+def update_inventory_tax_rate_endpoint(
+    inventory_id: str,
+    request: InventoryItemUpdateRequest,
+    current_user: User = Depends(
+        require_permission("inventory.manage")
+    ),
+    db: Session = Depends(get_db),
+):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    if retailer.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Retailer is not active.",
+        )
+
+    try:
+        parsed_inventory_id = uuid.UUID(inventory_id)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid inventory ID.",
+        )
+
+    statement = select(InventoryItem).where(
+        InventoryItem.id == parsed_inventory_id,
+        InventoryItem.retailer_id == retailer.id,
+    )
+
+    inventory_item = db.execute(
+        statement
+    ).scalar_one_or_none()
+
+    if inventory_item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Inventory item not found.",
+        )
+
+    try:
+        inventory_item = update_inventory_tax_rate(
+            db=db,
+            inventory_item=inventory_item,
+            tax_rate=request.tax_rate,
+        )
+
+        return inventory_to_response(inventory_item)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         )
 

@@ -10,6 +10,7 @@ from app.schemas.inventory_location import (
 )
 from app.services.inventory_location_service import (
     create_inventory_location,
+    get_all_inventory_locations,
 )
 from app.services.retailer_service import (
     get_retailer_by_owner,
@@ -33,6 +34,38 @@ def location_to_response(location):
         created_at=location.created_at,
         updated_at=location.updated_at,
     )
+
+
+@router.get(
+    "",
+    response_model=list[InventoryLocationResponse],
+)
+def list_inventory_locations(
+    current_user: User = Depends(
+        require_permission("inventory.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    locations = get_all_inventory_locations(
+        db,
+        retailer.id,
+    )
+
+    return [
+        location_to_response(location)
+        for location in locations
+    ]
 
 
 @router.post(

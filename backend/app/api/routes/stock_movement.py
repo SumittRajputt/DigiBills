@@ -14,7 +14,10 @@ from app.schemas.stock_movement import (
     StockMovementCreateRequest,
     StockMovementResponse,
 )
-from app.services.inventory_service import get_inventory_item
+from app.services.inventory_service import (
+    create_inventory_item,
+    get_inventory_item,
+)
 from app.services.product_variant_service import get_variant_by_sku
 from app.services.retailer_service import get_retailer_by_owner
 from app.services.stock_movement_service import (
@@ -133,11 +136,21 @@ def create_stock_movement_endpoint(
         variant.id,
     )
 
+    # Automatically create the inventory record when stock is
+    # being added for a product at this location for the first time.
     if inventory_item is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Inventory item not found.",
-        )
+        try:
+            inventory_item = create_inventory_item(
+                db=db,
+                retailer=retailer,
+                location=location,
+                product_variant=variant,
+            )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            )
 
     reference_id = None
 

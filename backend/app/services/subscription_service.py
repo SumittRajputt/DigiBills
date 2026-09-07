@@ -81,6 +81,26 @@ def get_active_subscription_for_customer(
     ).scalar_one_or_none()
 
 
+def get_current_subscription_for_customer(
+    db: Session,
+    customer_id: uuid.UUID,
+) -> Optional[Subscription]:
+    statement = (
+        select(Subscription)
+        .where(
+            Subscription.customer_id == customer_id,
+            Subscription.status.in_(
+                ["pending_payment", "trialing", "active"]
+            ),
+        )
+        .order_by(Subscription.created_at.desc())
+    )
+
+    return db.execute(
+        statement
+    ).scalars().first()
+
+
 def validate_plan(
     plan: SubscriptionPlan,
     expected_customer_type: str,
@@ -130,11 +150,38 @@ def create_subscription(
     plan: SubscriptionPlan,
     retailer_id: Optional[uuid.UUID] = None,
     customer_id: Optional[uuid.UUID] = None,
+    salesman_id: Optional[uuid.UUID] = None,
 ) -> Subscription:
     if (retailer_id is None) == (customer_id is None):
         raise ValueError(
             "Subscription must belong to exactly one retailer or customer."
         )
+
+    if salesman_id is not None:
+        from app.models.employee import Employee
+
+        salesman = db.execute(
+            select(Employee).where(
+                Employee.id == salesman_id,
+                Employee.employee_type == "salesman",
+                Employee.status == "active",
+            )
+        ).scalar_one_or_none()
+
+        if salesman is None:
+            raise ValueError(
+                "Active salesman not found."
+            )
+
+        if retailer_id is not None and salesman.retailer_id != retailer_id:
+            raise ValueError(
+                "Salesman does not belong to this retailer."
+            )
+
+        if customer_id is None:
+            raise ValueError(
+                "Salesman can only be assigned to a customer subscription."
+            )
 
     if retailer_id is not None:
         validate_plan(plan, "retailer")
@@ -165,13 +212,9 @@ def create_subscription(
     now = datetime.now(timezone.utc)
 
     if plan.billing_type == "monthly":
-        from datetime import timedelta
-
         period_end = now + timedelta(days=30)
 
     elif plan.billing_type == "yearly":
-        from datetime import timedelta
-
         period_end = now + timedelta(days=365)
 
     else:
@@ -181,20 +224,21 @@ def create_subscription(
     trial_ends_at = None
 
     if plan.trial_days > 0:
-        from datetime import timedelta
-
         trial_ends_at = now + timedelta(
             days=plan.trial_days
         )
         status = "trialing"
     else:
-        status = "active"
+        # A paid monthly/yearly subscription with no trial
+        # must not become active before payment.
+        status = "pending_payment"
 
     subscription = Subscription(
         subscription_id=generate_subscription_id(),
         plan_id=plan.id,
         retailer_id=retailer_id,
         customer_id=customer_id,
+        salesman_id=salesman_id,
         status=status,
         started_at=now,
         current_period_start=now,
@@ -204,6 +248,23 @@ def create_subscription(
     )
 
     db.add(subscription)
+    db.flush()
+
+    # Customer monthly/yearly plans with zero trial require
+    # payment before the subscription becomes active.
+    if (
+        customer_id is not None
+        and plan.trial_days == 0
+        and plan.billing_type in {"monthly", "yearly"}
+    ):
+        create_subscription_invoice(
+            db=db,
+            subscription=subscription,
+            plan=plan,
+            billing_period_start=now,
+            billing_period_end=period_end,
+        )
+
     db.commit()
     db.refresh(subscription)
 
@@ -334,12 +395,23 @@ def process_subscription_lifecycle(
     db: Session,
 ) -> dict:
     """
-    Process trial expiration, subscription expiration,
-    and automatic period renewal.
+    Process customer subscription trials, payments, renewals,
+    and expiration.
 
-    This function intentionally does not process per-bill
-    subscriptions because they do not have a recurring
-    calendar period.
+    Customer monthly/yearly subscriptions require payment
+    before becoming active.
+
+    Trialing subscriptions receive the subscription benefit
+    during the trial. When the trial ends, a subscription
+    invoice is created. The subscription remains pending
+    until that invoice is paid.
+
+    Active subscriptions receive the subscription benefit
+    until the current billing period ends. A renewal invoice
+    is then created. The next period only becomes active
+    after that invoice is paid.
+
+    Per-bill plans do not participate in this calendar lifecycle.
     """
 
     now = datetime.now(timezone.utc)
@@ -348,7 +420,7 @@ def process_subscription_lifecycle(
         select(Subscription)
         .where(
             Subscription.status.in_(
-                ["trialing", "active"]
+                ["pending_payment", "trialing", "active"]
             )
         )
         .with_for_update()
@@ -358,7 +430,7 @@ def process_subscription_lifecycle(
         db.execute(statement).scalars().all()
     )
 
-    trial_activated = 0
+    trial_invoices = 0
     renewed = 0
     expired = 0
     skipped_per_bill = 0
@@ -375,16 +447,19 @@ def process_subscription_lifecycle(
         if plan is None:
             continue
 
-        # Per-bill subscriptions do not have a recurring
-        # calendar lifecycle.
+        # Per-bill is not a customer calendar subscription.
         if plan.billing_type == "per_bill":
             skipped_per_bill += 1
             continue
 
-        # Normalize database timestamps in case the database
-        # returns a naive datetime.
-        trial_ends_at = subscription.trial_ends_at
         current_period_end = subscription.current_period_end
+
+        if current_period_end.tzinfo is None:
+            current_period_end = current_period_end.replace(
+                tzinfo=timezone.utc
+            )
+
+        trial_ends_at = subscription.trial_ends_at
 
         if (
             trial_ends_at is not None
@@ -394,55 +469,94 @@ def process_subscription_lifecycle(
                 tzinfo=timezone.utc
             )
 
-        if current_period_end.tzinfo is None:
-            current_period_end = current_period_end.replace(
-                tzinfo=timezone.utc
-            )
+        # --------------------------------------------------
+        # 1. Zero-day subscription waiting for first payment
+        # --------------------------------------------------
+        if subscription.status == "pending_payment":
 
-        # Trial has ended.
+            # If the first billing period has already ended
+            # without payment, expire the subscription.
+            if current_period_end <= now:
+                subscription.status = "expired"
+                subscription.auto_renew = False
+                subscription.updated_at = now
+                expired += 1
+
+            continue
+
+        # --------------------------------------------------
+        # 2. Trial has ended
+        # --------------------------------------------------
         if (
             subscription.status == "trialing"
             and trial_ends_at is not None
             and trial_ends_at <= now
         ):
-            subscription.status = "active"
-            subscription.updated_at = now
-            trial_activated += 1
-
-        # Current billing period has ended.
-        if current_period_end <= now:
-
-            if subscription.auto_renew:
-                if plan.billing_type == "monthly":
-                    period_days = 30
-                elif plan.billing_type == "yearly":
-                    period_days = 365
-                else:
-                    continue
-
-                next_period_start = current_period_end
-                next_period_end = (
-                    next_period_start
-                    + timedelta(days=period_days)
+            existing_invoice = db.execute(
+                select(Invoice).where(
+                    Invoice.subscription_id
+                    == subscription.id,
+                    Invoice.billing_period_start
+                    == subscription.current_period_start,
+                    Invoice.billing_period_end
+                    == subscription.current_period_end,
                 )
+            ).scalar_one_or_none()
 
-                existing_invoice = db.execute(
-                    select(Invoice).where(
-                        Invoice.subscription_id
-                        == subscription.id,
-                        Invoice.billing_period_start
-                        == next_period_start,
-                        Invoice.billing_period_end
-                        == next_period_end,
-                    )
-                ).scalar_one_or_none()
+            if existing_invoice is None:
+                create_or_get_renewal_invoice(
+                    db=db,
+                    subscription=subscription,
+                    plan=plan,
+                    billing_period_start=(
+                        subscription.current_period_start
+                    ),
+                    billing_period_end=(
+                        subscription.current_period_end
+                    ),
+                )
+                trial_invoices += 1
 
-                if existing_invoice is not None:
-                    # Renewal invoice already exists.
-                    # Wait for payment before advancing
-                    # the subscription period.
-                    continue
+            # Do not activate until the subscription invoice
+            # has actually been paid.
+            subscription.status = "pending_payment"
+            subscription.updated_at = now
 
+            continue
+
+        # --------------------------------------------------
+        # 3. Active subscription period has ended
+        # --------------------------------------------------
+        if (
+            subscription.status == "active"
+            and current_period_end <= now
+        ):
+
+            if plan.billing_type == "monthly":
+                period_days = 30
+            elif plan.billing_type == "yearly":
+                period_days = 365
+            else:
+                continue
+
+            next_period_start = current_period_end
+            next_period_end = (
+                next_period_start
+                + timedelta(days=period_days)
+            )
+
+            existing_invoice = db.execute(
+                select(Invoice).where(
+                    Invoice.subscription_id
+                    == subscription.id,
+                    Invoice.billing_period_start
+                    == next_period_start,
+                    Invoice.billing_period_end
+                    == next_period_end,
+                )
+            ).scalar_one_or_none()
+
+            if existing_invoice is None:
                 create_or_get_renewal_invoice(
                     db=db,
                     subscription=subscription,
@@ -451,24 +565,28 @@ def process_subscription_lifecycle(
                     billing_period_end=next_period_end,
                 )
 
+                # The current subscription period has ended.
+                # It must not continue receiving benefits while
+                # waiting for payment.
+                subscription.status = "pending_payment"
+                subscription.auto_renew = True
                 subscription.updated_at = now
 
                 renewed += 1
 
             else:
-                subscription.status = "expired"
-                subscription.auto_renew = False
-                subscription.updated_at = now
-
-                expired += 1
+                # Renewal invoice already exists and is unpaid.
+                # Keep subscription out of active state.
+                if existing_invoice.payment_status != "paid":
+                    subscription.status = "pending_payment"
+                    subscription.updated_at = now
 
     db.commit()
 
     return {
-        "processed_at": now.isoformat(),
-        "processed": len(subscriptions),
-        "trial_activated": trial_activated,
+        "trial_invoices": trial_invoices,
         "renewed": renewed,
         "expired": expired,
         "skipped_per_bill": skipped_per_bill,
     }
+

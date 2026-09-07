@@ -52,3 +52,51 @@ def get_current_user(
         )
 
     return user
+
+def get_current_salesman(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.employee import Employee
+
+    salesman = (
+        db.query(Employee)
+        .filter(
+            Employee.user_id == current_user.id,
+            Employee.employee_type == "salesman",
+            Employee.status == "active",
+        )
+        .first()
+    )
+
+    if salesman is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Active salesman account is required.",
+        )
+
+    return salesman
+
+
+def get_current_employee(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.employee import Employee
+
+    employee = (
+        db.query(Employee)
+        .filter(
+            Employee.user_id == current_user.id,
+            Employee.status == 'active',
+        )
+        .first()
+    )
+
+    if employee is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Active employee account is required.',
+        )
+
+    return employee

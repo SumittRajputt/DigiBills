@@ -1,9 +1,10 @@
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
-from app.api.dependencies import get_db
+from app.api.dependencies import get_current_salesman, get_db
 from app.models.customer import Customer
 from app.models.invoice import Invoice
 from app.models.subscription import Subscription
@@ -13,6 +14,7 @@ from app.schemas.subscription import (
     BillingUsageCreateRequest,
     BillingUsageResponse,
     SubscriptionCancelResponse,
+    SalesmanSubscriptionCreateRequest,
     SubscriptionCreateRequest,
     SubscriptionPlanResponse,
     SubscriptionPaymentRequest,
@@ -32,6 +34,7 @@ from app.services.subscription_service import (
     create_billing_usage,
     create_subscription,
     get_active_subscription_for_customer,
+    get_current_subscription_for_customer,
     get_active_subscription_for_retailer,
     get_plan_by_reference,
     get_subscription_by_reference,
@@ -81,6 +84,11 @@ def subscription_to_response(
         customer_id=(
             str(subscription.customer_id)
             if subscription.customer_id
+            else None
+        ),
+        salesman_id=(
+            str(subscription.salesman_id)
+            if subscription.salesman_id
             else None
         ),
         status=subscription.status,
@@ -166,7 +174,7 @@ def get_my_subscription_endpoint(
                 detail="Customer or retailer account not found.",
             )
 
-        subscription = get_active_subscription_for_customer(
+        subscription = get_current_subscription_for_customer(
             db,
             customer.id,
         )
@@ -178,6 +186,70 @@ def get_my_subscription_endpoint(
         )
 
     return subscription_to_response(subscription)
+
+
+@router.post(
+    "/salesman",
+    response_model=SubscriptionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_salesman_subscription_endpoint(
+    request: SalesmanSubscriptionCreateRequest,
+    salesman=Depends(get_current_salesman),
+    db: Session = Depends(get_db),
+):
+    plan = get_plan_by_reference(
+        db,
+        request.plan_id,
+    )
+
+    if plan is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription plan not found.",
+        )
+
+    if plan.customer_type != "customer":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Salesmen can only sell customer subscription plans.",
+        )
+
+    try:
+        customer_id = uuid.UUID(request.customer_id)
+
+        customer = db.execute(
+            select(Customer).where(
+                Customer.id == customer_id
+            )
+        ).scalar_one_or_none()
+
+        if customer is None:
+            raise ValueError(
+                "Customer not found."
+            )
+
+        if customer.status != "active":
+            raise ValueError(
+                "Customer account is not active."
+            )
+
+        subscription = create_subscription(
+            db=db,
+            plan=plan,
+            customer_id=customer.id,
+            salesman_id=salesman.id,
+        )
+
+        return subscription_to_response(subscription)
+
+    except ValueError as exc:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
 
 
 @router.post(

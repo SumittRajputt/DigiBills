@@ -86,6 +86,29 @@ def get_product_variant_by_id(
     ).scalar_one_or_none()
 
 
+
+def get_warranties_for_retailer(
+    db: Session,
+    retailer_id: uuid.UUID,
+) -> list[Warranty]:
+    statement = (
+        select(Warranty)
+        .join(
+            Invoice,
+            Invoice.id == Warranty.invoice_id,
+        )
+        .where(
+            Invoice.retailer_id == retailer_id
+        )
+        .order_by(
+            Warranty.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
 def create_warranty(
     db: Session,
     retailer: Retailer,

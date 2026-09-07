@@ -61,8 +61,21 @@ def get_product_by_code(
     ).scalar_one_or_none()
 
 
+def get_all_product_variants(
+    db: Session,
+) -> list[ProductVariant]:
+    statement = (
+        select(ProductVariant)
+        .order_by(ProductVariant.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
 def create_product_variant(
     db: Session,
+
     product_code: str,
     sku: str,
     variant_name: str,

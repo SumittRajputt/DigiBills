@@ -6,14 +6,44 @@ from app.api.routes.audit_log import (
 from app.api.routes.admin_dashboard import (
     router as admin_dashboard_router,
 )
+from app.api.routes.report import (
+    router as report_router,
+)
+from app.api.routes.retailer_dashboard import (
+    router as retailer_dashboard_router,
+)
 from app.api.routes.admin_purchase_return import (
     router as admin_purchase_return_router,
 )
 from app.api.routes.auth import (
     router as auth_router,
 )
+from app.api.routes.customer_invoices import (
+    router as customer_invoices_router,
+)
+from app.api.routes.customer_payments import (
+    router as customer_payments_router,
+)
+from app.api.routes.customer_warranty import (
+    router as customer_warranty_router,
+)
+from app.api.routes.customer_transfers import (
+    router as customer_transfers_router,
+)
+from app.api.routes.customer_support import (
+    router as customer_support_router,
+)
+from app.api.routes.customer_products import (
+    router as customer_products_router,
+)
+from app.api.routes.customer_dashboard import (
+    router as customer_dashboard_router,
+)
 from app.api.routes.customer import (
     router as customer_router,
+)
+from app.api.routes.employee import (
+    router as employee_router,
 )
 from app.api.routes.health import (
     router as health_router,
@@ -29,6 +59,9 @@ from app.api.routes.invoice import (
 )
 from app.api.routes.payment import (
     router as payment_router,
+)
+from app.api.routes.payment_configuration import (
+    router as payment_configuration_router,
 )
 from app.api.routes.product import (
     router as product_router,
@@ -53,6 +86,12 @@ from app.api.routes.purchase_return import (
 )
 from app.api.routes.retailer import (
     router as retailer_router,
+)
+from app.api.routes.retailer_plans import (
+    router as retailer_plans_router,
+)
+from app.api.routes.customer_plans import (
+    router as customer_plans_router,
 )
 from app.api.routes.role import (
     router as role_router,
@@ -93,7 +132,44 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    customer_dashboard_router
+)
+
+api_router.include_router(
+    customer_invoices_router
+)
+
+api_router.include_router(
+    customer_payments_router
+)
+api_router.include_router(
+    customer_warranty_router
+)
+api_router.include_router(
+    customer_transfers_router
+)
+api_router.include_router(
+    customer_support_router
+)
+
+api_router.include_router(
+    customer_products_router
+)
+
+api_router.include_router(
+    employee_router
+)
+
+api_router.include_router(
     retailer_router
+)
+
+api_router.include_router(
+    retailer_plans_router
+)
+
+api_router.include_router(
+    customer_plans_router
 )
 
 api_router.include_router(
@@ -159,12 +235,25 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    payment_configuration_router
+)
+
+api_router.include_router(
     audit_log_router
 )
 
 api_router.include_router(
     admin_dashboard_router
 )
+
+api_router.include_router(
+    retailer_dashboard_router
+)
+
+api_router.include_router(
+    report_router
+)
+
 
 api_router.include_router(
     admin_purchase_return_router

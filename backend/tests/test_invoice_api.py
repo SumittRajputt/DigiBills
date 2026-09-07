@@ -1,5 +1,7 @@
+import json
 from app.schemas.invoice import InvoiceItemCreateRequest
 from app.services.invoice_service import create_invoice
+from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from app.models.customer import Customer
@@ -8,10 +10,23 @@ from app.models.inventory_location import InventoryLocation
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.retailer import Retailer
+from app.models.subscription import Subscription
+from app.models.subscription_plan import SubscriptionPlan
 from app.models.user import User
 from app.models.role import Role
 from app.models.access_control import user_roles
 from app.services.auth_service import create_user_token
+from app.services.plan_limit_service import (
+    PlanLimitExceededError,
+    check_invoice_limit,
+    get_invoice_usage,
+)
+
+
+def auth_headers(token):
+    return {
+        "Authorization": f"Bearer {token}",
+    }
 
 
 def create_invoice_api_context(db, stock_quantity=5):
@@ -42,6 +57,40 @@ def create_invoice_api_context(db, stock_quantity=5):
         status="active",
     )
     db.add(retailer)
+    db.flush()
+
+    now = datetime.now(timezone.utc)
+
+    plan = SubscriptionPlan(
+        plan_id=f"test_retailer_plan_{uuid4().hex[:8]}",
+        name="Test Retailer Plan",
+        description="Invoice API test plan",
+        customer_type="retailer",
+        billing_type="monthly",
+        monthly_price=100,
+        yearly_price=1200,
+        per_bill_price=0,
+        trial_days=0,
+        features="[]",
+        limits='{"invoices":{"unlimited":false,"limit":1000}}',
+        is_active=True,
+    )
+    db.add(plan)
+    db.flush()
+
+    subscription = Subscription(
+        subscription_id=f"SUB-TEST-{uuid4().hex[:8].upper()}",
+        plan_id=plan.id,
+        retailer_id=retailer.id,
+        customer_id=None,
+        status="active",
+        started_at=now,
+        current_period_start=now - timedelta(seconds=1),
+        current_period_end=now + timedelta(days=30),
+        trial_ends_at=None,
+        auto_renew=True,
+    )
+    db.add(subscription)
     db.flush()
 
     location = InventoryLocation(
@@ -144,6 +193,40 @@ def test_create_invoice_api(client, db):
         status="active",
     )
     db.add(retailer)
+    db.flush()
+
+    now = datetime.now(timezone.utc)
+
+    plan = SubscriptionPlan(
+        plan_id=f"test_retailer_plan_{uuid4().hex[:8]}",
+        name="Test Retailer Plan",
+        description="Invoice API test plan",
+        customer_type="retailer",
+        billing_type="monthly",
+        monthly_price=100,
+        yearly_price=1200,
+        per_bill_price=0,
+        trial_days=0,
+        features="[]",
+        limits='{"invoices":{"unlimited":false,"limit":1000}}',
+        is_active=True,
+    )
+    db.add(plan)
+    db.flush()
+
+    subscription = Subscription(
+        subscription_id=f"SUB-TEST-{uuid4().hex[:8].upper()}",
+        plan_id=plan.id,
+        retailer_id=retailer.id,
+        customer_id=None,
+        status="active",
+        started_at=now,
+        current_period_start=now - timedelta(seconds=1),
+        current_period_end=now + timedelta(days=30),
+        trial_ends_at=None,
+        auto_renew=True,
+    )
+    db.add(subscription)
     db.flush()
 
     location = InventoryLocation(
@@ -924,3 +1007,198 @@ def test_get_invoice_api_rejects_invoice_from_another_retailer(
     assert response.json()["detail"] == "Invoice not found."
 
 
+
+
+def test_invoice_limit_blocks_when_limit_is_reached(db):
+    context = create_invoice_api_context(db)
+
+    subscription = db.query(Subscription).filter(
+        Subscription.retailer_id == context["retailer"].id
+    ).one()
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.id == subscription.plan_id
+    ).one()
+
+    plan.limits = json.dumps({
+        "invoices": {
+            "unlimited": False,
+            "limit": 1,
+        }
+    })
+
+    db.commit()
+
+    invoice = create_invoice(
+        db=db,
+        retailer=context["retailer"],
+        customer=context["customer"],
+        location=context["location"],
+        items=[
+            InvoiceItemCreateRequest(
+                sku=context["variant"].sku,
+                quantity=1,
+            )
+        ],
+    )
+
+    db.commit()
+
+    assert get_invoice_usage(
+        db,
+        context["retailer"].id,
+        subscription,
+    ) == 1
+
+    try:
+        check_invoice_limit(
+            db,
+            context["retailer"].id,
+        )
+    except PlanLimitExceededError as exc:
+        assert "Invoice limit of 1 has been reached" in str(exc)
+    else:
+        raise AssertionError(
+            "Expected invoice limit to be exceeded."
+        )
+
+
+def test_unlimited_invoice_plan_bypasses_limit(db):
+    context = create_invoice_api_context(db)
+
+    subscription = db.query(Subscription).filter(
+        Subscription.retailer_id == context["retailer"].id
+    ).one()
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.id == subscription.plan_id
+    ).one()
+
+    plan.limits = json.dumps({
+        "invoices": {
+            "unlimited": True,
+            "limit": 1,
+        }
+    })
+
+    db.commit()
+
+    for _ in range(3):
+        check_invoice_limit(
+            db,
+            context["retailer"].id,
+        )
+
+
+def test_old_period_invoices_do_not_count_toward_current_limit(db):
+    context = create_invoice_api_context(db)
+
+    subscription = db.query(Subscription).filter(
+        Subscription.retailer_id == context["retailer"].id
+    ).one()
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.id == subscription.plan_id
+    ).one()
+
+    plan.limits = json.dumps({
+        "invoices": {
+            "unlimited": False,
+            "limit": 1,
+        }
+    })
+
+    db.commit()
+
+    invoice = create_invoice(
+        db=db,
+        retailer=context["retailer"],
+        customer=context["customer"],
+        location=context["location"],
+        items=[
+            InvoiceItemCreateRequest(
+                sku=context["variant"].sku,
+                quantity=1,
+            )
+        ],
+    )
+
+    old_time = (
+        subscription.current_period_start
+        - timedelta(days=2)
+    )
+
+    invoice.created_at = old_time
+    db.commit()
+
+    assert get_invoice_usage(
+        db,
+        context["retailer"].id,
+        subscription,
+    ) == 0
+
+    check_invoice_limit(
+        db,
+        context["retailer"].id,
+    )
+
+
+def test_create_invoice_api_enforces_configured_invoice_limit(
+    client,
+    db,
+):
+    context = create_invoice_api_context(db)
+
+    subscription = db.query(Subscription).filter(
+        Subscription.retailer_id == context["retailer"].id
+    ).one()
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.id == subscription.plan_id
+    ).one()
+
+    plan.limits = json.dumps({
+        "invoices": {
+            "unlimited": False,
+            "limit": 1,
+        }
+    })
+
+    db.commit()
+
+    first_response = client.post(
+        "/invoices",
+        headers=auth_headers(context["token"]),
+        json={
+            "customer_id": context["customer"].customer_id,
+            "location_id": str(context["location"].id),
+            "items": [
+                {
+                    "sku": context["variant"].sku,
+                    "quantity": 1,
+                }
+            ],
+        },
+    )
+
+    assert first_response.status_code == 201
+
+    second_response = client.post(
+        "/invoices",
+        headers=auth_headers(context["token"]),
+        json={
+            "customer_id": context["customer"].customer_id,
+            "location_id": str(context["location"].id),
+            "items": [
+                {
+                    "sku": context["variant"].sku,
+                    "quantity": 1,
+                }
+            ],
+        },
+    )
+
+    assert second_response.status_code == 403
+    assert "Invoice limit of 1 has been reached" in (
+        second_response.json()["detail"]
+    )

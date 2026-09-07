@@ -643,3 +643,22 @@ def get_all_sales_returns(
     return list(
         db.execute(statement).scalars().all()
     )
+
+
+def get_sales_returns_for_retailer(
+    db: Session,
+    retailer_id: uuid.UUID,
+) -> list[SalesReturn]:
+    statement = (
+        select(SalesReturn)
+        .where(
+            SalesReturn.retailer_id == retailer_id
+        )
+        .order_by(
+            SalesReturn.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )

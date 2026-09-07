@@ -99,3 +99,26 @@ def get_all_retailers(
     return list(
         db.execute(statement).scalars().all()
     )
+
+
+def update_retailer(
+    db: Session,
+    retailer: Retailer,
+    business_name: str,
+    business_type: str,
+    phone_number: str,
+    email: Optional[str],
+    address: Optional[str],
+) -> Retailer:
+    retailer.business_name = business_name.strip()
+    retailer.business_type = (
+        business_type.strip() if business_type else None
+    )
+    retailer.phone_number = phone_number.strip()
+    retailer.email = email
+    retailer.address = address.strip() if address else None
+
+    db.commit()
+    db.refresh(retailer)
+
+    return retailer

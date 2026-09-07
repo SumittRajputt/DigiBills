@@ -124,7 +124,21 @@ def list_payments(
     ),
     db: Session = Depends(get_db),
 ):
-    payments = get_all_payments(db)
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    payments = get_all_payments(
+        db,
+        retailer_id=retailer.id,
+    )
 
     return [
         payment_to_response(payment)

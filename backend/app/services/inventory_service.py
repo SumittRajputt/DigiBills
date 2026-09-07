@@ -36,6 +36,7 @@ def create_inventory_item(
     reorder_level: int = 0,
     reorder_quantity: int = 0,
     average_cost: Decimal = Decimal("0"),
+    tax_rate: Optional[Decimal] = None,
 ) -> InventoryItem:
 
     if location.retailer_id != retailer.id:
@@ -75,6 +76,18 @@ def create_inventory_item(
             "Average cost cannot be negative."
         )
 
+    if tax_rate is None:
+        tax_rate = product_variant.tax_rate
+
+    if tax_rate < 0 or tax_rate > 100:
+        raise ValueError(
+            "GST rate must be between 0 and 100 percent."
+        )
+
+    tax_rate = Decimal(str(tax_rate)).quantize(
+        Decimal("0.01")
+    )
+
     inventory_item = InventoryItem(
         retailer_id=retailer.id,
         location_id=location.id,
@@ -84,10 +97,35 @@ def create_inventory_item(
         reorder_level=reorder_level,
         reorder_quantity=reorder_quantity,
         average_cost=average_cost,
+        tax_rate=tax_rate,
         last_stocked_at=None,
     )
 
     db.add(inventory_item)
+    db.commit()
+    db.refresh(inventory_item)
+
+    return inventory_item
+
+
+def update_inventory_tax_rate(
+    db: Session,
+    inventory_item: InventoryItem,
+    tax_rate: Decimal,
+) -> InventoryItem:
+    """Update the retailer-controlled GST rate for an inventory item."""
+
+    tax_rate = Decimal(str(tax_rate)).quantize(
+        Decimal("0.01")
+    )
+
+    if tax_rate < 0 or tax_rate > 100:
+        raise ValueError(
+            "GST rate must be between 0 and 100 percent."
+        )
+
+    inventory_item.tax_rate = tax_rate
+
     db.commit()
     db.refresh(inventory_item)
 

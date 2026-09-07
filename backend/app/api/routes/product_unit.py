@@ -8,7 +8,10 @@ from app.schemas.product_unit import (
     ProductUnitCreateRequest,
     ProductUnitResponse,
 )
-from app.services.product_unit_service import create_product_unit
+from app.services.product_unit_service import (
+    create_product_unit,
+    get_product_units_by_variant,
+)
 
 
 router = APIRouter(
@@ -30,6 +33,37 @@ def product_unit_to_response(
         created_at=product_unit.created_at,
         updated_at=product_unit.updated_at,
     )
+
+
+@router.get(
+    "/variant/{product_variant_id}",
+    response_model=list[ProductUnitResponse],
+)
+def list_product_units_endpoint(
+    product_variant_id: str,
+    current_user: User = Depends(
+        require_permission("product.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    try:
+        parsed_id = __import__("uuid").UUID(product_variant_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid product variant ID.",
+        )
+
+    units = get_product_units_by_variant(
+        db,
+        parsed_id,
+    )
+
+    return [
+        product_unit_to_response(unit)
+        for unit in units
+    ]
+
 
 
 @router.post(

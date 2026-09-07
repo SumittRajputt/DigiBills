@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import {
+  Link,
   Navigate,
   Route,
   Routes,
@@ -7,6 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import {
+  ArrowLeft,
   Bell,
   ChevronDown,
   CircleHelp,
@@ -16,12 +18,30 @@ import {
   ShieldCheck,
   Store,
   UserRound,
+  UsersRound,
 } from "lucide-react";
 
 import AdminDashboard from "./dashboards/AdminDashboard";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import RetailerDashboard from "./dashboards/RetailerDashboard";
+import RetailerInventory from "./pages/RetailerInventory";
+import RetailerSuppliers from "./pages/RetailerSuppliers";
+import RetailerPayments from "./pages/RetailerPayments";
+import RetailerSettings from "./pages/RetailerSettings";
+import RetailerCustomers from "./pages/RetailerCustomers";
+import RetailerEmployees from "./pages/RetailerEmployees";
+import RetailerPurchases from "./pages/RetailerPurchases";
 import CustomerDashboard from "./dashboards/CustomerDashboard";
+import CustomerInvoices from "./pages/CustomerInvoices";
+import CustomerPayments from "./pages/CustomerPayments";
+import CustomerWarranty from "./pages/CustomerWarranty";
+import CustomerTransfers from "./pages/CustomerTransfers";
+import CustomerSupport from "./pages/CustomerSupport";
+import CustomerSettings from "./pages/CustomerSettings";
+import CustomerSubscription from "./pages/CustomerSubscription";
+import CustomerProducts from "./pages/CustomerProducts";
+import CustomerProfile from "./pages/CustomerProfile";
+import CashierDashboard from "./dashboards/CashierDashboard";
 import AdminRetailers from "./pages/AdminRetailers";
 import AdminUsers from "./pages/AdminUsers";
 import AdminCustomers from "./pages/AdminCustomers";
@@ -31,10 +51,63 @@ import AdminPayments from "./pages/AdminPayments";
 import AdminWarranty from "./pages/AdminWarranty";
 import AdminReports from "./pages/AdminReports";
 import AdminReturns from "./pages/AdminReturns";
+import RetailerReturns from "./pages/RetailerReturns";
+import RetailerWarranty from "./pages/RetailerWarranty";
+import RetailerReports from "./pages/RetailerReports";
 import AdminSettings from "./pages/AdminSettings";
+import RetailerRegistration from "./pages/RetailerRegistration";
+import CustomerRegistration from "./pages/CustomerRegistration";
 import { apiFetch } from "./api";
 
-type Role = "super_admin" | "retailer_owner" | "customer";
+type Role =
+  | "super_admin"
+  | "retailer_owner"
+  | "customer"
+  | "cashier"
+  | "retailer_manager"
+  | "inventory_manager"
+  | "salesman";
+
+const retailerNavPaths: Record<string, string> = {
+  Dashboard: "/retailer",
+  Products: "/retailer/products",
+  Inventory: "/retailer/inventory",
+  Invoices: "/retailer/invoices",
+  Payments: "/retailer/payments",
+  Customers: "/retailer/customers",
+  Employees: "/retailer/employees",
+  Purchases: "/retailer/purchases",
+  Returns: "/retailer/returns",
+  Suppliers: "/retailer/suppliers",
+  Warranty: "/retailer/warranty",
+  Reports: "/retailer/reports",
+  Settings: "/retailer/settings",
+};
+
+function RetailerPlaceholder({ title }: { title: string }) {
+  return (
+    <section className="dashboard retailer-placeholder-page">
+      <div className="page-heading">
+        <span className="page-eyebrow">RETAILER MANAGEMENT</span>
+        <h1>{title}</h1>
+        <p>This retailer module is ready for implementation.</p>
+      </div>
+
+      <div className="panel">
+        <div className="panel-header">
+          <div>
+            <h3>{title}</h3>
+            <span>The navigation route is active.</span>
+          </div>
+        </div>
+
+        <div style={{ padding: "28px 20px", color: "#7d8998", fontSize: "13px" }}>
+          {title} page will be built here.
+        </div>
+      </div>
+    </section>
+  );
+}
 
 type User = {
   id: string;
@@ -64,6 +137,30 @@ const roleMeta = {
     color: "#7352d6",
     path: "/customer",
   },
+  cashier: {
+    label: "Cashier",
+    shortLabel: "Cashier",
+    color: "#1769ff",
+    path: "/employee/cashier",
+  },
+  retailer_manager: {
+    label: "Retailer Manager",
+    shortLabel: "Manager",
+    color: "#11a36a",
+    path: "/employee/manager",
+  },
+  inventory_manager: {
+    label: "Inventory Manager",
+    shortLabel: "Inventory",
+    color: "#7352d6",
+    path: "/employee/inventory",
+  },
+  salesman: {
+    label: "Salesman",
+    shortLabel: "Salesman",
+    color: "#d97706",
+    path: "/employee/salesman",
+  },
 };
 
 function App() {
@@ -71,7 +168,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("digibills_token");
+    const token = sessionStorage.getItem("digibills_token");
 
     if (!token) {
       setLoading(false);
@@ -83,7 +180,7 @@ function App() {
         setUser(currentUser);
       })
       .catch(() => {
-        localStorage.removeItem("digibills_token");
+        sessionStorage.removeItem("digibills_token");
         setUser(null);
       })
       .finally(() => {
@@ -106,13 +203,71 @@ function App() {
 
   return (
     <Routes>
+
+      <Route
+        path="/retailer-register"
+        element={<RetailerRegistration />}
+      />
+
+      <Route
+        path="/customer-register"
+        element={<CustomerRegistration />}
+      />
+
+      <Route
+        path="/register"
+        element={<AccountTypePage mode="register" />}
+      />
+
       <Route
         path="/login"
         element={
           user ? (
             <NavigateToRole user={user} />
           ) : (
-            <LoginPage onLogin={setUser} />
+            <AccountTypePage mode="login" />
+          )
+        }
+      />
+
+      <Route
+        path="/login/retailer"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="retailer"
+            />
+          )
+        }
+      />
+
+      <Route
+        path="/login/customer"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="customer"
+            />
+          )
+        }
+      />
+
+      <Route
+        path="/login/employee"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="employee"
+            />
           )
         }
       />
@@ -147,6 +302,7 @@ function App() {
                   path="invoices"
                   element={<AdminInvoices />}
                 />
+
                 <Route
                   path="payments"
                   element={<AdminPayments />}
@@ -182,7 +338,79 @@ function App() {
         element={
           <ProtectedRoute user={user} role="retailer_owner">
             <DashboardFrame role="retailer_owner" user={user!}>
-              <RetailerDashboard />
+              <Routes>
+                <Route
+                  index
+                  element={<RetailerDashboard />}
+                />
+                <Route
+                  path="products"
+                  element={<AdminProducts />}
+                />
+                <Route
+                  path="invoices"
+                  element={<AdminInvoices />}
+                />
+                <Route
+                  path="inventory"
+                  element={<RetailerInventory />}
+                />
+                <Route
+                  path="payments"
+                  element={<RetailerPayments />}
+                />
+                <Route
+                  path="customers"
+                  element={<RetailerCustomers />}
+                />
+                <Route
+                  path="employees"
+                  element={<RetailerEmployees />}
+                />
+                <Route
+                  path="purchases"
+                  element={<RetailerPurchases />}
+                />
+                <Route
+                  path="returns"
+                  element={<RetailerReturns />}
+                />
+                <Route
+                  path="suppliers"
+                  element={<RetailerSuppliers />}
+                />
+                <Route
+                  path="warranty"
+                  element={<RetailerWarranty />}
+                />
+                <Route
+                  path="reports"
+                  element={<RetailerReports />}
+                />
+                <Route
+                  path="settings"
+                  element={<RetailerSettings />}
+                />
+                <Route
+                  path="products"
+                  element={<AdminProducts />}
+                />
+                <Route
+                  path="invoices"
+                  element={<AdminInvoices />}
+                />
+              </Routes>
+            </DashboardFrame>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/employee/cashier"
+        element={
+          <ProtectedRoute user={user} role="cashier">
+            <DashboardFrame role="cashier" user={user!}>
+              <CashierDashboard />
             </DashboardFrame>
           </ProtectedRoute>
         }
@@ -193,7 +421,63 @@ function App() {
         element={
           <ProtectedRoute user={user} role="customer">
             <DashboardFrame role="customer" user={user!}>
-              <CustomerDashboard />
+              <Routes>
+                <Route
+                  index
+                  element={<CustomerDashboard />}
+                />
+                <Route
+                  path="profile"
+                  element={<CustomerProfile />}
+                />
+
+                <Route
+                  path="invoices"
+                  element={<CustomerInvoices />}
+                />
+
+                <Route
+                  path="invoices/:invoiceId"
+                  element={<CustomerInvoices />}
+                />
+
+                <Route
+                  path="payments"
+                  element={<CustomerPayments />}
+                />
+
+                <Route
+                  path="warranty"
+                  element={<CustomerWarranty />}
+                />
+
+                <Route
+                  path="transfers"
+                  element={<CustomerTransfers />}
+                />
+
+                <Route
+                  path="support"
+                  element={<CustomerSupport />}
+                />
+
+                <Route
+                  path="settings"
+                  element={<CustomerSettings />}
+                />
+
+                <Route
+                  path="subscription"
+                  element={<CustomerSubscription />}
+                />
+
+                <Route
+                  path="products"
+                  element={<CustomerProducts />}
+                />
+
+
+              </Routes>
             </DashboardFrame>
           </ProtectedRoute>
         }
@@ -224,13 +508,145 @@ function App() {
   );
 }
 
-function LoginPage({ onLogin }: { onLogin: (user: User) => void }) {
+function AccountTypePage({
+  mode,
+}: {
+  mode: "login" | "register";
+}) {
+  const navigate = useNavigate();
+  const isLogin = mode === "login";
+
+  function handleRetailer() {
+    navigate(isLogin ? "/login/retailer" : "/retailer-register");
+  }
+
+  function handleCustomer() {
+    navigate(isLogin ? "/login/customer" : "/customer-register");
+  }
+
+  function handleEmployee() {
+    navigate("/login/employee");
+  }
+
+  return (
+    <div className="account-type-page">
+      <div className="account-type-card">
+        <div className="brand large">
+          <span className="brand-mark">✣</span> DigiBills
+        </div>
+
+        <div className="account-type-heading">
+          <span className="account-type-eyebrow">
+            {isLogin ? "ACCOUNT ACCESS" : "GET STARTED"}
+          </span>
+
+          <h1>
+            {isLogin ? "Welcome back" : "Create your account"}
+          </h1>
+
+          <p>
+            {isLogin
+              ? "Choose how you want to sign in to DigiBills."
+              : "Choose the account type that fits you best."}
+          </p>
+        </div>
+
+        <div className="account-type-options">
+          <button
+            type="button"
+            className="account-type-option retailer"
+            onClick={handleRetailer}
+          >
+            <span className="account-type-icon">
+              <Store size={22} strokeWidth={1.8} />
+            </span>
+
+            <span className="account-type-content">
+              <strong>Retailer</strong>
+              <span>
+                {isLogin
+                  ? "Manage your store and business"
+                  : "Create a retailer account"}
+              </span>
+            </span>
+
+            <span className="account-type-arrow">→</span>
+          </button>
+
+          <button
+            type="button"
+            className="account-type-option customer"
+            onClick={handleCustomer}
+          >
+            <span className="account-type-icon">
+              <UserRound size={22} strokeWidth={1.8} />
+            </span>
+
+            <span className="account-type-content">
+              <strong>Customer</strong>
+              <span>
+                {isLogin
+                  ? "Manage your bills and purchases"
+                  : "Create a customer account"}
+              </span>
+            </span>
+
+            <span className="account-type-arrow">→</span>
+          </button>
+
+          {isLogin && (
+            <button
+              type="button"
+              className="account-type-option employee"
+              onClick={handleEmployee}
+            >
+              <span className="account-type-icon">
+                <UsersRound size={22} strokeWidth={1.8} />
+              </span>
+
+              <span className="account-type-content">
+                <strong>Employee</strong>
+                <span>Access your assigned work dashboard</span>
+              </span>
+
+              <span className="account-type-arrow">→</span>
+            </button>
+          )}
+        </div>
+
+        <div className="account-type-footer">
+          {isLogin ? (
+            <>
+              Don't have a DigiBills account?{" "}
+              <Link to="/register">Register</Link>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <Link to="/login">Sign in</Link>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoginPage({
+  onLogin,
+  accountType,
+}: {
+  onLogin: (user: User) => void;
+  accountType: "retailer" | "customer" | "employee";
+}) {
   const navigate = useNavigate();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const isRetailer = accountType === "retailer";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -245,12 +661,13 @@ function LoginPage({ onLogin }: { onLogin: (user: User) => void }) {
       }>("/auth/login", {
         method: "POST",
         body: JSON.stringify({
-          phone_number: phoneNumber,
+          phone_number: phoneNumber.trim(),
           password,
+          account_type: accountType,
         }),
       });
 
-      localStorage.setItem(
+      sessionStorage.setItem(
         "digibills_token",
         tokenResponse.access_token
       );
@@ -260,22 +677,64 @@ function LoginPage({ onLogin }: { onLogin: (user: User) => void }) {
       onLogin(user);
       navigate(getRolePath(user), { replace: true });
     } catch {
-      localStorage.removeItem("digibills_token");
-      setError("Invalid phone number or password.");
+      sessionStorage.removeItem("digibills_token");
+
+      setError(
+        isRetailer
+          ? "Invalid retailer phone number or password."
+          : "Invalid customer phone number or password."
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
+    <div className="login-page account-login-page">
+      <div className="login-card account-login-card">
+        <button
+          type="button"
+          className="login-back-button"
+          onClick={() => navigate("/login")}
+        >
+          <ArrowLeft size={17} />
+          Back
+        </button>
+
         <div className="brand large">
           <span className="brand-mark">✣</span> DigiBills
         </div>
 
-        <h1>Welcome back</h1>
-        <p>Sign in to continue to your DigiBills account.</p>
+        <div className="account-login-heading">
+          <span
+            className={`account-login-badge ${
+              isRetailer ? "retailer" : "customer"
+            }`}
+          >
+            {isRetailer ? (
+              <>
+                <Store size={15} />
+                Retailer
+              </>
+            ) : (
+              <>
+                <UserRound size={15} />
+                Customer
+              </>
+            )}
+          </span>
+
+          <h1>
+            {isRetailer
+              ? "Retailer sign in"
+              : "Customer sign in"}
+          </h1>
+
+          <p>
+            Sign in to continue to your DigiBills{" "}
+            {isRetailer ? "store" : "account"}.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <label>
@@ -283,8 +742,11 @@ function LoginPage({ onLogin }: { onLogin: (user: User) => void }) {
             <input
               type="tel"
               value={phoneNumber}
-              onChange={(event) => setPhoneNumber(event.target.value)}
+              onChange={(event) =>
+                setPhoneNumber(event.target.value)
+              }
               placeholder="Enter phone number"
+              autoComplete="tel"
               required
             />
           </label>
@@ -294,22 +756,36 @@ function LoginPage({ onLogin }: { onLogin: (user: User) => void }) {
             <input
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
               placeholder="Enter password"
+              autoComplete="current-password"
               required
             />
           </label>
 
-          {error && <div className="login-error">{error}</div>}
+          {error && (
+            <div className="login-error">
+              {error}
+            </div>
+          )}
 
           <button
-            className="login-button"
+            className={`login-button ${
+              isRetailer ? "retailer" : "customer"
+            }`}
             type="submit"
             disabled={submitting}
           >
             {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        <div className="registration-footer">
+          Don't have a DigiBills account?{" "}
+          <Link to="/register">Register</Link>
+        </div>
       </div>
     </div>
   );
@@ -360,6 +836,22 @@ function getRolePath(user: User): string {
     return "/customer";
   }
 
+  if (user.roles.includes("cashier")) {
+    return "/employee/cashier";
+  }
+
+  if (user.roles.includes("retailer_manager")) {
+    return "/employee/manager";
+  }
+
+  if (user.roles.includes("inventory_manager")) {
+    return "/employee/inventory";
+  }
+
+  if (user.roles.includes("salesman")) {
+    return "/employee/salesman";
+  }
+
   return "/login";
 }
 
@@ -398,6 +890,7 @@ function DashboardFrame({
       "Invoices",
       "Payments",
       "Customers",
+      "Employees",
       "Purchases",
       "Returns",
       "Suppliers",
@@ -410,13 +903,41 @@ function DashboardFrame({
       "My Profile",
       "My Invoices",
       "My Payments",
-      "My Orders",
-      "My Returns",
       "My Warranty",
-      "My Products",
-      "Transfers",
+      "Transfer Bills",
+      "Subscription",
       "Support",
       "Settings",
+    ],
+    cashier: [
+      "Dashboard",
+      "Invoices",
+      "Customers",
+      "Payments",
+    ],
+    retailer_manager: [
+      "Dashboard",
+      "Products",
+      "Inventory",
+      "Invoices",
+      "Payments",
+      "Customers",
+      "Employees",
+      "Reports",
+    ],
+    inventory_manager: [
+      "Dashboard",
+      "Products",
+      "Inventory",
+      "Purchases",
+      "Suppliers",
+      "Returns",
+    ],
+    salesman: [
+      "Dashboard",
+      "Customers",
+      "Subscriptions",
+      "Sales",
     ],
   }[role];
 
@@ -437,7 +958,7 @@ function DashboardFrame({
   const meta = roleMeta[role];
 
   function logout() {
-    localStorage.removeItem("digibills_token");
+    sessionStorage.removeItem("digibills_token");
     navigate("/login", { replace: true });
   }
 
@@ -491,15 +1012,47 @@ function DashboardFrame({
                       (item === "Reports & Analytics" && location.pathname === "/admin/reports") ||
                       (item === "System Settings" && location.pathname === "/admin/settings")
                     )) ||
-                  (role !== "super_admin" &&
-                    index === 0 &&
-                    location.pathname === `/${role === "retailer_owner" ? "retailer" : "customer"}`)
+                  (
+                    role === "retailer_owner" &&
+                    location.pathname === retailerNavPaths[item]
+                  ) ||
+                  (
+                    role === "customer" &&
+                    (
+                      (item === "Dashboard" &&
+                        location.pathname === "/customer") ||
+                      (item === "My Profile" &&
+                        location.pathname === "/customer/profile") ||
+                      (item === "My Invoices" &&
+                        location.pathname.startsWith("/customer/invoices")) ||
+                      (item === "My Payments" &&
+                        location.pathname === "/customer/payments") ||
+                      (item === "My Warranty" &&
+                        location.pathname === "/customer/warranty") ||
+                      (item === "Transfer Bills" &&
+                        location.pathname === "/customer/transfers") ||
+                      (item === "Subscription" &&
+                        location.pathname === "/customer/subscription") ||
+                      (item === "Support" &&
+                        location.pathname === "/customer/support") ||
+                      (item === "Settings" &&
+                        location.pathname === "/customer/settings")
+                    )
+                  )
                     ? "active"
                     : ""
                 }`}
                 type="button"
                 onClick={() => {
-                  if (role === "super_admin" && item === "Retailers") {
+                  if (
+                    role === "retailer_owner" &&
+                    retailerNavPaths[item]
+                  ) {
+                    navigate(retailerNavPaths[item]);
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Retailers"
+                  ) {
                     navigate("/admin/retailers");
                   } else if (role === "super_admin" && item === "Users") {
                     navigate("/admin/users");
@@ -513,6 +1066,31 @@ function DashboardFrame({
                     navigate("/admin/payments");
                   } else if (role === "super_admin" && item === "Returns & Refunds") {
                     navigate("/admin/returns");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Warranty"
+                  ) {
+                    navigate("/customer/warranty");
+                  } else if (
+                    role === "customer" &&
+                    item === "Transfer Bills"
+                  ) {
+                    navigate("/customer/transfers");
+                  } else if (
+                    role === "customer" &&
+                    item === "Subscription"
+                  ) {
+                    navigate("/customer/subscription");
+                  } else if (
+                    role === "customer" &&
+                    item === "Support"
+                  ) {
+                    navigate("/customer/support");
+                  } else if (
+                    role === "customer" &&
+                    item === "Settings"
+                  ) {
+                    navigate("/customer/settings");
                   } else if (role === "super_admin" && item === "Warranty") {
                     navigate("/admin/warranty");
                   } else if (
@@ -530,6 +1108,21 @@ function DashboardFrame({
                     item === "Audit Logs"
                   ) {
                     navigate("/admin/audit-logs");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Profile"
+                  ) {
+                    navigate("/customer/profile");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Invoices"
+                  ) {
+                    navigate("/customer/invoices");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Payments"
+                  ) {
+                    navigate("/customer/payments");
                   } else if (index === 0) {
                     navigate(
                       role === "super_admin"

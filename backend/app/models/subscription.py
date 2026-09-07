@@ -47,6 +47,15 @@ class Subscription(Base):
         nullable=True,
     )
 
+    salesman_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey(
+            "employees.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+        index=True,
+    )
+
     status: Mapped[str] = mapped_column(
         String(30),
         default="trialing",

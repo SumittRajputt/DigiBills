@@ -10,6 +10,9 @@ from app.models.invoice import Invoice
 from app.models.payment import Payment
 from app.models.subscription import Subscription
 from app.services.audit_log_service import create_audit_log
+from app.services.salesman_commission_service import (
+    create_salesman_commission_for_subscription,
+)
 
 
 def generate_payment_id() -> str:
@@ -97,10 +100,23 @@ def get_completed_payment_total(
 
 def get_all_payments(
     db: Session,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> list[Payment]:
     statement = (
         select(Payment)
-        .order_by(Payment.created_at.desc())
+        .join(
+            Invoice,
+            Invoice.id == Payment.invoice_id,
+        )
+    )
+
+    if retailer_id is not None:
+        statement = statement.where(
+            Invoice.retailer_id == retailer_id
+        )
+
+    statement = statement.order_by(
+        Payment.created_at.desc()
     )
 
     return list(
@@ -357,6 +373,15 @@ def create_subscription_payment(
             subscription.updated_at = (
                 datetime.now(timezone.utc)
             )
+
+        # Create the DigiBills salesman commission only after
+        # the subscription invoice has been fully paid.
+        create_salesman_commission_for_subscription(
+            db=db,
+            subscription=subscription,
+            invoice=invoice,
+        )
+
     else:
         invoice.payment_status = "partial"
 

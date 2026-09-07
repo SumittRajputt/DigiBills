@@ -5,7 +5,7 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("digibills_token");
+  const token = sessionStorage.getItem("digibills_token");
   const headers = new Headers(options.headers);
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -16,7 +16,7 @@ export async function apiFetch<T>(
   });
 
   if (response.status === 401) {
-    localStorage.removeItem("digibills_token");
+    sessionStorage.removeItem("digibills_token");
     window.location.href = "/login";
     throw new Error("Session expired. Please log in again.");
   }

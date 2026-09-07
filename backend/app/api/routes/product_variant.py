@@ -13,6 +13,7 @@ from app.schemas.product_variant import (
 from app.services.product_variant_service import (
     create_product_variant,
     get_variant_by_sku,
+    get_all_product_variants,
 )
 
 
@@ -77,6 +78,24 @@ def create_product_variant_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[ProductVariantResponse],
+)
+def list_product_variants(
+    current_user: User = Depends(
+        require_permission("product.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    variants = get_all_product_variants(db)
+
+    return [
+        variant_to_response(variant)
+        for variant in variants
+    ]
 
 
 @router.get(

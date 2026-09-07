@@ -5,16 +5,20 @@ from app.api.authorization import require_permission
 from app.api.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.schemas.auth import (
+    ChangePasswordRequest,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
     UserResponse,
 )
+from app.schemas.retailer_registration import RetailerRegistrationRequest
 from app.services.authorization_service import get_user_roles
 from app.services.auth_service import (
     authenticate_user,
+    change_user_password,
     create_user_token,
     register_user,
+    register_retailer,
 )
 
 
@@ -36,9 +40,15 @@ def register(
     try:
         user = register_user(
             db=db,
+            full_name=request.full_name,
             phone_number=request.phone_number,
-            email=request.email,
+            email=str(request.email) if request.email else None,
             password=request.password,
+        )
+
+        roles = get_user_roles(
+            db=db,
+            user_id=user.id,
         )
 
         return UserResponse(
@@ -47,7 +57,46 @@ def register(
             email=user.email,
             status=user.status,
             is_phone_verified=user.is_phone_verified,
+            roles=[role.name for role in roles],
         )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/retailer-register",
+    status_code=status.HTTP_201_CREATED,
+)
+def register_retailer_account(
+    request: RetailerRegistrationRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        user, retailer = register_retailer(
+            db=db,
+            phone_number=request.phone_number,
+            email=str(request.email),
+            password=request.password,
+            business_name=request.business_name,
+            business_type=request.business_type,
+            business_phone_number=request.phone_number,
+            business_email=str(request.email),
+            address=request.address,
+        )
+
+        return {
+            "message": (
+                "Retailer registration submitted successfully. "
+                "Your account is pending admin approval."
+            ),
+            "retailer_id": retailer.retailer_id,
+            "status": retailer.status,
+            "user_id": str(user.id),
+        }
 
     except ValueError as exc:
         raise HTTPException(
@@ -68,6 +117,7 @@ def login(
         db=db,
         phone_number=request.phone_number,
         password=request.password,
+        account_type=request.account_type,
     )
 
     if not user:
@@ -105,6 +155,33 @@ def get_me(
         is_phone_verified=current_user.is_phone_verified,
         roles=[role.name for role in roles],
     )
+
+
+@router.put(
+    "/change-password",
+)
+def change_password(
+    request: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        change_user_password(
+            db=db,
+            user=current_user,
+            current_password=request.current_password,
+            new_password=request.new_password,
+        )
+
+        return {
+            "message": "Password changed successfully.",
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
 
 
 @router.get(

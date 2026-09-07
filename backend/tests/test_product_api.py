@@ -2,6 +2,9 @@ from uuid import uuid4
 
 from app.models.access_control import user_roles
 from app.models.retailer import Retailer
+from app.models.subscription import Subscription
+from app.models.subscription_plan import SubscriptionPlan
+from app.services.retailer_plan_service import ensure_retailer_plans
 from app.models.role import Role
 from app.models.user import User
 from app.services.auth_service import create_user_token
@@ -35,6 +38,28 @@ def create_product_api_context(db):
         status="active",
     )
     db.add(retailer)
+    db.flush()
+
+    ensure_retailer_plans(db)
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.plan_id == "retailer_pro"
+    ).one()
+
+    subscription = Subscription(
+        subscription_id=f"SUB-PROD-{uuid4().hex[:8].upper()}",
+        plan_id=plan.id,
+        retailer_id=retailer.id,
+        customer_id=None,
+        status="active",
+        started_at=plan.created_at,
+        current_period_start=plan.created_at,
+        current_period_end=plan.created_at,
+        trial_ends_at=None,
+        auto_renew=True,
+    )
+
+    db.add(subscription)
     db.commit()
 
     return {
@@ -230,8 +255,10 @@ def test_get_product_api(client, db):
 
     assert create_response.status_code == 201
 
+    product_code = create_response.json()["product_code"]
+
     response = client.get(
-        "/products/PROD-GET-001",
+        f"/products/{product_code}",
         headers=auth_headers(context["token"]),
     )
 
@@ -239,7 +266,7 @@ def test_get_product_api(client, db):
 
     data = response.json()
 
-    assert data["product_code"] == "PROD-GET-001"
+    assert data["product_code"] == product_code
     assert data["name"] == "Get Product"
     assert data["brand"] == "Brand"
     assert data["category"] == "Category"
@@ -285,3 +312,96 @@ def test_create_product_api_requires_authentication(
     )
 
     assert response.status_code == 401
+
+def test_products_are_isolated_between_retailers(client, db):
+    retailer_a = create_product_api_context(db)
+    retailer_b = create_product_api_context(db)
+
+    product_a_code = f"PROD-A-{uuid4().hex[:8].upper()}"
+    product_b_code = f"PROD-B-{uuid4().hex[:8].upper()}"
+
+    response_a = client.post(
+        "/products",
+        headers=auth_headers(retailer_a["token"]),
+        json={
+            "product_code": product_a_code,
+            "name": "Retailer A Product",
+        },
+    )
+
+    response_b = client.post(
+        "/products",
+        headers=auth_headers(retailer_b["token"]),
+        json={
+            "product_code": product_b_code,
+            "name": "Retailer B Product",
+        },
+    )
+
+    assert response_a.status_code == 201
+    assert response_b.status_code == 201
+
+    list_response = client.get(
+        "/products",
+        headers=auth_headers(retailer_a["token"]),
+    )
+
+    assert list_response.status_code == 200
+
+    products = list_response.json()
+    product_codes = {
+        product["product_code"]
+        for product in products
+    }
+
+    assert product_a_code in product_codes
+    assert product_b_code not in product_codes
+
+    cross_retailer_response = client.get(
+        f"/products/{product_b_code}",
+        headers=auth_headers(retailer_a["token"]),
+    )
+
+    assert cross_retailer_response.status_code == 404
+
+
+
+def test_create_product_api_enforces_configured_product_limit(
+    client,
+    db,
+):
+    context = create_product_api_context(db)
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.plan_id == "retailer_pro"
+    ).one()
+
+    plan.limits = (
+        '{"products":{"unlimited":false,"limit":1}}'
+    )
+    db.commit()
+
+    first_response = client.post(
+        "/products",
+        headers=auth_headers(context["token"]),
+        json={
+            "product_code": f"PROD-LIMIT-1-{uuid4().hex[:8].upper()}",
+            "name": "First Limited Product",
+        },
+    )
+
+    assert first_response.status_code == 201
+
+    second_response = client.post(
+        "/products",
+        headers=auth_headers(context["token"]),
+        json={
+            "product_code": f"PROD-LIMIT-2-{uuid4().hex[:8].upper()}",
+            "name": "Second Limited Product",
+        },
+    )
+
+    assert second_response.status_code == 403
+    assert "Product limit of 1 has been reached" in (
+        second_response.json()["detail"]
+    )

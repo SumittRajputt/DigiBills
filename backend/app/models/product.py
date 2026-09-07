@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -21,6 +21,12 @@ class Product(Base):
         unique=True,
         index=True,
         nullable=False,
+    )
+
+    retailer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("retailers.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
     )
 
     name: Mapped[str] = mapped_column(

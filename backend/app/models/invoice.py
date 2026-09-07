@@ -89,6 +89,12 @@ class Invoice(Base):
         nullable=False,
     )
 
+    customer_bill_charge: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=0,
+        nullable=False,
+    )
+
     total_amount: Mapped[Decimal] = mapped_column(
         Numeric(14, 2),
         nullable=False,

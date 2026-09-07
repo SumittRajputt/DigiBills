@@ -62,6 +62,13 @@ class InventoryItem(Base):
         nullable=False,
     )
 
+    # Retailer-specific GST rate for this product at this location.
+    tax_rate: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2),
+        default=0,
+        nullable=False,
+    )
+
     last_stocked_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,

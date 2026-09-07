@@ -27,6 +27,11 @@ class SubscriptionCreateRequest(BaseModel):
     plan_id: str
 
 
+class SalesmanSubscriptionCreateRequest(BaseModel):
+    plan_id: str
+    customer_id: str
+
+
 class BillingUsageCreateRequest(BaseModel):
     subscription_id: str
     invoice_id: str
@@ -38,6 +43,7 @@ class SubscriptionResponse(BaseModel):
     plan_id: str
     retailer_id: Optional[str]
     customer_id: Optional[str]
+    salesman_id: Optional[str] = None
     status: str
     started_at: datetime
     current_period_start: datetime

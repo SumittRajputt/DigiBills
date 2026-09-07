@@ -188,3 +188,172 @@ def get_admin_reports(db: Session) -> dict:
         "sales_trend": sales_trend,
         "payment_methods": payment_methods,
     }
+
+
+def get_retailer_reports(
+    db: Session,
+    retailer_id,
+) -> dict:
+    total_sales = db.scalar(
+        select(
+            func.coalesce(
+                func.sum(Invoice.total_amount),
+                0,
+            )
+        ).where(
+            Invoice.retailer_id == retailer_id,
+            Invoice.status == "active",
+        )
+    ) or Decimal("0.00")
+
+    total_invoices = db.scalar(
+        select(
+            func.count(Invoice.id)
+        ).where(
+            Invoice.retailer_id == retailer_id,
+            Invoice.status == "active",
+        )
+    ) or 0
+
+    payments_collected = db.scalar(
+        select(
+            func.coalesce(
+                func.sum(Payment.amount),
+                0,
+            )
+        )
+        .join(
+            Invoice,
+            Invoice.id == Payment.invoice_id,
+        )
+        .where(
+            Invoice.retailer_id == retailer_id,
+            Payment.payment_status == "completed",
+        )
+    ) or Decimal("0.00")
+
+    total_refunds = db.scalar(
+        select(
+            func.coalesce(
+                func.sum(Payment.refund_amount),
+                0,
+            )
+        )
+        .join(
+            Invoice,
+            Invoice.id == Payment.invoice_id,
+        )
+        .where(
+            Invoice.retailer_id == retailer_id,
+        )
+    ) or Decimal("0.00")
+
+    sales_returns = db.scalar(
+        select(
+            func.coalesce(
+                func.sum(SalesReturn.return_amount),
+                0,
+            )
+        ).where(
+            SalesReturn.retailer_id == retailer_id,
+            SalesReturn.status == "processed",
+        )
+    ) or Decimal("0.00")
+
+    purchase_returns = db.scalar(
+        select(
+            func.coalesce(
+                func.sum(PurchaseReturn.return_amount),
+                0,
+            )
+        ).where(
+            PurchaseReturn.retailer_id == retailer_id,
+            PurchaseReturn.status == "processed",
+        )
+    ) or Decimal("0.00")
+
+    average_invoice_value = (
+        total_sales / total_invoices
+        if total_invoices
+        else Decimal("0.00")
+    )
+
+    sales_rows = db.execute(
+        select(
+            func.date(Invoice.invoice_date).label("date"),
+            func.count(Invoice.id).label("invoice_count"),
+            func.coalesce(
+                func.sum(Invoice.total_amount),
+                0,
+            ).label("sales"),
+        )
+        .where(
+            Invoice.retailer_id == retailer_id,
+            Invoice.status == "active",
+        )
+        .group_by(
+            func.date(Invoice.invoice_date)
+        )
+        .order_by(
+            func.date(Invoice.invoice_date)
+        )
+    ).all()
+
+    sales_trend = [
+        {
+            "date": str(row.date),
+            "invoice_count": row.invoice_count,
+            "sales": str(row.sales),
+        }
+        for row in sales_rows
+    ]
+
+    payment_rows = db.execute(
+        select(
+            Payment.payment_method,
+            func.count(Payment.id).label("payment_count"),
+            func.coalesce(
+                func.sum(Payment.amount),
+                0,
+            ).label("amount"),
+        )
+        .join(
+            Invoice,
+            Invoice.id == Payment.invoice_id,
+        )
+        .where(
+            Invoice.retailer_id == retailer_id,
+            Payment.payment_status == "completed",
+        )
+        .group_by(
+            Payment.payment_method
+        )
+        .order_by(
+            desc("amount")
+        )
+    ).all()
+
+    payment_methods = [
+        {
+            "method": row.payment_method,
+            "payment_count": row.payment_count,
+            "amount": str(row.amount),
+        }
+        for row in payment_rows
+    ]
+
+    return {
+        "total_sales": str(total_sales),
+        "total_invoices": total_invoices,
+        "average_invoice_value": str(
+            average_invoice_value
+        ),
+        "payments_collected": str(
+            payments_collected
+        ),
+        "total_refunds": str(total_refunds),
+        "sales_returns": str(sales_returns),
+        "purchase_returns": str(purchase_returns),
+        "sales_trend": sales_trend,
+        "payment_methods": payment_methods,
+    }

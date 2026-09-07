@@ -29,6 +29,24 @@ class InventoryItemCreateRequest(BaseModel):
         decimal_places=2,
     )
 
+    # Retailer-controlled GST rate.
+    # If omitted, the product variant's default tax rate is used.
+    tax_rate: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        decimal_places=2,
+    )
+
+
+class InventoryItemUpdateRequest(BaseModel):
+    # Retailer can change GST for an existing inventory item.
+    tax_rate: Decimal = Field(
+        ge=0,
+        le=100,
+        decimal_places=2,
+    )
+
 
 class InventoryItemResponse(BaseModel):
     id: str
@@ -41,5 +59,6 @@ class InventoryItemResponse(BaseModel):
     reorder_level: int
     reorder_quantity: int
     average_cost: Decimal
+    tax_rate: Decimal
     last_stocked_at: Optional[datetime]
     updated_at: datetime

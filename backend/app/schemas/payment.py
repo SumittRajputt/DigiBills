@@ -22,6 +22,7 @@ class PaymentResponse(BaseModel):
     id: str
     payment_id: str
     invoice_id: str
+    item_names: list[str] = []
     amount: Decimal
     payment_method: str
     payment_status: str

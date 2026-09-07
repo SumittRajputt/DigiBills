@@ -19,6 +19,10 @@ from app.services.invoice_service import (
     get_all_invoices,
 )
 from app.services.retailer_service import get_retailer_by_owner
+from app.services.plan_limit_service import (
+    PlanLimitExceededError,
+    check_invoice_limit,
+)
 
 
 router = APIRouter(
@@ -27,7 +31,11 @@ router = APIRouter(
 )
 
 
-def invoice_to_response(invoice):
+def invoice_to_response(
+    invoice,
+    payment_status=None,
+    item_names=None,
+):
     return InvoiceResponse(
         id=str(invoice.id),
         invoice_id=invoice.invoice_id,
@@ -49,11 +57,17 @@ def invoice_to_response(invoice):
         customer_id=str(invoice.customer_id),
         invoice_number=invoice.invoice_number,
         invoice_date=invoice.invoice_date,
+        item_names=item_names or [],
         subtotal=invoice.subtotal,
         discount_amount=invoice.discount_amount,
         tax_amount=invoice.tax_amount,
+        customer_bill_charge=invoice.customer_bill_charge,
         total_amount=invoice.total_amount,
-        payment_status=invoice.payment_status,
+        payment_status=(
+            payment_status
+            if payment_status is not None
+            else invoice.payment_status
+        ),
         status=invoice.status,
         notes=invoice.notes,
         created_at=invoice.created_at,
@@ -73,13 +87,18 @@ def invoice_item_to_response(item):
         unit_cost=item.unit_cost,
         discount_amount=item.discount_amount,
         tax_rate=item.tax_rate,
+        taxable_amount=item.taxable_amount,
         tax_amount=item.tax_amount,
         line_total=item.line_total,
         created_at=item.created_at,
     )
 
 
-def invoice_detail_to_response(invoice, items):
+def invoice_detail_to_response(
+    invoice,
+    items,
+    payment_status=None,
+):
     return InvoiceDetailResponse(
         id=str(invoice.id),
         invoice_id=invoice.invoice_id,
@@ -104,8 +123,13 @@ def invoice_detail_to_response(invoice, items):
         subtotal=invoice.subtotal,
         discount_amount=invoice.discount_amount,
         tax_amount=invoice.tax_amount,
+        customer_bill_charge=invoice.customer_bill_charge,
         total_amount=invoice.total_amount,
-        payment_status=invoice.payment_status,
+        payment_status=(
+            payment_status
+            if payment_status is not None
+            else invoice.payment_status
+        ),
         status=invoice.status,
         notes=invoice.notes,
         created_at=invoice.created_at,
@@ -176,6 +200,11 @@ def create_invoice_endpoint(
         )
 
     try:
+        check_invoice_limit(
+            db=db,
+            retailer_id=retailer.id,
+        )
+
         invoice = create_invoice(
             db=db,
             retailer=retailer,
@@ -197,6 +226,14 @@ def create_invoice_endpoint(
         return invoice_detail_to_response(
             invoice,
             items,
+        )
+
+    except PlanLimitExceededError as exc:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
         )
 
     except ValueError as exc:

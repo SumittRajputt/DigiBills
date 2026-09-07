@@ -23,6 +23,7 @@ from app.models.role import Role
 from app.models.sales_return import SalesReturn
 from app.models.sales_return_item import SalesReturnItem
 from app.models.stock_movement import StockMovement
+from app.models.support_ticket import SupportTicket
 from app.models.supplier import Supplier
 from app.models.user import User
 from app.models.warranty import Warranty
@@ -33,3 +34,7 @@ from app.models.sales_return_item_unit import SalesReturnItemUnit
 from app.models.subscription_plan import SubscriptionPlan
 from app.models.subscription import Subscription
 from app.models.billing_usage import BillingUsage
+
+from app.models.payment_configuration import PaymentConfiguration
+
+from app.models.salesman_commission import SalesmanCommission

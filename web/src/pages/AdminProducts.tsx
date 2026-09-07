@@ -1,4 +1,4 @@
-import { Search, Package, CheckCircle, XCircle } from "lucide-react";
+import { Search, Package, CheckCircle, XCircle, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { apiFetch } from "../api";
 
@@ -24,6 +24,23 @@ export default function AdminProducts() {
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
 
+  const [showCreateForm, setShowCreateForm] =
+    useState(false);
+
+  const [creating, setCreating] = useState(false);
+
+  const [createError, setCreateError] =
+    useState("");
+
+  const [createForm, setCreateForm] = useState({
+    product_code: "",
+    name: "",
+    brand: "",
+    category: "",
+    description: "",
+    is_transferable: true,
+  });
+
   async function loadProducts() {
     try {
       setLoading(true);
@@ -45,6 +62,51 @@ export default function AdminProducts() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  async function createProduct(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    setCreating(true);
+    setCreateError("");
+
+    try {
+      await apiFetch<Product>("/products", {
+        method: "POST",
+        body: JSON.stringify({
+          product_code: createForm.product_code.trim(),
+          name: createForm.name.trim(),
+          brand: createForm.brand.trim() || null,
+          category: createForm.category.trim() || null,
+          description:
+            createForm.description.trim() || null,
+          is_transferable: createForm.is_transferable,
+        }),
+      });
+
+      setCreateForm({
+        product_code: "",
+        name: "",
+        brand: "",
+        category: "",
+        description: "",
+        is_transferable: true,
+      });
+
+      setShowCreateForm(false);
+
+      await loadProducts();
+    } catch (err) {
+      setCreateError(
+        err instanceof Error
+          ? err.message
+          : "Unable to create product."
+      );
+    } finally {
+      setCreating(false);
+    }
+  }
 
   const filteredProducts = useMemo(() => {
     const query = search.toLowerCase().trim();
@@ -95,13 +157,25 @@ export default function AdminProducts() {
       <div className="admin-products-header">
         <div>
           <div className="page-eyebrow">
-            <span>ADMINISTRATION</span>
+            <span>PRODUCT MANAGEMENT</span>
           </div>
           <h1>Products</h1>
           <p>
-            Manage product catalog, status and transfer settings across DigiBills.
+            Manage your product catalog, status and transfer settings.
           </p>
         </div>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => {
+            setCreateError("");
+            setShowCreateForm(true);
+          }}
+        >
+          <Plus size={17} />
+          Create Product
+        </button>
       </div>
 
       <div className="product-stats-grid">
@@ -269,6 +343,176 @@ export default function AdminProducts() {
             </div>
           )}
       </div>
+
+      {showCreateForm && (
+        <div
+          className="modal-backdrop"
+          onClick={() => {
+            if (!creating) {
+              setShowCreateForm(false);
+              setCreateError("");
+            }
+          }}
+        >
+          <div
+            className="product-details-modal"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div className="modal-header">
+              <div>
+                <h2>Create Product</h2>
+                <p>
+                  Add a new product to your catalog.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="icon-button"
+                disabled={creating}
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setCreateError("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form
+              onSubmit={createProduct}
+              className="product-create-form"
+            >
+              {createError && (
+                <div className="table-state negative">
+                  {createError}
+                </div>
+              )}
+
+              <div className="product-create-grid">
+                <label>
+                  <span>Product Code *</span>
+                  <input
+                    required
+                    value={createForm.product_code}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        product_code:
+                          event.target.value,
+                      }))
+                    }
+                    placeholder="TEST-001"
+                  />
+                </label>
+
+                <label>
+                  <span>Product Name *</span>
+                  <input
+                    required
+                    value={createForm.name}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        name: event.target.value,
+                      }))
+                    }
+                    placeholder="Limit Test Product"
+                  />
+                </label>
+
+                <label>
+                  <span>Brand</span>
+                  <input
+                    value={createForm.brand}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        brand: event.target.value,
+                      }))
+                    }
+                    placeholder="Optional"
+                  />
+                </label>
+
+                <label>
+                  <span>Category</span>
+                  <input
+                    value={createForm.category}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        category:
+                          event.target.value,
+                      }))
+                    }
+                    placeholder="Optional"
+                  />
+                </label>
+
+                <label className="product-create-full">
+                  <span>Description</span>
+                  <textarea
+                    value={createForm.description}
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        description:
+                          event.target.value,
+                      }))
+                    }
+                    placeholder="Optional product description"
+                    rows={4}
+                  />
+                </label>
+
+                <label className="product-create-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={
+                      createForm.is_transferable
+                    }
+                    onChange={(event) =>
+                      setCreateForm((current) => ({
+                        ...current,
+                        is_transferable:
+                          event.target.checked,
+                      }))
+                    }
+                  />
+                  <span>Product is transferable</span>
+                </label>
+              </div>
+
+              <div className="product-create-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={creating}
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setCreateError("");
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={creating}
+                >
+                  {creating
+                    ? "Creating..."
+                    : "Create Product"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {selectedProduct && (
         <div

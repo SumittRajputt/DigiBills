@@ -30,6 +30,10 @@ ROLES: List[Dict[str, str]] = [
         "description": "Inventory and purchasing management access.",
     },
     {
+        "name": "salesman",
+        "description": "Sales access for selling products and DigiBills subscriptions.",
+    },
+    {
         "name": "customer",
         "description": "Customer account access.",
     },
@@ -203,6 +207,17 @@ ROLE_PERMISSIONS: Dict[str, List[str]] = {
         "purchase_order.manage",
         "supplier.view",
         "supplier.manage",
+    ],
+    "salesman": [
+        "product.view",
+        "inventory.view",
+        "invoice.view",
+        "invoice.create",
+        "customer.view",
+        "customer.manage",
+        "payment.view",
+        "subscription.view",
+        "subscription.manage",
     ],
     "customer": [
         "invoice.view",

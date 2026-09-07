@@ -6,6 +6,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.services.payment_configuration_service import get_payment_configuration
 from app.models.customer import Customer
 from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
@@ -236,6 +237,7 @@ def create_subscription_invoice(
         )
 
     if subscription.status not in {
+        "pending_payment",
         "trialing",
         "active",
     }:
@@ -467,22 +469,42 @@ def create_invoice(
             gross_amount - item_discount
         )
 
+        # Selling price is GST-inclusive.
+        # GST is controlled by the retailer's inventory item.
         tax_rate = (
-            variant.tax_rate
+            inventory_item.tax_rate
             or Decimal("0.00")
         )
 
-        tax_amount = money(
-            net_amount
-            * tax_rate
-            / Decimal("100")
+        tax_rate = Decimal(str(tax_rate)).quantize(
+            Decimal("0.01")
         )
 
-        line_total = money(
-            net_amount + tax_amount
-        )
+        # Extract GST from the GST-inclusive amount.
+        #
+        # Example:
+        # ₹29,999 at 18% GST
+        # Taxable value = ₹29,999 / 118 * 100
+        # GST = ₹29,999 - taxable value
+        if tax_rate > Decimal("0.00"):
+            taxable_amount = money(
+                net_amount
+                * Decimal("100.00")
+                / (Decimal("100.00") + tax_rate)
+            )
+            tax_amount = money(
+                net_amount - taxable_amount
+            )
+        else:
+            # No GST: the full GST-inclusive amount is taxable value.
+            taxable_amount = money(net_amount)
+            tax_amount = Decimal("0.00")
 
-        subtotal += net_amount
+        # line_total remains the GST-inclusive selling amount.
+        line_total = money(net_amount)
+
+        # Subtotal represents the GST-inclusive product amount.
+        subtotal += line_total
         total_tax += tax_amount
 
         prepared_items.append(
@@ -494,6 +516,7 @@ def create_invoice(
                 "unit_price": unit_price,
                 "item_discount": item_discount,
                 "tax_rate": tax_rate,
+                "taxable_amount": taxable_amount,
                 "tax_amount": tax_amount,
                 "line_total": line_total,
                 "product_units": product_units,
@@ -503,15 +526,49 @@ def create_invoice(
     subtotal = money(subtotal)
     total_tax = money(total_tax)
 
+    # DigiBills customer bill charge:
+    # Customers with a trialing/active Monthly or Yearly
+    # subscription do not pay this charge.
+    #
+    # Local import avoids the circular dependency:
+    # subscription_service -> invoice_service
+    # invoice_service -> subscription_service
+    from app.services.subscription_service import (
+        get_active_subscription_for_customer,
+    )
+    subscription = get_active_subscription_for_customer(
+        db=db,
+        customer_id=customer.id,
+    )
+
+    if subscription is not None:
+        customer_bill_charge = Decimal("0.00")
+    else:
+        configuration = get_payment_configuration(db)
+        customer_bill_charge = money(
+            configuration.customer_bill_charge
+        )
+
+    if customer_bill_charge < Decimal("0.00"):
+        raise ValueError(
+            "Customer bill charge cannot be negative."
+        )
+
     if invoice_discount > subtotal:
         raise ValueError(
             "Invoice discount cannot exceed subtotal."
         )
 
+    # Product prices already include GST.
+    # Do not add total_tax again.
+    # The retailer's customer invoice contains only the
+    # GST-inclusive product amount after any invoice discount.
+    #
+    # DigiBills customer bill charges are separate from the
+    # retailer invoice and must not increase this invoice total.
     total_amount = money(
         subtotal
         - invoice_discount
-        + total_tax
     )
 
     invoice = Invoice(
@@ -524,6 +581,7 @@ def create_invoice(
         subtotal=subtotal,
         discount_amount=invoice_discount,
         tax_amount=total_tax,
+        customer_bill_charge=customer_bill_charge,
         total_amount=total_amount,
         payment_status="unpaid",
         status="active",
@@ -548,6 +606,7 @@ def create_invoice(
             unit_cost=variant.purchase_cost,
             discount_amount=prepared["item_discount"],
             tax_rate=prepared["tax_rate"],
+            taxable_amount=prepared["taxable_amount"],
             tax_amount=prepared["tax_amount"],
             line_total=prepared["line_total"],
         )

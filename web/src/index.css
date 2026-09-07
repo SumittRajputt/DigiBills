@@ -1,0 +1,2124 @@
+
+/* Invoice creation footer */
+.admin-invoices-page .invoice-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid #edf1f5;
+  background: #fff;
+}
+
+.admin-invoices-page .invoice-form-footer .secondary-button,
+.admin-invoices-page .invoice-form-footer .primary-button {
+  min-width: 110px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+}
+
+.admin-invoices-page .invoice-form-footer .secondary-button {
+  border: 1px solid #dce3ec;
+  background: #fff;
+  color: #455368;
+}
+
+.admin-invoices-page .invoice-form-footer .secondary-button:hover {
+  background: #f8fafc;
+  border-color: #c5cfdb;
+}
+
+.admin-invoices-page .invoice-form-footer .primary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* Customer Search */
+.admin-invoices-page .customer-search-card {
+  position: relative;
+}
+
+.admin-invoices-page .customer-search-card > input {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid #dce3ec;
+  border-radius: 8px;
+  background: #fff;
+  color: #202a3b;
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-invoices-page .customer-search-card > input:focus {
+  border-color: #1769ff;
+  box-shadow: 0 0 0 3px rgba(23, 105, 255, 0.08);
+}
+
+.admin-invoices-page .customer-search-results {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% - 4px);
+  overflow: hidden;
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(20, 35, 55, 0.12);
+}
+
+.admin-invoices-page .customer-search-result {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #edf1f5;
+  background: #fff;
+  color: #202a3b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-invoices-page .customer-search-result:last-child {
+  border-bottom: 0;
+}
+
+.admin-invoices-page .customer-search-result:hover {
+  background: #f6f9ff;
+}
+
+.admin-invoices-page .customer-search-result strong {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-invoices-page .customer-search-result small {
+  color: #7d8998;
+  font-size: 9px;
+}
+
+.admin-invoices-page .customer-search-empty {
+  padding: 11px 12px;
+  color: #8995a5;
+  font-size: 10px;
+}
+
+.admin-invoices-page .selected-customer-card {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  background: #f7faff;
+  box-sizing: border-box;
+}
+
+.admin-invoices-page .selected-customer-card > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-invoices-page .selected-customer-card strong {
+  color: #202a3b;
+  font-size: 11px;
+}
+
+.admin-invoices-page .selected-customer-card small {
+  color: #718096;
+  font-size: 9px;
+}
+
+.admin-invoices-page .customer-clear-button {
+  flex-shrink: 0;
+  padding: 5px 8px;
+  border: 1px solid #d7e0ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #1769ff;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-invoices-page .customer-clear-button:hover {
+  background: #eef5ff;
+}
+
+@media (max-width: 700px) {
+  .admin-invoices-page .customer-search-results {
+    position: static;
+    margin-top: 5px;
+  }
+}
+
+
+/* Customer Registration */
+.admin-invoices-page .customer-register-result {
+  width: 100%;
+  display: block;
+  padding: 10px 12px;
+  border: 0;
+  border-top: 1px solid #edf1f5;
+  background: #f8fbff;
+  color: #1769ff;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-invoices-page .customer-register-result:hover {
+  background: #eef5ff;
+}
+
+.admin-invoices-page .customer-registration-panel {
+  margin: 0 0 20px;
+  padding: 16px;
+  border: 1px solid #dce6f4;
+  border-radius: 11px;
+  background: #f9fbff;
+}
+
+.admin-invoices-page .customer-registration-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.admin-invoices-page .customer-registration-header h3 {
+  margin: 0 0 4px;
+  color: #202a3b;
+  font-size: 13px;
+}
+
+.admin-invoices-page .customer-registration-header p {
+  margin: 0;
+  color: #7d8998;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.admin-invoices-page .customer-registration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-invoices-page .customer-registration-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-invoices-page .customer-registration-grid label:last-child {
+  grid-column: 1 / -1;
+}
+
+.admin-invoices-page .customer-registration-grid label > span {
+  color: #4b5870;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-invoices-page .customer-registration-grid input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #dce3ec;
+  border-radius: 7px;
+  background: #fff;
+  color: #202a3b;
+  font: inherit;
+  font-size: 10px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-invoices-page .customer-registration-grid input:focus {
+  border-color: #1769ff;
+  box-shadow: 0 0 0 3px rgba(23, 105, 255, 0.08);
+}
+
+.admin-invoices-page .customer-registration-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e7ecf3;
+}
+
+.admin-invoices-page .customer-registration-footer .secondary-button,
+.admin-invoices-page .customer-registration-footer .primary-button {
+  min-width: 120px;
+}
+
+@media (max-width: 700px) {
+  .admin-invoices-page .customer-registration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-invoices-page .customer-registration-grid label:last-child {
+    grid-column: auto;
+  }
+
+  .admin-invoices-page .customer-registration-footer {
+    justify-content: flex-end;
+  }
+}
+
+
+
+/* =========================================================
+   CUSTOMER REGISTRATION
+   ========================================================= */
+
+.admin-invoices-page .customer-registration-panel {
+  margin: 18px 0 20px;
+  padding: 18px 0 20px;
+  border-top: 1px solid #edf1f5;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.admin-invoices-page .customer-registration-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admin-invoices-page .customer-registration-header h3 {
+  margin: 0 0 4px;
+  color: #202a3b;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.admin-invoices-page .customer-registration-header p {
+  margin: 0;
+  color: #7d8998;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.admin-invoices-page .customer-registration-header .icon-button {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+}
+
+/* Registration fields */
+.admin-invoices-page .customer-registration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-invoices-page .customer-registration-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-invoices-page .customer-registration-grid label > span {
+  color: #718096;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.admin-invoices-page .customer-registration-grid input {
+  width: 100%;
+  height: 38px;
+  padding: 0 11px;
+  box-sizing: border-box;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #202a3b;
+
+  font: inherit;
+  font-size: 11px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.admin-invoices-page .customer-registration-grid input::placeholder {
+  color: #a0aaba;
+}
+
+.admin-invoices-page .customer-registration-grid input:focus {
+  border-color: #8db5ff;
+  box-shadow: 0 0 0 3px rgba(23, 105, 255, 0.08);
+}
+
+/* Email field spans full width */
+.admin-invoices-page .customer-registration-grid label:last-child {
+  grid-column: 1 / -1;
+}
+
+/* Footer */
+.admin-invoices-page .customer-registration-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.admin-invoices-page .customer-registration-footer .secondary-button {
+  height: 34px;
+  padding: 0 13px;
+
+  border: 1px solid #dce3ec;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #455368;
+
+  font-size: 10px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.admin-invoices-page .customer-registration-footer .secondary-button:hover {
+  border-color: #b8c8dd;
+  background: #f8faff;
+}
+
+.admin-invoices-page .customer-registration-footer .primary-button {
+  height: 34px;
+  padding: 0 14px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: #1769ff;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+}
+
+.admin-invoices-page .customer-registration-footer .primary-button:hover {
+  background: #0f5ee8;
+}
+
+.admin-invoices-page .customer-registration-footer .primary-button:active {
+  transform: translateY(1px);
+}
+
+.admin-invoices-page .customer-registration-footer .primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Customer search result button */
+.admin-invoices-page .customer-register-result {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 34px;
+  margin-top: 6px;
+  padding: 0 10px;
+
+  border: 1px solid #dce6f5;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #334155;
+
+  font-size: 10px;
+  font-weight: 650;
+
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.admin-invoices-page .customer-register-result:hover {
+  border-color: #8db5ff;
+  background: #f7faff;
+  color: #1769ff;
+}
+
+/* Empty search state */
+.admin-invoices-page .customer-search-empty {
+  padding: 8px 0;
+  color: #8491a3;
+  font-size: 10px;
+}
+
+/* Selected customer */
+.admin-invoices-page .selected-customer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+}
+
+.admin-invoices-page .selected-customer-card strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #202a3b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-invoices-page .selected-customer-card small {
+  display: block;
+  color: #7d8998;
+  font-size: 9px;
+}
+
+.admin-invoices-page .customer-clear-button {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 11px;
+
+  border: 1px solid #dce3ec;
+  border-radius: 7px;
+
+  background: #fff;
+  color: #455368;
+
+  font-size: 10px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.admin-invoices-page .customer-clear-button:hover {
+  border-color: #b8c8dd;
+  background: #f8faff;
+  color: #1769ff;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .admin-invoices-page .customer-registration-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-invoices-page .customer-registration-grid label:last-child {
+    grid-column: auto;
+  }
+
+  .admin-invoices-page .customer-registration-footer {
+    justify-content: flex-end;
+  }
+}
+
+/* =========================================================
+   RETAILER DASHBOARD — LIVE BUSINESS OVERVIEW
+   ========================================================= */
+
+.retailer-dashboard-page {
+  width: 100%;
+  padding: 24px 30px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+
+.retailer-dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.retailer-dashboard-header h1 {
+  margin: 0 0 5px;
+  color: #172033;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.3px;
+}
+
+.retailer-dashboard-header p {
+  margin: 0;
+  color: #7d8998;
+  font-size: 11px;
+}
+
+.retailer-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 7px;
+  color: #1769ff;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.retailer-dashboard-date {
+  min-width: 155px;
+  padding: 10px 13px;
+  border: 1px solid #e5eaf1;
+  border-radius: 8px;
+  background: #fff;
+  text-align: right;
+}
+
+.retailer-dashboard-date span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.retailer-dashboard-date strong {
+  display: block;
+  color: #354256;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* KPI STATS */
+
+.retailer-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.retailer-stats-grid > * {
+  min-width: 0;
+}
+
+.retailer-stat-card {
+  min-height: 92px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(20, 35, 55, .035);
+}
+
+.retailer-stat-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.retailer-stat-icon.green {
+  color: #11a36a;
+  background: #e8faf3;
+}
+
+.retailer-stat-icon.blue {
+  color: #1769ff;
+  background: #edf4ff;
+}
+
+.retailer-stat-icon.orange {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.retailer-stat-icon.purple {
+  color: #7352d6;
+  background: #f1ebff;
+}
+
+.retailer-stat-card span {
+  display: block;
+  margin-bottom: 4px;
+  color: #7d8998;
+  font-size: 9px;
+}
+
+.retailer-stat-card strong {
+  display: block;
+  color: #172033;
+  font-size: 20px;
+  line-height: 1.1;
+  font-weight: 750;
+}
+
+.retailer-stat-card small {
+  display: block;
+  margin-top: 5px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+/* STATUS SUMMARY */
+
+.retailer-status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.retailer-status-card {
+  min-height: 58px;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e7ecf3;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.retailer-status-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.retailer-status-card.paid .retailer-status-icon {
+  color: #129562;
+  background: #e7faf1;
+}
+
+.retailer-status-card.partial .retailer-status-icon {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.retailer-status-card.unpaid .retailer-status-icon {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.retailer-status-card span {
+  display: block;
+  margin-bottom: 3px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.retailer-status-card strong {
+  color: #202a3b;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* MAIN DASHBOARD GRID */
+
+.retailer-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, .95fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.retailer-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(20, 35, 55, .035);
+}
+
+.retailer-panel-header {
+  min-height: 58px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.retailer-panel-header h3 {
+  margin: 0 0 3px;
+  color: #202a3b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.retailer-panel-header span {
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+/* SALES CHART */
+
+.retailer-chart {
+  min-height: 280px;
+  padding: 10px 12px 7px;
+}
+
+/* PAYMENT METHODS */
+
+.payment-method-list {
+  padding: 5px 16px 9px;
+}
+
+.payment-method-row {
+  min-height: 49px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.payment-method-row:last-child {
+  border-bottom: 0;
+}
+
+.payment-method-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-method-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: #11a36a;
+}
+
+.payment-method-info b {
+  color: #354256;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.payment-method-value {
+  text-align: right;
+}
+
+.payment-method-value strong {
+  display: block;
+  color: #202a3b;
+  font-size: 9px;
+}
+
+.payment-method-value small {
+  display: block;
+  margin-top: 2px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+/* LOW STOCK */
+
+.retailer-dashboard-page .alert-row {
+  min-height: 55px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid #f0f2f5;
+  color: #d08a12;
+}
+
+.retailer-dashboard-page .alert-row:last-child {
+  border-bottom: 0;
+}
+
+.retailer-dashboard-page .alert-row > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.retailer-dashboard-page .alert-row b {
+  display: block;
+  overflow: hidden;
+  color: #354256;
+  font-size: 9px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.retailer-dashboard-page .alert-row small {
+  display: block;
+  margin-top: 3px;
+  color: #8a95a4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7px;
+}
+
+.retailer-dashboard-page .alert-row strong {
+  color: #d94b4b;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* RECENT ROWS */
+
+.retailer-dashboard-page .simple-row {
+  min-height: 55px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.retailer-dashboard-page .simple-row:last-child {
+  border-bottom: 0;
+}
+
+.retailer-dashboard-page .simple-row > div:first-child {
+  min-width: 0;
+}
+
+.retailer-dashboard-page .simple-row b {
+  display: block;
+  overflow: hidden;
+  color: #354256;
+  font-size: 9px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.retailer-dashboard-page .simple-row small {
+  display: block;
+  margin-top: 3px;
+  color: #8a95a4;
+  font-size: 7px;
+}
+
+.simple-row-right {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.simple-row-right > span {
+  display: block;
+  margin-bottom: 4px;
+  color: #202a3b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.retailer-dashboard-page .status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.retailer-dashboard-page .status-badge.paid {
+  color: #129562;
+  background: #e7faf1;
+}
+
+.retailer-dashboard-page .status-badge.partial {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.retailer-dashboard-page .status-badge.unpaid {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.retailer-dashboard-page .status-badge.completed {
+  color: #129562;
+  background: #e7faf1;
+}
+
+/* EMPTY PANEL */
+
+.empty-panel-state {
+  min-height: 105px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #9aa5b4;
+  font-size: 9px;
+  text-align: center;
+}
+
+/* LOADING / ERROR */
+
+.retailer-dashboard-page .dashboard-state {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.retailer-dashboard-page .dashboard-state-card {
+  width: min(380px, 100%);
+  padding: 32px;
+  text-align: center;
+  border: 1px solid #e7ecf3;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.retailer-dashboard-page .dashboard-state-icon {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 13px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #11a36a;
+  background: #e8faf3;
+}
+
+.retailer-dashboard-page .dashboard-state-card.negative .dashboard-state-icon {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.retailer-dashboard-page .dashboard-state-card h2 {
+  margin: 0 0 6px;
+  color: #202a3b;
+  font-size: 14px;
+}
+
+.retailer-dashboard-page .dashboard-state-card p {
+  margin: 0;
+  color: #8a95a4;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .retailer-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .retailer-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .retailer-dashboard-header {
+    flex-direction: column;
+  }
+
+  .retailer-dashboard-date {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+@media (max-width: 700px) {
+  .retailer-dashboard-page {
+    padding: 20px 16px 30px;
+  }
+
+  .retailer-stats-grid,
+  .retailer-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .retailer-dashboard-header h1 {
+    font-size: 18px;
+  }
+}
+
+
+/* =========================================================
+   RETAILER DASHBOARD — LOWER PANEL CONTENT
+   ========================================================= */
+
+/* PANEL HEADER */
+
+.retailer-panel-header {
+  min-height: 57px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.retailer-panel-header > div {
+  min-width: 0;
+}
+
+.retailer-panel-header h3 {
+  margin: 0 0 3px;
+  color: #202a3b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.retailer-panel-header span {
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.retailer-panel-action {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: #1769ff;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* EMPTY STATE */
+
+.retailer-empty-state {
+  min-height: 105px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #9aa5b4;
+  font-size: 9px;
+  text-align: center;
+}
+
+/* PAYMENT METHODS */
+
+.payment-method-list {
+  padding: 4px 16px 8px;
+}
+
+.payment-method-row {
+  min-height: 63px;
+  padding: 8px 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.payment-method-row:last-child {
+  border-bottom: 0;
+}
+
+.payment-method-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #1769ff;
+  background: #edf4ff;
+}
+
+.payment-method-main {
+  min-width: 0;
+}
+
+.payment-method-main > strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #354256;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.payment-method-bar {
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2f6;
+}
+
+.payment-method-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1769ff;
+}
+
+.payment-method-value {
+  min-width: 65px;
+  text-align: right;
+}
+
+.payment-method-value strong {
+  display: block;
+  color: #202a3b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.payment-method-value span {
+  display: block;
+  margin-top: 3px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+/* LOW STOCK */
+
+.stock-list {
+  padding: 4px 16px 8px;
+}
+
+.stock-row {
+  min-height: 63px;
+  padding: 8px 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.stock-row:last-child {
+  border-bottom: 0;
+}
+
+.stock-warning-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #d08a12;
+  background: #fff4df;
+}
+
+.stock-info {
+  min-width: 0;
+}
+
+.stock-info strong {
+  display: block;
+  overflow: hidden;
+  color: #354256;
+  font-size: 10px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stock-info span {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #8a95a4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stock-quantity {
+  min-width: 55px;
+  text-align: right;
+}
+
+.stock-quantity strong {
+  display: block;
+  color: #d94b4b;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.stock-quantity span {
+  display: block;
+  margin-top: 4px;
+  color: #8a95a4;
+  font-size: 7px;
+}
+
+/* RECENT INVOICES / PAYMENTS */
+
+.retailer-list {
+  width: 100%;
+}
+
+.retailer-list-row {
+  min-height: 67px;
+  padding: 9px 16px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.retailer-list-row:last-child {
+  border-bottom: 0;
+}
+
+.retailer-list-avatar {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #1769ff;
+  background: #edf4ff;
+}
+
+.retailer-list-avatar.payment {
+  color: #11a36a;
+  background: #e8faf3;
+}
+
+.retailer-list-main {
+  min-width: 0;
+}
+
+.retailer-list-main strong {
+  display: block;
+  overflow: hidden;
+  color: #354256;
+  font-size: 9px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.retailer-list-main span {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #8a95a4;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.retailer-list-date {
+  flex: 0 0 auto;
+  color: #7d8998;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.retailer-list-amount {
+  min-width: 75px;
+  text-align: right;
+}
+
+.retailer-list-amount > strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #202a3b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* STATUS BADGE */
+
+.retailer-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.retailer-status.paid {
+  color: #129562;
+  background: #e7faf1;
+}
+
+.retailer-status.partial {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.retailer-status.unpaid {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.retailer-status.completed {
+  color: #129562;
+  background: #e7faf1;
+}
+
+/* BUSINESS SNAPSHOT */
+
+.snapshot-grid {
+  padding: 13px 16px 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.snapshot-item {
+  padding: 9px 10px;
+  border: 1px solid #eef1f5;
+  border-radius: 8px;
+  background: #fafbfd;
+}
+
+.snapshot-item span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.snapshot-item strong {
+  display: block;
+  color: #202a3b;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.snapshot-progress {
+  padding: 5px 16px 10px;
+}
+
+.snapshot-progress-row {
+  margin-bottom: 8px;
+}
+
+.snapshot-progress-row:last-child {
+  margin-bottom: 0;
+}
+
+.snapshot-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  color: #8a95a4;
+  font-size: 7px;
+}
+
+.snapshot-progress-bar {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2f6;
+}
+
+.snapshot-progress-bar > div {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.snapshot-progress-paid {
+  background: #11a36a;
+}
+
+.snapshot-progress-partial {
+  background: #f59e0b;
+}
+
+.snapshot-progress-unpaid {
+  background: #d94b4b;
+}
+
+.snapshot-footer {
+  padding: 9px 16px 13px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.snapshot-footer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.snapshot-footer span {
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.snapshot-footer strong {
+  color: #202a3b;
+  font-size: 10px;
+}
+
+/* LOWER DASHBOARD ROWS */
+
+.retailer-stock-panel,
+.retailer-list-panel,
+.retailer-summary-panel {
+  min-width: 0;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .retailer-list-row {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+  }
+
+  .retailer-list-date {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .payment-method-row,
+  .stock-row {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+  }
+
+  .retailer-list-row {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .retailer-list-amount {
+    min-width: 65px;
+  }
+
+  .snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   RETAILER INVENTORY
+   ========================================================= */
+
+.retailer-inventory-page {
+  padding-bottom: 40px;
+}
+
+.retailer-inventory-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.retailer-inventory-heading h1 {
+  margin: 0 0 5px;
+  color: #172033;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 750;
+}
+
+.retailer-inventory-heading p {
+  margin: 0;
+  color: #7d8998;
+  font-size: 11px;
+}
+
+.retailer-inventory-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inventory-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.inventory-summary-card {
+  min-height: 82px;
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.inventory-summary-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+}
+
+.inventory-summary-icon.blue {
+  color: #1769ff;
+  background: #edf4ff;
+}
+
+.inventory-summary-icon.green {
+  color: #11a36a;
+  background: #e8faf3;
+}
+
+.inventory-summary-icon.orange {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.inventory-summary-icon.purple {
+  color: #7352d6;
+  background: #f1ebff;
+}
+
+.inventory-summary-card span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.inventory-summary-card strong {
+  display: block;
+  color: #202a3b;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.inventory-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.inventory-location-control {
+  min-width: 220px;
+  height: 36px;
+  padding: 0 9px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #dfe5ed;
+  border-radius: 7px;
+  color: #7d8998;
+}
+
+.inventory-location-control select {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #354256;
+  font-size: 9px;
+}
+
+.inventory-search {
+  height: 36px;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 10px;
+  border: 1px solid #dfe5ed;
+  border-radius: 7px;
+  color: #9aa5b4;
+}
+
+.inventory-search input {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  color: #354256;
+  font-size: 9px;
+  background: transparent;
+}
+
+.inventory-search button {
+  height: 100%;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background: #1769ff;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inventory-search button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.inventory-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, .8fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.inventory-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.inventory-panel-header {
+  min-height: 57px;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.inventory-panel-header h3 {
+  margin: 0 0 3px;
+  color: #202a3b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inventory-panel-header span {
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.inventory-health {
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 7px !important;
+  font-weight: 700;
+}
+
+.inventory-health.healthy {
+  color: #129562;
+  background: #e7faf1;
+}
+
+.inventory-health.low {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.inventory-health.out {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.inventory-stock-main {
+  padding: 18px 16px;
+  display: grid;
+  grid-template-columns: minmax(170px, .75fr) 1fr;
+  gap: 20px;
+}
+
+.inventory-stock-number {
+  padding: 14px;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.inventory-stock-number span {
+  display: block;
+  margin-bottom: 7px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.inventory-stock-number strong {
+  display: block;
+  color: #172033;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.inventory-stock-number small {
+  display: block;
+  margin-top: 7px;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.inventory-metric-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.inventory-metric-list > div {
+  padding: 10px;
+  border: 1px solid #eef1f5;
+  border-radius: 8px;
+}
+
+.inventory-metric-list span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8a95a4;
+  font-size: 7px;
+}
+
+.inventory-metric-list strong {
+  display: block;
+  color: #354256;
+  font-size: 10px;
+}
+
+.inventory-location-detail {
+  min-height: 148px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.inventory-location-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #1769ff;
+  background: #edf4ff;
+}
+
+.inventory-location-detail strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #354256;
+  font-size: 11px;
+}
+
+.inventory-location-detail span {
+  display: block;
+  margin-bottom: 8px;
+  color: #7d8998;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.inventory-location-detail small {
+  display: block;
+  color: #9aa5b4;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.inventory-movement-panel {
+  margin-bottom: 12px;
+}
+
+.inventory-movement-search {
+  width: 180px;
+  height: 29px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #dfe5ed;
+  border-radius: 6px;
+  color: #9aa5b4;
+}
+
+.inventory-movement-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: #354256;
+  background: transparent;
+  font-size: 8px;
+}
+
+.inventory-movement-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.inventory-movement-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-movement-table th {
+  padding: 9px 16px;
+  text-align: left;
+  color: #8a95a4;
+  background: #fafbfd;
+  border-bottom: 1px solid #eef1f5;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.inventory-movement-table td {
+  padding: 11px 16px;
+  color: #526074;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.inventory-movement-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.movement-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 7px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.movement-type.stock_in,
+.movement-type.opening_stock {
+  color: #129562;
+  background: #e7faf1;
+}
+
+.movement-type.stock_out {
+  color: #d94b4b;
+  background: #fff0f0;
+}
+
+.movement-type.adjustment {
+  color: #c57b0b;
+  background: #fff4df;
+}
+
+.inventory-empty-state {
+  min-height: 260px;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+  background: #fff;
+  color: #9aa5b4;
+  text-align: center;
+}
+
+.inventory-empty-state h3 {
+  margin: 0 0 5px;
+  color: #354256;
+  font-size: 12px;
+}
+
+.inventory-empty-state p {
+  max-width: 390px;
+  margin: 0 0 14px;
+  color: #8a95a4;
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+.inventory-empty-inline {
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #9aa5b4;
+  font-size: 9px;
+}
+
+.retailer-inventory-error {
+  min-height: 38px;
+  margin-bottom: 12px;
+  padding: 8px 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #f2d3d3;
+  border-radius: 7px;
+  background: #fff7f7;
+  color: #c94a4a;
+  font-size: 8px;
+}
+
+.retailer-inventory-error span {
+  flex: 1;
+}
+
+.inventory-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 29, 43, .38);
+}
+
+.inventory-modal {
+  width: min(480px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(20, 29, 43, .18);
+}
+
+.inventory-modal-header {
+  padding: 17px 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.inventory-modal-header h2 {
+  margin: 0 0 4px;
+  color: #202a3b;
+  font-size: 14px;
+}
+
+.inventory-modal-header p {
+  margin: 0;
+  color: #8a95a4;
+  font-size: 8px;
+}
+
+.inventory-form {
+  padding: 17px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.inventory-form label {
+  display: grid;
+  gap: 5px;
+  color: #526074;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.inventory-form input,
+.inventory-form select,
+.inventory-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 1px solid #dfe5ed;
+  border-radius: 7px;
+  outline: none;
+  color: #354256;
+  background: #fff;
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.inventory-form textarea {
+  resize: vertical;
+}
+
+.inventory-modal-footer {
+  padding: 12px 18px 17px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #eef1f5;
+}
+
+@media (max-width: 1000px) {
+  .inventory-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .retailer-inventory-heading {
+    flex-direction: column;
+  }
+
+  .retailer-inventory-actions {
+    width: 100%;
+  }
+
+  .inventory-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .inventory-location-control,
+  .inventory-search {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .inventory-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-stock-main {
+    grid-template-columns: 1fr;
+  }
+}

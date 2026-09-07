@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -65,8 +66,40 @@ class ProductTransfer(Base):
 
     status: Mapped[str] = mapped_column(
         String(30),
-        default="pending",
+        default="pending_acceptance",
         nullable=False,
+    )
+
+    transfer_fee: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=Decimal("0.00"),
+        server_default="0.00",
+        nullable=False,
+    )
+
+    payment_status: Mapped[str] = mapped_column(
+        String(30),
+        default="not_required",
+        server_default="not_required",
+        nullable=False,
+    )
+
+    payment_invoice_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey(
+            "invoices.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
+    )
+
+    payment_reference: Mapped[Optional[str]] = mapped_column(
+        String(30),
+        nullable=True,
+    )
+
+    accepted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     reason: Mapped[Optional[str]] = mapped_column(

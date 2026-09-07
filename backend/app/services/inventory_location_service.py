@@ -36,6 +36,25 @@ def get_location_by_name(
     ).scalar_one_or_none()
 
 
+
+def get_all_inventory_locations(
+    db: Session,
+    retailer_id: uuid.UUID,
+) -> list[InventoryLocation]:
+    statement = (
+        select(InventoryLocation)
+        .where(
+            InventoryLocation.retailer_id == retailer_id,
+        )
+        .order_by(
+            InventoryLocation.created_at.desc()
+        )
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
 def create_inventory_location(
     db: Session,
     retailer: Retailer,

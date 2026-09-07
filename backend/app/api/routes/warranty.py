@@ -12,6 +12,7 @@ from app.schemas.warranty import (
 )
 from app.services.retailer_service import get_retailer_by_owner
 from app.services.warranty_service import (
+    get_warranties_for_retailer,
     create_warranty,
     get_invoice_by_reference,
     get_warranty_by_reference,
@@ -110,6 +111,38 @@ def create_warranty_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.get(
+    "",
+    response_model=list[WarrantyResponse],
+)
+def list_warranties_endpoint(
+    current_user: User = Depends(
+        require_permission("invoice.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    warranties = get_warranties_for_retailer(
+        db,
+        retailer.id,
+    )
+
+    return [
+        warranty_to_response(warranty)
+        for warranty in warranties
+    ]
 
 
 @router.get(

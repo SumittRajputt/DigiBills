@@ -10,3 +10,8 @@ __pycache__/
 .mypy_cache/
 web/node_modules/
 web/dist/
+
+# Local backup files
+*.backup
+*.backup-*
+*.before-*

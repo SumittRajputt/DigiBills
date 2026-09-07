@@ -10,6 +10,7 @@ from app.schemas.customer import (
 )
 from app.services.customer_service import (
     create_customer,
+    create_customer_for_retailer,
     get_all_customers,
     get_customer_by_user_id,
 )
@@ -63,6 +64,43 @@ def create_customer_endpoint(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         )
+
+
+@router.post(
+    "/register-for-invoice",
+    response_model=CustomerResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def register_customer_for_invoice(
+    request: CustomerCreateRequest,
+    current_user: User = Depends(
+        require_permission("customer.manage")
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Register a new customer from the retailer invoice flow.
+
+    The authenticated retailer is NOT used as the customer's
+    user_id. A separate User record is created for the customer.
+    """
+
+    try:
+        customer = create_customer_for_retailer(
+            db=db,
+            full_name=request.full_name,
+            phone_number=request.phone_number,
+            email=request.email,
+        )
+
+        return customer_to_response(customer)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
+
 
 
 @router.get(

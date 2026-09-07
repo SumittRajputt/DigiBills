@@ -18,6 +18,7 @@ from app.services.sales_return_service import (
     create_sales_return,
     get_all_sales_returns,
     get_invoice_by_reference,
+    get_sales_returns_for_retailer,
     get_sales_return_by_reference,
     get_sales_return_items,
     process_sales_return,
@@ -336,7 +337,18 @@ def get_all_sales_returns_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
-    sales_returns = get_all_sales_returns(db)
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is not None:
+        sales_returns = get_sales_returns_for_retailer(
+            db,
+            retailer.id,
+        )
+    else:
+        sales_returns = get_all_sales_returns(db)
 
     return [
         sales_return_to_response(sales_return)
