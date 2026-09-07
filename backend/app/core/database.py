@@ -4,8 +4,26 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from app.core.config import settings
 
 
+database_url = settings.database_url
+
+# Railway/PostgreSQL may provide a URL without an explicit driver.
+# Force SQLAlchemy to use psycopg v3, which is installed by the project.
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql+psycopg://",
+        1,
+    )
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace(
+        "postgresql://",
+        "postgresql+psycopg://",
+        1,
+    )
+
+
 engine = create_engine(
-    settings.database_url,
+    database_url,
     pool_pre_ping=True,
 )
 
