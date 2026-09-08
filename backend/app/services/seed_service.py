@@ -220,6 +220,7 @@ ROLE_PERMISSIONS: Dict[str, List[str]] = {
         "subscription.manage",
     ],
     "customer": [
+        "customer.view",
         "invoice.view",
         "subscription.view",
         "subscription.manage",
