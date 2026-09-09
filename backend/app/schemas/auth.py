@@ -37,7 +37,7 @@ class LoginRequest(BaseModel):
     phone_number: str
     password: str
     account_type: str = Field(
-        pattern="^(retailer|customer|employee|salesman)$"
+        pattern="^(admin|retailer|customer|employee|salesman)$"
     )
 
 
@@ -65,4 +65,5 @@ class UserResponse(BaseModel):
     status: str
     is_phone_verified: bool
     roles: list[str]
+
 
