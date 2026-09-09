@@ -264,6 +264,20 @@ function App() {
       />
 
       <Route
+        path="/login/admin"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="admin"
+            />
+          )
+        }
+      />
+
+      <Route
         path="/login/employee"
         element={
           user ? (
@@ -529,6 +543,10 @@ function AccountTypePage({
     navigate(isLogin ? "/login/customer" : "/customer-register");
   }
 
+  function handleAdmin() {
+    navigate("/login/admin");
+  }
+
   function handleEmployee() {
     navigate("/login/employee");
   }
@@ -600,9 +618,27 @@ function AccountTypePage({
           </button>
 
           {isLogin && (
-            <button
-              type="button"
-              className="account-type-option employee"
+            <>
+              <button
+                type="button"
+                className="account-type-option admin"
+                onClick={handleAdmin}
+              >
+                <span className="account-type-icon">
+                  <ShieldCheck size={22} strokeWidth={1.8} />
+                </span>
+
+                <span className="account-type-content">
+                  <strong>Admin</strong>
+                  <span>Manage DigiBills platform settings</span>
+                </span>
+
+                <span className="account-type-arrow">&rarr;</span>
+              </button>
+
+              <button
+                type="button"
+                className="account-type-option employee"
               onClick={handleEmployee}
             >
               <span className="account-type-icon">
@@ -615,7 +651,8 @@ function AccountTypePage({
               </span>
 
               <span className="account-type-arrow">→</span>
-            </button>
+              </button>
+            </>
           )}
         </div>
 
@@ -642,7 +679,7 @@ function LoginPage({
   accountType,
 }: {
   onLogin: (user: User) => void;
-  accountType: "retailer" | "customer" | "employee";
+  accountType: "admin" | "retailer" | "customer" | "employee";
 }) {
   const navigate = useNavigate();
 
@@ -652,6 +689,8 @@ function LoginPage({
   const [submitting, setSubmitting] = useState(false);
 
   const isRetailer = accountType === "retailer";
+  const isAdmin = accountType === "admin";
+  const isEmployee = accountType === "employee";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -685,9 +724,13 @@ function LoginPage({
       sessionStorage.removeItem("digibills_token");
 
       setError(
-        isRetailer
-          ? "Invalid retailer phone number or password."
-          : "Invalid customer phone number or password."
+        isAdmin
+          ? "Invalid admin phone number or password."
+          : isRetailer
+            ? "Invalid retailer phone number or password."
+            : isEmployee
+              ? "Invalid employee phone number or password."
+              : "Invalid customer phone number or password."
       );
     } finally {
       setSubmitting(false);
@@ -713,13 +756,29 @@ function LoginPage({
         <div className="account-login-heading">
           <span
             className={`account-login-badge ${
-              isRetailer ? "retailer" : "customer"
+              isAdmin
+                ? "admin"
+                : isRetailer
+                  ? "retailer"
+                  : isEmployee
+                    ? "employee"
+                    : "customer"
             }`}
           >
-            {isRetailer ? (
+            {isAdmin ? (
+              <>
+                <ShieldCheck size={15} />
+                Admin
+              </>
+            ) : isRetailer ? (
               <>
                 <Store size={15} />
                 Retailer
+              </>
+            ) : isEmployee ? (
+              <>
+                <UsersRound size={15} />
+                Employee
               </>
             ) : (
               <>
@@ -730,14 +789,24 @@ function LoginPage({
           </span>
 
           <h1>
-            {isRetailer
-              ? "Retailer sign in"
-              : "Customer sign in"}
+            {isAdmin
+              ? "Admin sign in"
+              : isRetailer
+                ? "Retailer sign in"
+                : isEmployee
+                  ? "Employee sign in"
+                  : "Customer sign in"}
           </h1>
 
           <p>
             Sign in to continue to your DigiBills{" "}
-            {isRetailer ? "store" : "account"}.
+            {isAdmin
+              ? "admin dashboard"
+              : isRetailer
+                ? "store"
+                : isEmployee
+                  ? "work dashboard"
+                  : "account"}.
           </p>
         </div>
 
@@ -778,7 +847,13 @@ function LoginPage({
 
           <button
             className={`login-button ${
-              isRetailer ? "retailer" : "customer"
+              isAdmin
+                ? "admin"
+                : isRetailer
+                  ? "retailer"
+                  : isEmployee
+                    ? "employee"
+                    : "customer"
             }`}
             type="submit"
             disabled={submitting}
@@ -1534,3 +1609,7 @@ function getInitials(value: string): string {
 }
 
 export default App;
+
+
+
+

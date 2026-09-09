@@ -612,7 +612,7 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="settings-page">
+    <div className="settings-page admin-settings-page">
       <div className="page-heading">
         <div>
           <h1>System Settings</h1>
@@ -679,17 +679,259 @@ export default function AdminSettings() {
                 </p>
               </div>
 
-              <div className="settings-form-grid">
-                <label>
-                  Business name
-                  <input
-                    value={businessName}
-                    onChange={(event) =>
-                      setBusinessName(event.target.value)
-                    }
-                  />
-                </label>
+              {brandLoading && (
+                <div className="settings-status">
+                  Loading branding settings...
+                </div>
+              )}
 
+              {brandError && (
+                <div className="settings-status settings-status-error">
+                  {brandError}
+                </div>
+              )}
+
+              {brandSuccess && (
+                <div className="settings-status settings-status-success">
+                  {brandSuccess}
+                </div>
+              )}
+
+              {brandSettings && (
+                <div className="brand-settings-panel">
+                  <div className="brand-settings-header">
+                    <div>
+                      <h3>Branding</h3>
+                      <p>
+                        Customize the company identity and theme used across
+                        the customer application.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="settings-form-grid">
+                    <label>
+                      Company / App name
+                      <input
+                        value={brandSettings.company_name}
+                        onChange={(event) => {
+                          const value = event.target.value;
+
+                          setBusinessName(value);
+
+                          setBrandSettings((current) =>
+                            current
+                              ? {
+                                  ...current,
+                                  company_name: value,
+                                }
+                              : current
+                          );
+                        }}
+                        placeholder="Enter company name"
+                      />
+                    </label>
+
+                    <label>
+                      Logo URL
+                      <input
+                        value={brandSettings.logo_url ?? ""}
+                        onChange={(event) =>
+                          setBrandSettings((current) =>
+                            current
+                              ? {
+                                  ...current,
+                                  logo_url:
+                                    event.target.value || null,
+                                }
+                              : current
+                          )
+                        }
+                        placeholder="https://example.com/logo.png"
+                      />
+                    </label>
+
+                    <label>
+                      Primary color
+                      <div className="brand-color-input">
+                        <input
+                          type="color"
+                          value={brandSettings.primary_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    primary_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+
+                        <input
+                          value={brandSettings.primary_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    primary_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+                      </div>
+                    </label>
+
+                    <label>
+                      Secondary color
+                      <div className="brand-color-input">
+                        <input
+                          type="color"
+                          value={brandSettings.secondary_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    secondary_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+
+                        <input
+                          value={brandSettings.secondary_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    secondary_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+                      </div>
+                    </label>
+
+                    <label>
+                      Accent / background color
+                      <div className="brand-color-input">
+                        <input
+                          type="color"
+                          value={brandSettings.accent_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    accent_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+
+                        <input
+                          value={brandSettings.accent_color}
+                          onChange={(event) =>
+                            setBrandSettings((current) =>
+                              current
+                                ? {
+                                    ...current,
+                                    accent_color:
+                                      event.target.value,
+                                  }
+                                : current
+                            )
+                          }
+                        />
+                      </div>
+                    </label>
+
+                    <label className="full-width">
+                      Login tagline
+                      <input
+                        value={brandSettings.login_tagline}
+                        onChange={(event) =>
+                          setBrandSettings((current) =>
+                            current
+                              ? {
+                                  ...current,
+                                  login_tagline:
+                                    event.target.value,
+                                }
+                              : current
+                          )
+                        }
+                        placeholder="Your Bills. Always With You"
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    className="brand-preview"
+                    style={{
+                      background:
+                        brandSettings.accent_color,
+                    }}
+                  >
+                    <div
+                      className="brand-preview-logo"
+                      style={{
+                        background:
+                          brandSettings.primary_color,
+                      }}
+                    >
+                      {brandSettings.logo_url ? (
+                        <img
+                          src={brandSettings.logo_url}
+                          alt="Company logo"
+                        />
+                      ) : (
+                        <span>
+                          {brandSettings.company_name
+                            .trim()
+                            .charAt(0)
+                            .toUpperCase() || "D"}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="brand-preview-content">
+                      <strong>
+                        {brandSettings.company_name}
+                      </strong>
+
+                      <span>
+                        {brandSettings.login_tagline}
+                      </span>
+
+                      <button
+                        type="button"
+                        style={{
+                          background:
+                            brandSettings.primary_color,
+                        }}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="settings-form-grid">
                 <label>
                   Support email
                   <input
