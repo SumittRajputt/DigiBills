@@ -1,5 +1,9 @@
 from fastapi import APIRouter
 
+from app.api.routes.brand_settings import (
+    router as brand_settings_router,
+)
+
 from app.api.routes.audit_log import (
     router as audit_log_router,
 )
@@ -118,6 +122,10 @@ from app.api.routes.user import (
 
 api_router = APIRouter()
 
+
+api_router.include_router(
+    brand_settings_router
+)
 
 api_router.include_router(
     health_router

@@ -12,8 +12,13 @@ import {
   Bell,
   ChevronDown,
   CircleHelp,
+  MoreHorizontal,
+  Home,
+  Headphones,
+  FileText,
   LayoutDashboard,
   LogOut,
+  Menu,
   Search,
   ShieldCheck,
   Store,
@@ -867,6 +872,7 @@ function DashboardFrame({
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const nav = {
     super_admin: [
@@ -899,11 +905,10 @@ function DashboardFrame({
       "Settings",
     ],
     customer: [
-      "Dashboard",
-      "My Profile",
-      "My Invoices",
+      "My Orders",
       "My Payments",
-      "My Warranty",
+      "My Products",
+      "My Returns",
       "Transfer Bills",
       "Subscription",
       "Support",
@@ -961,6 +966,30 @@ function DashboardFrame({
     sessionStorage.removeItem("digibills_token");
     navigate("/login", { replace: true });
   }
+
+  function closeMobileMenu() {
+    setMobileMenuOpen(false);
+  }
+
+  useEffect(() => {
+    function openMobileMenu() {
+      if (role === "customer") {
+        setMobileMenuOpen(true);
+      }
+    }
+
+    window.addEventListener(
+      "digibills:open-mobile-menu",
+      openMobileMenu
+    );
+
+    return () => {
+      window.removeEventListener(
+        "digibills:open-mobile-menu",
+        openMobileMenu
+      );
+    };
+  }, [role]);
 
   const initials =
     role === "customer"
@@ -1068,6 +1097,225 @@ function DashboardFrame({
                     navigate("/admin/returns");
                   } else if (
                     role === "customer" &&
+                    item === "My Orders"
+                  ) {
+                    navigate("/customer/orders");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Payments"
+                  ) {
+                    navigate("/customer/payments");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Products"
+                  ) {
+                    navigate("/customer/products");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Returns"
+                  ) {
+                    navigate("/customer/returns");
+                  } else if (
+                    role === "customer" &&
+                    item === "Transfer Bills"
+                  ) {
+                    navigate("/customer/transfers");
+                  } else if (
+                    role === "customer" &&
+                    item === "Subscription"
+                  ) {
+                    navigate("/customer/subscription");
+                  } else if (
+                    role === "customer" &&
+                    item === "Support"
+                  ) {
+                    navigate("/customer/support");
+                  } else if (
+                    role === "customer" &&
+                    item === "Settings"
+                  ) {
+                    navigate("/customer/settings");
+                  } else if (role === "super_admin" && item === "Warranty") {
+                    navigate("/admin/warranty");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Reports & Analytics"
+                  ) {
+                    navigate("/admin/reports");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "System Settings"
+                  ) {
+                    navigate("/admin/settings");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Audit Logs"
+                  ) {
+                    navigate("/admin/audit-logs");
+                  } else if (index === 0) {
+                    navigate(
+                      role === "super_admin"
+                        ? "/admin"
+                        : role === "retailer_owner"
+                          ? "/retailer"
+                          : "/customer"
+                    );
+                  }
+                }}
+              >
+                <Icon size={16} />
+                <span>{item}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <button
+          className="nav-item logout"
+          type="button"
+          onClick={logout}
+        >
+          <LogOut size={16} />
+          Logout
+        </button>
+      </aside>
+
+      {mobileMenuOpen && (
+        <div
+          className="mobile-menu-overlay"
+          onClick={closeMobileMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`mobile-sidebar ${
+          mobileMenuOpen ? "mobile-sidebar-open" : ""
+        }`}
+        aria-label="Mobile navigation"
+      >
+        <div className="mobile-sidebar-header">
+          <div className="brand">
+            <span className="brand-mark">✣</span> DigiBills
+          </div>
+
+          <button
+            className="mobile-menu-close"
+            type="button"
+            aria-label="Close menu"
+            onClick={closeMobileMenu}
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mobile-profile-mini">
+          <div className="avatar">{initials}</div>
+
+          <div>
+            <strong>{meta.label}</strong>
+            <small>{user.email || user.phone_number}</small>
+          </div>
+        </div>
+
+        <nav className="mobile-nav">
+          {nav.map((item, index) => {
+            const Icon = icons[index % icons.length];
+
+            const isActive =
+              (role === "super_admin" &&
+                (
+                  (item === "Overview" && location.pathname === "/admin") ||
+                  (item === "Retailers" &&
+                    location.pathname === "/admin/retailers") ||
+                  (item === "Users" &&
+                    location.pathname === "/admin/users") ||
+                  (item === "Customers" &&
+                    location.pathname === "/admin/customers") ||
+                  (item === "Products" &&
+                    location.pathname === "/admin/products") ||
+                  (item === "Invoices" &&
+                    location.pathname === "/admin/invoices") ||
+                  (item === "Payments" &&
+                    location.pathname === "/admin/payments") ||
+                  (item === "Returns & Refunds" &&
+                    location.pathname === "/admin/returns") ||
+                  (item === "Warranty" &&
+                    location.pathname === "/admin/warranty") ||
+                  (item === "Reports & Analytics" &&
+                    location.pathname === "/admin/reports") ||
+                  (item === "System Settings" &&
+                    location.pathname === "/admin/settings")
+                )) ||
+              (role === "retailer_owner" &&
+                location.pathname === retailerNavPaths[item]) ||
+              (role === "customer" &&
+                (
+                  (item === "Dashboard" &&
+                    location.pathname === "/customer") ||
+                  (item === "My Profile" &&
+                    location.pathname === "/customer/profile") ||
+                  (item === "My Invoices" &&
+                    location.pathname.startsWith("/customer/invoices")) ||
+                  (item === "My Payments" &&
+                    location.pathname === "/customer/payments") ||
+                  (item === "My Warranty" &&
+                    location.pathname === "/customer/warranty") ||
+                  (item === "Transfer Bills" &&
+                    location.pathname === "/customer/transfers") ||
+                  (item === "Subscription" &&
+                    location.pathname === "/customer/subscription") ||
+                  (item === "Support" &&
+                    location.pathname === "/customer/support") ||
+                  (item === "Settings" &&
+                    location.pathname === "/customer/settings")
+                ));
+
+            return (
+              <button
+                key={item}
+                className={`nav-item ${isActive ? "active" : ""}`}
+                type="button"
+                onClick={() => {
+                  if (
+                    role === "retailer_owner" &&
+                    retailerNavPaths[item]
+                  ) {
+                    navigate(retailerNavPaths[item]);
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Retailers"
+                  ) {
+                    navigate("/admin/retailers");
+                  } else if (role === "super_admin" && item === "Users") {
+                    navigate("/admin/users");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Customers"
+                  ) {
+                    navigate("/admin/customers");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Products"
+                  ) {
+                    navigate("/admin/products");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Invoices"
+                  ) {
+                    navigate("/admin/invoices");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Payments"
+                  ) {
+                    navigate("/admin/payments");
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Returns & Refunds"
+                  ) {
+                    navigate("/admin/returns");
+                  } else if (
+                    role === "customer" &&
                     item === "My Warranty"
                   ) {
                     navigate("/customer/warranty");
@@ -1091,7 +1339,10 @@ function DashboardFrame({
                     item === "Settings"
                   ) {
                     navigate("/customer/settings");
-                  } else if (role === "super_admin" && item === "Warranty") {
+                  } else if (
+                    role === "super_admin" &&
+                    item === "Warranty"
+                  ) {
                     navigate("/admin/warranty");
                   } else if (
                     role === "super_admin" &&
@@ -1132,9 +1383,11 @@ function DashboardFrame({
                           : "/customer"
                     );
                   }
+
+                  closeMobileMenu();
                 }}
               >
-                <Icon size={16} />
+                <Icon size={17} />
                 <span>{item}</span>
               </button>
             );
@@ -1142,48 +1395,127 @@ function DashboardFrame({
         </nav>
 
         <button
-          className="nav-item logout"
+          className="nav-item logout mobile-logout"
           type="button"
           onClick={logout}
         >
-          <LogOut size={16} />
-          Logout
+          <LogOut size={17} />
+          <span>Logout</span>
         </button>
       </aside>
 
       <main className="main">
-        <header className="topbar">
-          <div className="search-box">
-            <Search size={16} />
-
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={
-                role === "customer"
-                  ? "Search invoices, orders..."
-                  : "Search anything..."
-              }
-            />
-          </div>
-
-          <div className="top-actions">
-            <button className="icon-button" type="button">
-              <Bell size={18} />
-              <span className="notification-dot">3</span>
+        {!(role === "customer" && location.pathname === "/customer") && (
+          <header className="topbar">
+            <button
+              className="mobile-menu-button"
+              type="button"
+              aria-label="Open menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu size={22} />
             </button>
 
-            <button className="icon-button" type="button">
-              <CircleHelp size={18} />
-            </button>
+            <div className="search-box">
+              <Search size={16} />
 
-            <div className="top-avatar">{initials}</div>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={
+                  role === "customer"
+                    ? "Search invoices, orders..."
+                    : "Search anything..."
+                }
+              />
+            </div>
 
-            <ChevronDown size={16} />
-          </div>
-        </header>
+            <div className="top-actions">
+              <button className="icon-button" type="button">
+                <Bell size={18} />
+                <span className="notification-dot">3</span>
+              </button>
+
+              <button className="icon-button" type="button">
+                <CircleHelp size={18} />
+              </button>
+
+              <div className="top-avatar">{initials}</div>
+
+              <ChevronDown size={16} />
+            </div>
+          </header>
+        )}
 
         {children}
+
+        {role === "customer" && (
+          <nav
+            className="customer-permanent-bottom-nav"
+            aria-label="Customer navigation"
+          >
+            <button
+              type="button"
+              className={
+                location.pathname === "/customer"
+                  ? "active"
+                  : ""
+              }
+              onClick={() => navigate("/customer")}
+            >
+              <Home size={20} />
+              <span>Home</span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                location.pathname.startsWith("/customer/invoices")
+                  ? "active"
+                  : ""
+              }
+              onClick={() => navigate("/customer/invoices")}
+            >
+              <FileText size={20} />
+              <span>Invoices</span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                location.pathname.startsWith("/customer/profile")
+                  ? "active"
+                  : ""
+              }
+              onClick={() => navigate("/customer/profile")}
+            >
+              <UserRound size={20} />
+              <span>My Profile</span>
+            </button>
+
+            <button
+              type="button"
+              className={
+                location.pathname.startsWith("/customer/warranty")
+                  ? "active"
+                  : ""
+              }
+              onClick={() => navigate("/customer/warranty")}
+            >
+              <ShieldCheck size={20} />
+              <span>My Warranty</span>
+            </button>
+
+            <button
+              type="button"
+              className="more"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <MoreHorizontal size={21} />
+              <span>More</span>
+            </button>
+          </nav>
+        )}
       </main>
     </div>
   );

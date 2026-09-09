@@ -1,20 +1,23 @@
-import { useNavigate } from "react-router-dom";
-
+import { useEffect, useState } from "react";
 import {
-  ArrowRight,
-  BadgeIndianRupee,
+  Bell,
+  ChevronDown,
+  ChevronRight,
   FileText,
   Gift,
+  Headphones,
+  Home,
+  MoreHorizontal,
   Package,
-  RotateCcw,
-  ShieldCheck,
+  Receipt,
   ShoppingBag,
+  WalletCards,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
 
 type CustomerDashboardData = {
-  customer: {
+  customer?: {
     customer_id: string;
     full_name: string;
     phone_number: string;
@@ -22,32 +25,20 @@ type CustomerDashboardData = {
     status: string;
   };
 
-  total_purchases: string | number;
-  total_invoices: number;
-  amount_paid: string | number;
-  refunds_received: string | number;
-  outstanding_amount: string | number;
-
-  invoice_status: {
-    paid: number;
-    partial: number;
-    unpaid: number;
-  };
-
-  spending_trend: Array<{
-    date: string;
-    invoice_count: number;
-    amount: string | number;
-  }>;
+  total_purchases: number;
+  amount_paid: number;
+  refunds_received: number;
+  active_warranties: number;
+  product_transfers: number;
 
   recent_invoices: Array<{
     id: string;
     invoice_id: string;
-    invoice_number?: string | null;
+    invoice_number: string;
     item_names: string[];
-    total_amount: string | number;
+    total_amount: number;
     payment_status: string;
-    invoice_date: string | null;
+    invoice_date: string;
   }>;
 
   recent_payments: Array<{
@@ -55,41 +46,26 @@ type CustomerDashboardData = {
     payment_id: string;
     invoice_id: string;
     item_names: string[];
-    amount: string | number;
+    amount: number;
     payment_status: string;
-    refund_amount: string | number;
-    payment_method: string;
-    paid_at: string | null;
+    refund_amount: number;
+    payment_method: string | null;
+    paid_at: string;
   }>;
 
-  active_warranties: number;
-  product_transfers: number;
-
-  warranties: Array<{
-    id: string;
-    warranty_id: string;
-    invoice_id: string;
-    product_variant_id: string;
-    product_name: string;
-    start_date: string;
-    end_date: string;
-    duration_months: number;
-    is_transferable: boolean;
-    status: string;
-  }>;
+  warranties: Array<unknown>;
 };
 
-function formatAmount(value: string | number) {
-  const amount = Number(value || 0);
-
-  return `₹${amount.toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
+function formatAmount(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
     maximumFractionDigits: 2,
-  })}`;
+  }).format(Number(value || 0));
 }
 
 function formatDate(value: string) {
-  if (!value) return "—";
+  if (!value) return "";
 
   const date = new Date(value);
 
@@ -104,142 +80,27 @@ function formatDate(value: string) {
   });
 }
 
-function Stat({
-  icon,
-  title,
-  value,
-  tone,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  tone: string;
-}) {
-  return (
-    <div className="stat-card">
-      <div className={`stat-icon ${tone}`}>
-        {icon}
-      </div>
+function getInitials(value: string) {
+  const parts = value
+    .trim()
+    .split(/[\s@._-]+/)
+    .filter(Boolean);
 
-      <div>
-        <span>{title}</span>
-        <strong>{value}</strong>
-      </div>
-    </div>
-  );
-}
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
 
-function PanelHeader({
-  title,
-  count,
-}: {
-  title: string;
-  count?: number;
-}) {
-  return (
-    <div className="panel-header">
-      <div>
-        <h3>{title}</h3>
-
-        {typeof count === "number" && (
-          <span>{count} records</span>
-        )}
-      </div>
-
-      <button type="button">View All</button>
-    </div>
-  );
-}
-
-function Mini({
-  icon,
-  title,
-  value,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-}) {
-  return (
-    <div className="mini-card">
-      <div className="mini-icon">{icon}</div>
-
-      <span>{title}</span>
-
-      <strong>{value}</strong>
-    </div>
-  );
+  return value.slice(0, 2).toUpperCase();
 }
 
 export default function CustomerDashboard() {
   const navigate = useNavigate();
+
   const [dashboard, setDashboard] =
     useState<CustomerDashboardData | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  function openInvoicePdf(invoiceId: string) {
-    const token = sessionStorage.getItem("digibills_token");
-
-    if (!token) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const apiBase =
-      import.meta.env.VITE_API_BASE_URL ??
-      "http://localhost:8000";
-
-    const url =
-      `${apiBase}/customer/invoices/` +
-      `${encodeURIComponent(invoiceId)}/pdf`;
-
-    const pdfWindow = window.open("", "_blank");
-
-    if (!pdfWindow) {
-      setError(
-        "Unable to open the invoice PDF. Please allow pop-ups for DigiBills."
-      );
-      return;
-    }
-
-    fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const body = await response.text();
-
-          throw new Error(
-            body ||
-              `Unable to generate invoice PDF (${response.status}).`
-          );
-        }
-
-        return response.blob();
-      })
-      .then((blob) => {
-        const pdfUrl = URL.createObjectURL(blob);
-
-        pdfWindow.location.href = pdfUrl;
-
-        window.setTimeout(() => {
-          URL.revokeObjectURL(pdfUrl);
-        }, 60_000);
-      })
-      .catch((err) => {
-        pdfWindow.close();
-
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to open invoice PDF."
-        );
-      });
-  }
 
   async function loadDashboard() {
     try {
@@ -256,7 +117,7 @@ export default function CustomerDashboard() {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to load customer dashboard."
+          : "Unable to load your dashboard."
       );
     } finally {
       setLoading(false);
@@ -267,58 +128,90 @@ export default function CustomerDashboard() {
     loadDashboard();
   }, []);
 
+  async function openInvoicePdf(invoiceId: string) {
+    const token = sessionStorage.getItem("digibills_token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const apiBase =
+      import.meta.env.VITE_API_BASE_URL ||
+      "http://localhost:8000";
+
+    const pdfWindow = window.open("", "_blank");
+
+    if (!pdfWindow) {
+      setError(
+        "Unable to open the invoice PDF. Please allow pop-ups for DigiBills."
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${apiBase}/customer/invoices/${invoiceId}/pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const body = await response.text();
+
+        throw new Error(
+          body ||
+            `Unable to generate invoice PDF (${response.status}).`
+        );
+      }
+
+      const blob = await response.blob();
+      const pdfUrl = URL.createObjectURL(blob);
+
+      pdfWindow.location.href = pdfUrl;
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(pdfUrl);
+      }, 60_000);
+    } catch (err) {
+      pdfWindow.close();
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to open invoice PDF."
+      );
+    }
+  }
+
   if (loading) {
     return (
-      <section className="dashboard customer-dashboard-page">
-        <div className="welcome-row">
-          <div>
-            <h1>Customer Dashboard</h1>
-            <p>Loading your account overview...</p>
-          </div>
-        </div>
-
-        <div className="panel">
-          <div className="table-state">
-            Loading dashboard...
-          </div>
+      <section className="customer-dashboard-reference">
+        <div className="customer-dashboard-loading">
+          Loading your dashboard...
         </div>
       </section>
     );
   }
 
-  if (error) {
+  if (error || !dashboard) {
     return (
-      <section className="dashboard customer-dashboard-page">
-        <div className="welcome-row">
-          <div>
-            <h1>Customer Dashboard</h1>
-            <p>Unable to load your account overview.</p>
-          </div>
-        </div>
+      <section className="customer-dashboard-reference">
+        <div className="customer-dashboard-error">
+          <strong>Unable to load your dashboard</strong>
+          <span>
+            {error || "No dashboard data is available."}
+          </span>
 
-        <div className="panel">
-          <div className="table-state negative">
-            {error}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!dashboard) {
-    return (
-      <section className="dashboard customer-dashboard-page">
-        <div className="welcome-row">
-          <div>
-            <h1>Customer Dashboard</h1>
-            <p>No dashboard data is available.</p>
-          </div>
-        </div>
-
-        <div className="panel">
-          <div className="table-state">
-            No customer dashboard data found.
-          </div>
+          <button
+            type="button"
+            onClick={loadDashboard}
+          >
+            Try Again
+          </button>
         </div>
       </section>
     );
@@ -327,220 +220,272 @@ export default function CustomerDashboard() {
   const customerName =
     dashboard.customer?.full_name || "Customer";
 
-  return (
-    <section className="dashboard customer-dashboard-page">
-      <div className="welcome-row">
-        <div>
-          <h1>
-            Welcome back, {customerName}! 👋
-          </h1>
+  const initials = getInitials(customerName);
 
-          <p>
-            Here's your account overview.
-          </p>
+  const totalInvoices =
+    dashboard.recent_invoices.length;
+
+  const recentInvoices =
+    dashboard.recent_invoices.slice(0, 2);
+
+  return (
+    <section className="customer-dashboard-reference">
+
+      {/* Mobile reference header */}
+      <header className="customer-reference-header">
+        <div className="customer-reference-brand">
+          <span className="customer-reference-brand-icon">
+            ✣
+          </span>
+
+          <span>DigiBills</span>
+        </div>
+
+        <div className="customer-reference-header-actions">
+          <button
+            type="button"
+            className="customer-reference-bell"
+            aria-label="Notifications"
+            onClick={() => navigate("/customer/settings")}
+          >
+            <Bell size={21} />
+            <span className="customer-reference-notification">
+              1
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="customer-reference-avatar"
+            aria-label="Open profile"
+            onClick={() => navigate("/customer/profile")}
+          >
+            {initials}
+          </button>
+        </div>
+      </header>
+
+      {/* Greeting */}
+      <div className="customer-reference-greeting">
+        <h1>Hello, {customerName}! <span>👋</span></h1>
+        <p>Welcome back 👋</p>
+      </div>
+
+      {/* Total spent hero card */}
+      <div className="customer-reference-total-card">
+        <div className="customer-reference-total-top">
+          <span>Total Spent</span>
+
+          <button type="button">
+            This Month
+            <ChevronDown size={14} />
+          </button>
+        </div>
+
+        <strong>
+          {formatAmount(dashboard.total_purchases)}
+        </strong>
+
+        <div className="customer-reference-bars">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
         </div>
       </div>
 
-      <div className="stats-grid four">
-        <Stat
-          icon={<BadgeIndianRupee />}
-          title="Total Spent"
-          value={formatAmount(dashboard.total_purchases)}
-          tone="green"
-        />
+      {/* Four KPI cards */}
+      <div className="customer-reference-kpis">
 
-        <Stat
-          icon={<BadgeIndianRupee />}
-          title="Paid Amount"
-          value={formatAmount(dashboard.amount_paid)}
-          tone="blue"
-        />
+        <button
+          type="button"
+          onClick={() => navigate("/customer/invoices")}
+          className="customer-reference-kpi"
+        >
+          <span className="customer-reference-kpi-icon blue">
+            <Receipt size={18} />
+          </span>
 
-        <Stat
-          icon={<Gift />}
-          title="Refunds Received"
-          value={formatAmount(
-            dashboard.refunds_received
-          )}
-          tone="purple"
-        />
+          <span className="customer-reference-kpi-content">
+            <small>Total Invoices</small>
+            <strong>{totalInvoices}</strong>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/customer/products")}
+          className="customer-reference-kpi"
+        >
+          <span className="customer-reference-kpi-icon purple">
+            <Gift size={18} />
+          </span>
+
+          <span className="customer-reference-kpi-content">
+            <small>Total Orders</small>
+            <strong>—</strong>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/customer/payments")}
+          className="customer-reference-kpi"
+        >
+          <span className="customer-reference-kpi-icon green">
+            <WalletCards size={18} />
+          </span>
+
+          <span className="customer-reference-kpi-content">
+            <small>Paid Amount</small>
+            <strong>
+              {formatAmount(dashboard.amount_paid)}
+            </strong>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/customer/payments")}
+          className="customer-reference-kpi"
+        >
+          <span className="customer-reference-kpi-icon red">
+            <Gift size={18} />
+          </span>
+
+          <span className="customer-reference-kpi-content">
+            <small>Refunds</small>
+            <strong>
+              {formatAmount(dashboard.refunds_received)}
+            </strong>
+          </span>
+        </button>
+
       </div>
 
-      <div className="panel-grid customer-grid">
-        <div className="panel">
-          <PanelHeader
-            title="Recent Invoices"
-            count={dashboard.recent_invoices.length}
-          />
+      {/* Recent invoices */}
+      <section className="customer-reference-section">
+        <div className="customer-reference-section-header">
+          <h2>Recent Invoices</h2>
 
-          {dashboard.recent_invoices.length === 0 ? (
-            <div className="table-state">
+          <button
+            type="button"
+            onClick={() => navigate("/customer/invoices")}
+          >
+            View All
+          </button>
+        </div>
+
+        <div className="customer-reference-invoices">
+
+          {recentInvoices.length === 0 ? (
+            <div className="customer-reference-empty">
               No invoices found.
             </div>
           ) : (
-            dashboard.recent_invoices.map((invoice) => (
-              <div
-                className="order-row"
+            recentInvoices.map((invoice) => (
+              <button
+                type="button"
+                className="customer-reference-invoice"
                 key={invoice.invoice_id}
-                role="button"
-                tabIndex={0}
                 onClick={() =>
                   openInvoicePdf(invoice.invoice_id)
                 }
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" ||
-                    event.key === " "
-                  ) {
-                    event.preventDefault();
-                    openInvoicePdf(invoice.invoice_id);
-                  }
-                }}
-                style={{ cursor: "pointer" }}
               >
-                <div>
-                  <b>
-                    {invoice.item_names?.length
-                      ? invoice.item_names.join(", ")
-                      : "No items"}
-                  </b>
+                <span className="customer-reference-invoice-icon">
+                  <FileText size={19} />
+                </span>
+
+                <span className="customer-reference-invoice-info">
+                  <strong>
+                    #{invoice.invoice_number || invoice.invoice_id}
+                  </strong>
 
                   <small>
-                    {formatDate(invoice.invoice_date ?? "")}
+                    {formatDate(invoice.invoice_date)}
                   </small>
-                </div>
-
-                <strong>
-                  {formatAmount(invoice.total_amount)}
-                </strong>
-
-                <span
-                  className={`status ${invoice.payment_status}`}
-                >
-                  {invoice.payment_status}
                 </span>
-              </div>
+
+                <span className="customer-reference-invoice-right">
+                  <strong>
+                    {formatAmount(invoice.total_amount)}
+                  </strong>
+
+                  <span
+                    className={`customer-reference-status ${
+                      invoice.payment_status
+                        ?.toLowerCase()
+                        .includes("paid")
+                        ? "paid"
+                        : ""
+                    }`}
+                  >
+                    {invoice.payment_status || "Pending"}
+                  </span>
+                </span>
+
+                <ChevronRight size={18} />
+              </button>
             ))
           )}
+
         </div>
+      </section>
 
-        <div className="panel">
-          <PanelHeader
-            title="Recent Payments"
-            count={dashboard.recent_payments.length}
-          />
+      {/* Mobile bottom navigation */}
+      <nav className="customer-reference-bottom-nav">
 
-          {dashboard.recent_payments.length === 0 ? (
-            <div className="table-state">
-              No payments found.
-            </div>
-          ) : (
-            dashboard.recent_payments.map((payment) => (
-              <div
-                className="order-row"
-                key={payment.payment_id}
-                role="button"
-                tabIndex={0}
-                onClick={() =>
-                  openInvoicePdf(payment.invoice_id)
-                }
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" ||
-                    event.key === " "
-                  ) {
-                    event.preventDefault();
-                    openInvoicePdf(payment.invoice_id);
-                  }
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <div>
-                  <b>
-                    {payment.item_names?.length
-                      ? payment.item_names.join(", ")
-                      : "No items"}
-                  </b>
+        <button
+          type="button"
+          className="active"
+          onClick={() => navigate("/customer")}
+        >
+          <Home size={19} />
+          <span>Home</span>
+        </button>
 
-                  <small>
-                    {formatDate(payment.paid_at ?? "")}
-                  </small>
-                </div>
+        <button
+          type="button"
+          onClick={() => navigate("/customer/invoices")}
+        >
+          <FileText size={19} />
+          <span>Invoices</span>
+        </button>
 
-                <strong>
-                  {formatAmount(payment.amount)}
-                </strong>
+        <button
+          type="button"
+          onClick={() => navigate("/customer/products")}
+        >
+          <ShoppingBag size={19} />
+          <span>Orders</span>
+        </button>
 
-                <span
-                  className={`status ${
-                    Number(payment.refund_amount || 0) >=
-                    Number(payment.amount || 0)
-                      ? "refunded"
-                      : payment.payment_status
-                  }`}
-                >
-                  {Number(payment.refund_amount || 0) >=
-                  Number(payment.amount || 0)
-                    ? "refunded"
-                    : payment.payment_status}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/customer/support")}
+        >
+          <Headphones size={19} />
+          <span>Support</span>
+        </button>
 
+        <button
+          type="button"
+          className="more"
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("digibills:open-mobile-menu")
+            )
+          }
+        >
+          <MoreHorizontal size={20} />
+          <span>More</span>
+        </button>
 
-      </div>
+      </nav>
 
-      <div className="panel customer-dashboard-summary">
-        <div className="panel-header">
-          <div>
-            <h3>Account Summary</h3>
-            <span>
-              Your current billing and account position
-            </span>
-          </div>
-        </div>
-
-        <div className="customer-summary-grid">
-          <div>
-            <span>Total Invoices</span>
-            <strong>
-              {dashboard.total_invoices}
-            </strong>
-          </div>
-
-          <div>
-            <span>Paid Invoices</span>
-            <strong>
-              {dashboard.invoice_status.paid}
-            </strong>
-          </div>
-
-          <div>
-            <span>Partial Invoices</span>
-            <strong>
-              {dashboard.invoice_status.partial}
-            </strong>
-          </div>
-
-          <div>
-            <span>Unpaid Invoices</span>
-            <strong>
-              {dashboard.invoice_status.unpaid}
-            </strong>
-          </div>
-
-          <div>
-            <span>Outstanding</span>
-            <strong>
-              {formatAmount(
-                dashboard.outstanding_amount
-              )}
-            </strong>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

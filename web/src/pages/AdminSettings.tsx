@@ -79,6 +79,26 @@ export default function AdminSettings() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
+  type BrandSettings = {
+    id: string;
+    company_name: string;
+    logo_url: string | null;
+    primary_color: string;
+    secondary_color: string;
+    accent_color: string;
+    login_tagline: string;
+    created_at: string;
+    updated_at: string;
+  };
+
+  const [brandSettings, setBrandSettings] =
+    useState<BrandSettings | null>(null);
+
+  const [brandLoading, setBrandLoading] = useState(false);
+  const [brandSaving, setBrandSaving] = useState(false);
+  const [brandError, setBrandError] = useState("");
+  const [brandSuccess, setBrandSuccess] = useState("");
+
   const [paymentConfiguration, setPaymentConfiguration] =
     useState<PaymentConfigurationForm>({
       perBillCharge: "9.00",
@@ -301,6 +321,52 @@ export default function AdminSettings() {
     };
   }, [activeSection]);
 
+  useEffect(() => {
+    if (activeSection !== "business") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadBrandSettings() {
+      setBrandLoading(true);
+      setBrandError("");
+      setBrandSuccess("");
+
+      try {
+        const settings =
+          await apiFetch<BrandSettings>("/brand-settings");
+
+        if (cancelled) {
+          return;
+        }
+
+        setBrandSettings(settings);
+        setBusinessName(settings.company_name);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setBrandError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load brand settings."
+        );
+      } finally {
+        if (!cancelled) {
+          setBrandLoading(false);
+        }
+      }
+    }
+
+    void loadBrandSettings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSection]);
+
   function updateCustomerPlan(
     planId: string,
     updater: (plan: CustomerPlan) => CustomerPlan
@@ -446,6 +512,54 @@ export default function AdminSettings() {
   }
 
   async function saveSettings() {
+    if (activeSection === "business") {
+      if (!brandSettings) {
+        return;
+      }
+
+      setBrandSaving(true);
+      setBrandError("");
+      setBrandSuccess("");
+
+      try {
+        const updated =
+          await apiFetch<BrandSettings>(
+            "/admin/brand-settings",
+            {
+              method: "PUT",
+              body: JSON.stringify({
+                company_name: businessName,
+                logo_url: brandSettings.logo_url,
+                primary_color:
+                  brandSettings.primary_color,
+                secondary_color:
+                  brandSettings.secondary_color,
+                accent_color:
+                  brandSettings.accent_color,
+                login_tagline:
+                  brandSettings.login_tagline,
+              }),
+            }
+          );
+
+        setBrandSettings(updated);
+        setBusinessName(updated.company_name);
+        setBrandSuccess(
+          "Branding settings saved successfully."
+        );
+      } catch (error) {
+        setBrandError(
+          error instanceof Error
+            ? error.message
+            : "Unable to save branding settings."
+        );
+      } finally {
+        setBrandSaving(false);
+      }
+
+      return;
+    }
+
     if (activeSection !== "billing") {
       alert("Settings saved locally for this session.");
       return;
@@ -513,8 +627,13 @@ export default function AdminSettings() {
           className="primary-button"
           onClick={saveSettings}
           disabled={
-            activeSection === "billing" &&
-            (billingLoading || billingSaving)
+            activeSection === "billing"
+              ? billingLoading || billingSaving
+              : activeSection === "business"
+                ? brandLoading ||
+                  brandSaving ||
+                  !brandSettings
+                : false
           }
         >
           <Save size={16} />
