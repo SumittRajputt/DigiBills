@@ -1,4 +1,6 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
@@ -6,6 +8,8 @@ from app.api.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.schemas.auth import (
     ChangePasswordRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
@@ -19,6 +23,12 @@ from app.services.auth_service import (
     create_user_token,
     register_user,
     register_retailer,
+)
+from app.services.email_service import send_password_reset_email
+from app.services.password_reset_service import (
+    create_password_reset_token,
+    get_valid_password_reset_token,
+    reset_user_password,
 )
 
 
@@ -175,6 +185,95 @@ def change_password(
 
         return {
             "message": "Password changed successfully.",
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/forgot-password",
+)
+def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    user = db.execute(
+        select(User).where(
+            User.email == str(request.email).strip().lower()
+        )
+    ).scalar_one_or_none()
+
+    # Do not reveal whether an email exists in the system.
+    response = {
+        "message": (
+            "If an account exists with this email address, "
+            "a password reset link will be sent."
+        )
+    }
+
+    if user is None:
+        return response
+
+    token = create_password_reset_token(
+        db=db,
+        user=user,
+    )
+
+    frontend_url = os.getenv(
+        "FRONTEND_URL",
+        "http://localhost:5173",
+    ).rstrip("/")
+
+    reset_url = (
+        f"{frontend_url}/customer-reset-password"
+        f"?token={token}"
+    )
+
+    try:
+        send_password_reset_email(
+            recipient_email=str(user.email),
+            reset_url=reset_url,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unable to send password reset email: {exc}",
+        )
+
+    return response
+
+
+@router.post(
+    "/reset-password",
+)
+def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    reset_token = get_valid_password_reset_token(
+        db=db,
+        raw_token=request.token,
+    )
+
+    if reset_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset link.",
+        )
+
+    try:
+        reset_user_password(
+            db=db,
+            reset_token=reset_token,
+            new_password=request.new_password,
+        )
+
+        return {
+            "message": "Password reset successfully."
         }
 
     except ValueError as exc:

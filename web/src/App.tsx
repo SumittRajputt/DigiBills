@@ -9,6 +9,9 @@ import {
 } from "react-router-dom";
 import {
   ArrowLeft,
+  Eye,
+  EyeOff,
+  LockKeyhole,
   Bell,
   ChevronDown,
   CircleHelp,
@@ -62,6 +65,8 @@ import RetailerReports from "./pages/RetailerReports";
 import AdminSettings from "./pages/AdminSettings";
 import RetailerRegistration from "./pages/RetailerRegistration";
 import CustomerRegistration from "./pages/CustomerRegistration";
+import CustomerForgotPassword from "./pages/CustomerForgotPassword";
+import CustomerResetPassword from "./pages/CustomerResetPassword";
 import { apiFetch } from "./api";
 
 type Role =
@@ -217,6 +222,16 @@ function App() {
       <Route
         path="/customer-register"
         element={<CustomerRegistration />}
+      />
+
+      <Route
+        path="/customer-forgot-password"
+        element={<CustomerForgotPassword />}
+      />
+
+      <Route
+        path="/customer-reset-password"
+        element={<CustomerResetPassword />}
       />
 
       <Route
@@ -685,12 +700,15 @@ function LoginPage({
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const isRetailer = accountType === "retailer";
   const isAdmin = accountType === "admin";
   const isEmployee = accountType === "employee";
+  const isCustomer = accountType === "customer";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -738,133 +756,202 @@ function LoginPage({
   }
 
   return (
-    <div className="login-page account-login-page">
-      <div className="login-card account-login-card">
-        <button
-          type="button"
-          className="login-back-button"
-          onClick={() => navigate("/login")}
-        >
-          <ArrowLeft size={17} />
-          Back
-        </button>
+    <div
+      className={`login-page account-login-page ${
+        isCustomer ? "customer-login-page" : ""
+      }`}
+    >
+      <div className="customer-login-shell">
+        {isCustomer && (
+          <div className="customer-login-visual">
+            <div className="customer-login-glow customer-login-glow-one" />
+            <div className="customer-login-glow customer-login-glow-two" />
 
-        <div className="brand large">
-          <span className="brand-mark">✣</span> DigiBills
-        </div>
+            <div className="customer-login-visual-content">
+              <div className="customer-login-visual-logo">
+                <span className="customer-login-visual-logo-mark">✣</span>
+                <span>DigiBills</span>
+              </div>
 
-        <div className="account-login-heading">
-          <span
-            className={`account-login-badge ${
-              isAdmin
-                ? "admin"
-                : isRetailer
-                  ? "retailer"
-                  : isEmployee
-                    ? "employee"
-                    : "customer"
-            }`}
-          >
-            {isAdmin ? (
-              <>
-                <ShieldCheck size={15} />
-                Admin
-              </>
-            ) : isRetailer ? (
-              <>
-                <Store size={15} />
-                Retailer
-              </>
-            ) : isEmployee ? (
-              <>
-                <UsersRound size={15} />
-                Employee
-              </>
-            ) : (
-              <>
-                <UserRound size={15} />
-                Customer
-              </>
-            )}
-          </span>
+              <h2>Your Bills.<br />Always With You.</h2>
 
-          <h1>
-            {isAdmin
-              ? "Admin sign in"
-              : isRetailer
-                ? "Retailer sign in"
-                : isEmployee
-                  ? "Employee sign in"
-                  : "Customer sign in"}
-          </h1>
+              <p>
+                Keep your invoices, payments, warranties and purchases
+                together in one simple place.
+              </p>
 
-          <p>
-            Sign in to continue to your DigiBills{" "}
-            {isAdmin
-              ? "admin dashboard"
-              : isRetailer
-                ? "store"
-                : isEmployee
-                  ? "work dashboard"
-                  : "account"}.
-          </p>
-        </div>
+              <div className="customer-login-illustration">
+                <div className="customer-login-illustration-card">
+                  <div className="customer-login-illustration-card-top">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
 
-        <form onSubmit={handleSubmit}>
-          <label>
-            Phone number
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={(event) =>
-                setPhoneNumber(event.target.value)
-              }
-              placeholder="Enter phone number"
-              autoComplete="tel"
-              required
-            />
-          </label>
+                  <div className="customer-login-illustration-lines">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </div>
 
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Enter password"
-              autoComplete="current-password"
-              required
-            />
-          </label>
+                  <div className="customer-login-illustration-total">
+                    <small>Total</small>
+                    <strong>₹24,560</strong>
+                  </div>
+                </div>
 
-          {error && (
-            <div className="login-error">
-              {error}
+                <div className="customer-login-illustration-phone">
+                  <div className="customer-login-phone-notch" />
+                  <div className="customer-login-phone-logo">✣</div>
+                  <strong>DigiBills</strong>
+                  <span>Your bills, always with you</span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+        )}
 
+        <div className="login-card account-login-card customer-login-card">
           <button
-            className={`login-button ${
-              isAdmin
-                ? "admin"
-                : isRetailer
-                  ? "retailer"
-                  : isEmployee
-                    ? "employee"
-                    : "customer"
-            }`}
-            type="submit"
-            disabled={submitting}
+            type="button"
+            className="login-back-button"
+            onClick={() => navigate("/login")}
           >
-            {submitting ? "Signing in..." : "Sign in"}
+            <ArrowLeft size={17} />
+            Back
           </button>
-        </form>
 
-        <div className="registration-footer">
-          Don't have a DigiBills account?{" "}
-          <Link to="/register">Register</Link>
+          <div className="brand large">
+            <span className="brand-mark">✣</span>
+            DigiBills
+          </div>
+
+          <div className="account-login-heading">
+            <span
+              className={`account-login-badge ${
+                isRetailer ? "retailer" : "customer"
+              }`}
+            >
+              <UserRound size={15} />
+              {isRetailer ? "Retailer" : "Customer"}
+            </span>
+
+            <h1>
+              {isRetailer
+                ? "Retailer sign in"
+                : "Welcome back!"}
+            </h1>
+
+            <p>
+              {isRetailer
+                ? "Sign in to continue to your DigiBills store."
+                : "Sign in to manage your bills and purchases."}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <label className="customer-login-field">
+              <span>Email or Mobile Number</span>
+
+              <div className="customer-login-input-wrap">
+                <UserRound size={18} />
+                <input
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(event) =>
+                    setPhoneNumber(event.target.value)
+                  }
+                  placeholder="Enter mobile number"
+                  autoComplete="tel"
+                  required
+                />
+              </div>
+            </label>
+
+            <label className="customer-login-field">
+              <span>Password</span>
+
+              <div className="customer-login-input-wrap">
+                <LockKeyhole size={18} className="customer-login-lock-icon" />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
+                  placeholder="Enter password"
+                  autoComplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="customer-login-password-toggle"
+                  onClick={() =>
+                    setShowPassword((current) => !current)
+                  }
+                  aria-label={
+                    showPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+              </div>
+            </label>
+
+            <div className="customer-login-options">
+              <label className="customer-login-remember">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) =>
+                    setRememberMe(event.target.checked)
+                  }
+                />
+                <span className="customer-login-checkmark">
+                  {rememberMe ? "✓" : ""}
+                </span>
+                <span>Remember me</span>
+              </label>
+
+              <button
+                type="button"
+                className="customer-login-forgot"
+                onClick={() => navigate("/customer-forgot-password")}
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
+
+            <button
+              className={`login-button ${
+                isRetailer ? "retailer" : "customer"
+              } customer-login-submit`}
+              type="submit"
+              disabled={submitting}
+            >
+              {submitting ? "Signing in..." : "Login"}
+            </button>
+          </form>
+
+          <div className="registration-footer customer-login-register">
+            Don't have an account?{" "}
+            <Link to="/customer-register">Register</Link>
+          </div>
         </div>
       </div>
     </div>

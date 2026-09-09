@@ -15,8 +15,13 @@ class Settings(BaseSettings):
 
     access_token_expire_minutes: int = 60
 
+    resend_api_key: str = ""
+
     model_config = SettingsConfigDict(
-        env_file=PROJECT_ROOT / ".env",
+        env_file=(
+            Path(__file__).resolve().parents[3] / ".env",
+            Path(__file__).resolve().parents[2] / ".env",
+        ),
         env_file_encoding="utf-8",
         extra="ignore",
     )
