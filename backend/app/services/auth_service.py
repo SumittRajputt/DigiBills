@@ -170,12 +170,11 @@ def authenticate_user(
     account_type = account_type.strip().lower()
 
     role_name = {
+        "admin": "super_admin",
         "retailer": "retailer_owner",
         "customer": "customer",
         "salesman": "salesman",
     }.get(account_type)
-
-    # Employee accounts are identified from their Employee record.
     # The employee does not choose cashier/manager/etc. at login.
     if account_type == "employee":
         statement = (
@@ -422,3 +421,4 @@ def register_retailer(
     except Exception:
         db.rollback()
         raise
+

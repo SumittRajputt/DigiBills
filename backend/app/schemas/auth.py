@@ -65,3 +65,4 @@ class UserResponse(BaseModel):
     status: str
     is_phone_verified: bool
     roles: list[str]
+
