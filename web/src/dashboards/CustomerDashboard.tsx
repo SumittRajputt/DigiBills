@@ -101,6 +101,8 @@ export default function CustomerDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [customerUnreadNotifications, setCustomerUnreadNotifications] =
+    useState(0);
 
   async function loadDashboard() {
     try {
@@ -126,6 +128,44 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     loadDashboard();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCustomerUnreadNotifications() {
+      try {
+        const payload = await apiFetch<
+          Array<{ is_read: boolean }>
+        >("/customer/notifications");
+
+        if (cancelled) {
+          return;
+        }
+
+        const unreadCount = Array.isArray(payload)
+          ? payload.filter(
+              (notification) => !notification.is_read
+            ).length
+          : 0;
+
+        setCustomerUnreadNotifications(unreadCount);
+      } catch (err) {
+        if (!cancelled) {
+          console.error(
+            "Failed to load customer notification count:",
+            err
+          );
+          setCustomerUnreadNotifications(0);
+        }
+      }
+    }
+
+    loadCustomerUnreadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function openInvoicePdf(invoiceId: string) {
@@ -246,12 +286,14 @@ export default function CustomerDashboard() {
             type="button"
             className="customer-reference-bell"
             aria-label="Notifications"
-            onClick={() => navigate("/customer/settings")}
+            onClick={() => navigate("/customer/notifications")}
           >
             <Bell size={21} />
-            <span className="customer-reference-notification">
-              1
-            </span>
+            {customerUnreadNotifications > 0 && (
+              <span className="customer-reference-notification">
+                {customerUnreadNotifications}
+              </span>
+            )}
           </button>
 
           <button
