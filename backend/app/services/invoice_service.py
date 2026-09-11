@@ -18,6 +18,9 @@ from app.models.product_unit import ProductUnit
 from app.models.product_variant import ProductVariant
 from app.models.retailer import Retailer
 from app.services.audit_log_service import create_audit_log
+from app.services.customer_notification_service import (
+    create_customer_notification,
+)
 from app.services.product_ownership_service import (
     assign_product_ownership,
 )
@@ -660,6 +663,20 @@ def create_invoice(
             f"for customer {customer.customer_id} "
             f"amount {invoice.total_amount:.2f}."
         ),
+    )
+
+    create_customer_notification(
+        db=db,
+        customer_id=customer.id,
+        notification_type="invoice",
+        title="New Bill Available",
+        message=(
+            f"Your bill {invoice.invoice_id} "
+            f"for ₹{invoice.total_amount:.2f} "
+            "is now available."
+        ),
+        reference_type="invoice",
+        reference_id=str(invoice.id),
     )
 
     db.commit()

@@ -1,5 +1,6 @@
 from app.models.audit_log import AuditLog
 from app.models.customer import Customer
+from app.models.customer_notification import CustomerNotification
 from app.models.employee import Employee
 from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation

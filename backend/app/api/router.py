@@ -37,6 +37,9 @@ from app.api.routes.customer_transfers import (
 from app.api.routes.customer_support import (
     router as customer_support_router,
 )
+from app.api.routes.customer_notifications import (
+    router as customer_notifications_router,
+)
 from app.api.routes.customer_products import (
     router as customer_products_router,
 )
@@ -158,6 +161,10 @@ api_router.include_router(
 )
 api_router.include_router(
     customer_support_router
+)
+
+api_router.include_router(
+    customer_notifications_router
 )
 
 api_router.include_router(
