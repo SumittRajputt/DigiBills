@@ -189,6 +189,7 @@ export default function CustomerProfile() {
             className="customer-profile-edit-button"
             aria-label="Edit full name"
             title="Edit full name"
+            onClick={() => navigate("/customer/profile/edit")}
           >
             <Pencil size={16} />
           </button>
@@ -209,6 +210,7 @@ export default function CustomerProfile() {
             className="customer-profile-edit-button"
             aria-label="Edit phone number"
             title="Edit phone number"
+            onClick={() => navigate("/customer/profile/edit")}
           >
             <Pencil size={16} />
           </button>
@@ -231,6 +233,7 @@ export default function CustomerProfile() {
             className="customer-profile-edit-button"
             aria-label="Edit email"
             title="Edit email"
+            onClick={() => navigate("/customer/profile/edit")}
           >
             <Pencil size={16} />
           </button>

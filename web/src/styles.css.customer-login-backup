@@ -1,5 +1,6 @@
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#172033;background:#f7f9fc;font-synthesis:none;text-rendering:optimizeLegibility}*{box-sizing:border-box}body{margin:0}.app-shell{min-height:100vh;display:flex;background:#f7f9fc}.sidebar{width:218px;background:#071d35;color:#dbe7f5;display:flex;flex-direction:column;padding:20px 12px;position:fixed;inset:0 auto 0 0;z-index:2}.sidebar:has(.nav-item.active[style]){background:#071d35}.brand{font-weight:800;font-size:20px;color:#fff;display:flex;align-items:center;gap:9px;padding:0 12px 22px}.brand-mark{display:inline-grid;place-items:center;width:25px;height:25px;border:2px solid currentColor;border-radius:7px;font-size:14px}.profile-mini{display:flex;gap:10px;align-items:center;padding:11px 10px 18px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:12px}.profile-mini strong,.profile-mini small{display:block}.profile-mini strong{font-size:12px;color:#fff}.profile-mini small{font-size:9px;color:#93a7be;margin-top:3px}.avatar,.top-avatar{border-radius:50%;display:grid;place-items:center;background:#e7eef7;color:#1a2940;font-weight:800}.avatar{width:30px;height:30px;font-size:10px}.nav-item{width:100%;border:0;background:transparent;color:#b9c9da;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;margin:2px 0;text-align:left;font-size:12px;cursor:pointer}.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}.nav-item.active{background:var(--accent,#1769ff);color:#fff}.logout{margin-top:auto}.main{margin-left:218px;min-width:0;width:calc(100% - 218px)}.topbar{height:62px;background:#fff;border-bottom:1px solid #e7ecf3;display:flex;justify-content:flex-end;align-items:center;gap:14px;padding:0 25px;position:sticky;top:0;z-index:1}.search-box{height:34px;width:240px;border:1px solid #dce3ec;border-radius:7px;display:flex;align-items:center;gap:7px;padding:0 10px;color:#7d8998}.search-box input{border:0;outline:0;width:100%;font-size:11px}.top-actions{display:flex;align-items:center;gap:9px}.icon-button{border:0;background:transparent;color:#66758a;position:relative;cursor:pointer}.notification-dot{position:absolute;top:-5px;right:-4px;background:#e63946;color:#fff;border-radius:20px;font-size:7px;padding:2px 4px}.top-avatar{width:28px;height:28px;font-size:9px}.dashboard{padding:24px 26px 34px}.welcome-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}.welcome-row h1{font-size:18px;margin:0 0 4px;color:#172033}.welcome-row p{font-size:11px;color:#7d8998;margin:0}.date-filter,.panel-header button{border:1px solid #dce3ec;background:#fff;border-radius:6px;color:#516074;font-size:10px;padding:8px 11px}.stats-grid{display:grid;gap:10px;margin-bottom:10px}.stats-grid.six{grid-template-columns:repeat(6,1fr)}.stats-grid.four{grid-template-columns:repeat(4,1fr)}.stat-card{background:#fff;border:1px solid #e7ecf3;border-radius:9px;padding:13px;display:flex;gap:10px;min-width:0;box-shadow:0 1px 1px rgba(20,35,55,.02)}.stat-icon{width:35px;height:35px;flex:0 0 35px;border-radius:10px;display:grid;place-items:center}.stat-icon svg{width:18px}.stat-icon.blue{background:#eaf2ff;color:#1769ff}.stat-icon.green{background:#e7faf1;color:#11a36a}.stat-icon.orange{background:#fff4df;color:#e89413}.stat-icon.purple{background:#f1ebff;color:#7352d6}.stat-icon.cyan{background:#e5fbfa;color:#14a7a3}.stat-icon.red{background:#fff0f0;color:#e45b5b}.stat-card span{font-size:9px;color:#718096;display:block;margin-bottom:3px}.stat-card strong{font-size:20px;display:block;line-height:1.05;color:#162035}.stat-card small{font-size:8px;display:block;margin-top:6px}.stat-card small em{font-style:normal;color:#8994a4;margin-left:2px}.positive{color:#16a268}.negative{color:#e15252}.panel-grid{display:grid;gap:10px;margin-top:10px}.admin-grid{grid-template-columns:1.45fr 1.05fr 1fr 1.1fr}.retailer-grid{grid-template-columns:1.5fr 1fr 1fr}.customer-grid{grid-template-columns:1fr 1fr}.panel{background:#fff;border:1px solid #e7ecf3;border-radius:9px;padding:15px;min-width:0}.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.panel-header h3{font-size:12px;margin:0;color:#202a3b}.panel-header button{padding:5px 8px;font-size:9px}.rank,.product-rank,.simple-row,.order-row,.alert-row,.activity-row{display:flex;align-items:center;gap:8px;border-bottom:1px solid #eef1f5;padding:10px 0}.rank:last-child,.product-rank:last-child,.simple-row:last-child,.order-row:last-child,.alert-row:last-child,.activity-row:last-child{border-bottom:0}.rank>b,.product-rank>span{width:20px;height:20px;border:1px solid #dce3ec;border-radius:50%;display:grid;place-items:center;font-size:9px}.rank-body{flex:1}.rank-body span{display:block;font-size:9px}.progress{height:4px;background:#edf1f5;border-radius:4px;margin-top:5px}.progress i{height:100%;display:block;background:#1769ff;border-radius:4px}.rank>strong{font-size:9px}.donut-wrap{display:flex;align-items:center;gap:4px}.legend{flex:1}.legend div{font-size:9px;display:flex;align-items:center;gap:5px;margin:8px 0}.legend i{width:7px;height:7px;border-radius:50%}.legend b{margin-left:auto}.activity-row{align-items:flex-start}.activity-dot{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:#eef5ff;color:#1769ff}.activity-row b{display:block;font-size:9px;font-weight:600}.activity-row small{display:block;color:#8a95a4;font-size:8px;margin-top:3px}.a1{background:#edf8f2;color:#11a36a}.a2{background:#fff5e7;color:#e89413}.a3{background:#fff0f0;color:#e45b5b}.a4{background:#f2ecff;color:#7352d6}.product-rank b{font-size:10px;flex:1}.product-rank strong{font-size:10px;background:#e7faf1;color:#159666;padding:3px 6px;border-radius:6px}.alert-row{font-size:9px}.alert-row svg{color:#e89413}.alert-row b{flex:1}.alert-row strong{color:#e15252;font-size:9px}.simple-row b,.simple-row span{font-size:9px}.simple-row b{flex:1}.simple-row small{font-size:8px;color:#8a95a4}.order-row{font-size:9px}.order-row>div{flex:1}.order-row b,.order-row small{display:block}.order-row small{font-size:8px;color:#8a95a4;margin-top:4px}.order-row>strong{font-size:9px}.status{background:#e7faf1;color:#129562;padding:4px 7px;border-radius:6px;font-size:8px}.customer-stat{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.mini-card{background:#fff;border:1px solid #e7ecf3;border-radius:9px;padding:13px;position:relative;min-height:100px}.mini-icon{position:absolute;right:14px;bottom:12px;color:#b99df4}.mini-card span{font-size:9px;color:#7d8998;display:block}.mini-card strong{font-size:21px;margin-top:8px;display:block}.launcher{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#f4f7fb,#eef3fb)}.launcher-card{background:#fff;border:1px solid #e4eaf2;border-radius:18px;padding:42px;max-width:760px;width:92%;box-shadow:0 18px 60px rgba(21,40,70,.1)}.brand.large{color:#102039;padding:0;font-size:28px}.launcher-card h1{font-size:28px;margin:30px 0 8px}.launcher-card p{color:#7b8798;margin-bottom:28px}.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.role-card{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:22px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:7px}.role-card:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(20,40,70,.08)}.role-icon{width:44px;height:44px;border-radius:12px;color:#fff;display:grid;place-items:center;margin-bottom:7px}.role-card strong{font-size:15px}.role-card span:last-child{font-size:10px;color:#7d8998}@media(max-width:1200px){.stats-grid.six{grid-template-columns:repeat(3,1fr)}.admin-grid{grid-template-columns:1fr 1fr}.activity{grid-column:1/-1}}@media(max-width:900px){.sidebar{width:70px}.sidebar .brand{font-size:0;justify-content:center;padding-left:0;padding-right:0}.sidebar .brand-mark{font-size:14px}.profile-mini>div:last-child,.nav-item span{display:none}.nav-item{justify-content:center}.main{margin-left:70px;width:calc(100% - 70px)}.stats-grid.four,.stats-grid.six{grid-template-columns:repeat(2,1fr)}.retailer-grid,.customer-grid,.admin-grid{grid-template-columns:1fr}.customer-stat{grid-template-columns:repeat(2,1fr)}.role-grid{grid-template-columns:1fr}.topbar{padding:0 12px}.search-box{width:180px}}@media(max-width:600px){.dashboard{padding:15px}.stats-grid.four,.stats-grid.six{grid-template-columns:1fr}.welcome-row{display:block}.date-filter{margin-top:12px}.top-actions .icon-button:nth-child(2){display:none}.search-box{width:140px}.customer-stat{grid-template-columns:1fr 1fr}}
-/* ==================   Login Page
+/* =========================
+   Login Page
    ========================= */
 
 .login-page {
@@ -132,7 +133,8 @@
 }
 
 
-/* ==================   Admin System Settings
+/* =========================
+   Admin System Settings
    ========================= */
 
 .settings-page {
@@ -484,7 +486,8 @@
   }
 }
 
-/* ==================   Audit Logs
+/* =========================
+   Audit Logs
    ========================= */
 
 .audit-logs-page .welcome-row {
@@ -701,7 +704,8 @@
 }
 
 
-/* ==================================================   ADMIN DASHBOARD — PROFESSIONAL DESIGN SYSTEM
+/* =========================================================
+   ADMIN DASHBOARD — PROFESSIONAL DESIGN SYSTEM
    ========================================================= */
 
 .admin-dashboard {
@@ -1465,7 +1469,8 @@
 }
 
 
-/* ==================================================   ADMIN RETAILERS — PROFESSIONAL MANAGEMENT UI
+/* =========================================================
+   ADMIN RETAILERS — PROFESSIONAL MANAGEMENT UI
    ========================================================= */
 
 .retailers-page {
@@ -2175,7 +2180,8 @@
   }
 }
 
-/* ==================================================   ADMIN USERS — PROFESSIONAL MANAGEMENT UI
+/* =========================================================
+   ADMIN USERS — PROFESSIONAL MANAGEMENT UI
    ========================================================= */
 
 .admin-users-page {
@@ -2695,7 +2701,8 @@
   }
 }
 
-/* ==================================================   ADMIN CUSTOMERS — PROFESSIONAL MANAGEMENT UI
+/* =========================================================
+   ADMIN CUSTOMERS — PROFESSIONAL MANAGEMENT UI
    ========================================================= */
 
 .admin-customers-page {
@@ -3157,7 +3164,8 @@
   }
 }
 
-/* ==================================================   ADMIN PRODUCTS — PROFESSIONAL MANAGEMENT UI
+/* =========================================================
+   ADMIN PRODUCTS — PROFESSIONAL MANAGEMENT UI
    ========================================================= */
 
 .admin-products-page {
@@ -3647,7 +3655,8 @@
   }
 }
 
-/* ==================================================   ADMIN INVOICES — PROFESSIONAL BILLING UI
+/* =========================================================
+   ADMIN INVOICES — PROFESSIONAL BILLING UI
    ========================================================= */
 
 .admin-invoices-page {
@@ -4120,7 +4129,8 @@
   }
 }
 
-/* ==================================================   ADMIN PAYMENTS — PROFESSIONAL TRANSACTION UI
+/* =========================================================
+   ADMIN PAYMENTS — PROFESSIONAL TRANSACTION UI
    ========================================================= */
 
 .admin-payments-page {
@@ -4609,7 +4619,8 @@
   }
 }
 
-/* ==================================================   ADMIN RETURNS & REFUNDS — PROFESSIONAL OPERATIONS UI
+/* =========================================================
+   ADMIN RETURNS & REFUNDS — PROFESSIONAL OPERATIONS UI
    ========================================================= */
 
 .admin-returns-page {
@@ -5097,7 +5108,8 @@
   }
 }
 
-/* ==================================================   ADMIN WARRANTY — PROFESSIONAL WARRANTY OPERATIONS UI
+/* =========================================================
+   ADMIN WARRANTY — PROFESSIONAL WARRANTY OPERATIONS UI
    ========================================================= */
 
 .admin-warranty-page {
@@ -5570,7 +5582,8 @@
   }
 }
 
-/* ==================================================   ADMIN AUDIT LOGS — PROFESSIONAL ACTIVITY UI
+/* =========================================================
+   ADMIN AUDIT LOGS — PROFESSIONAL ACTIVITY UI
    ========================================================= */
 
 .audit-logs-page {
@@ -6001,7 +6014,8 @@
   }
 }
 
-/* ==================================================   ADMIN REPORTS — EXECUTIVE ANALYTICS UI
+/* =========================================================
+   ADMIN REPORTS — EXECUTIVE ANALYTICS UI
    ========================================================= */
 
 .admin-reports-page {
@@ -6030,7 +6044,8 @@
   line-height: 1.6;
 }
 
-/* ==================================================   KPI AREA
+/* =========================================================
+   KPI AREA
    ========================================================= */
 
 .reports-kpi-grid {
@@ -6093,7 +6108,8 @@
   letter-spacing: -0.25px;
 }
 
-/* ==================================================   ANALYTICS GRID
+/* =========================================================
+   ANALYTICS GRID
    ========================================================= */
 
 .reports-grid {
@@ -6140,7 +6156,8 @@
   font-weight: 700;
 }
 
-/* ==================================================   CHART CONTAINERS
+/* =========================================================
+   CHART CONTAINERS
    ========================================================= */
 
 .reports-sales-panel .recharts-responsive-container {
@@ -6170,7 +6187,8 @@
   box-shadow: 0 7px 20px rgba(20, 35, 55, 0.08);
 }
 
-/* ==================================================   PAYMENT PANEL
+/* =========================================================
+   PAYMENT PANEL
    ========================================================= */
 
 .reports-payment-panel .panel-header {
@@ -6183,7 +6201,8 @@
   font-weight: 650;
 }
 
-/* ==================================================   RETAILER PERFORMANCE
+/* =========================================================
+   RETAILER PERFORMANCE
    ========================================================= */
 
 .reports-retailer-panel {
@@ -6253,7 +6272,8 @@
   white-space: nowrap;
 }
 
-/* ==================================================   EMPTY / ERROR STATES
+/* =========================================================
+   EMPTY / ERROR STATES
    ========================================================= */
 
 .admin-reports-page .empty-state {
@@ -6271,14 +6291,16 @@
   color: #c34c4c;
 }
 
-/* ==================================================   LOADING / ERROR HEADER
+/* =========================================================
+   LOADING / ERROR HEADER
    ========================================================= */
 
 .admin-reports-page > .reports-header p.negative {
   font-weight: 600;
 }
 
-/* ==================================================   RESPONSIVE
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1200px) {
@@ -6334,7 +6356,8 @@
   }
 }
 
-/* ==================================================   DIGIBILLS — ADMIN DESIGN SYSTEM
+/* =========================================================
+   DIGIBILLS — ADMIN DESIGN SYSTEM
    Unified visual layer
    ========================================================= */
 
@@ -6729,7 +6752,8 @@
 }
 
 
-/* ==================================================   DIGIBILLS — ADMIN INTERACTION & CONTROL SYSTEM
+/* =========================================================
+   DIGIBILLS — ADMIN INTERACTION & CONTROL SYSTEM
    Fixes browser-default buttons, inputs, selects, modals,
    detail grids and action controls.
    ========================================================= */
@@ -7243,7 +7267,8 @@
 }
 
 
-/* ==================================================   DigiBills — Users Page Professional UI
+/* =========================================================
+   DigiBills — Users Page Professional UI
    ========================================================= */
 
 .users-page .user-details-modal {
@@ -7543,7 +7568,8 @@
 }
 
 
-/* ==================================================   DigiBills — Retailers Page Professional UI
+/* =========================================================
+   DigiBills — Retailers Page Professional UI
    ========================================================= */
 
 .retailers-page {
@@ -8093,7 +8119,8 @@
 }
 
 
-/* ==================================================   DigiBills — Customers Page Professional UI
+/* =========================================================
+   DigiBills — Customers Page Professional UI
    ========================================================= */
 
 .admin-customers-page {
@@ -8471,7 +8498,8 @@
 }
 
 
-/* ==================================================   DIGIBILLS — PROFESSIONAL PRODUCTS PAGE
+/* =========================================================
+   DIGIBILLS — PROFESSIONAL PRODUCTS PAGE
    ========================================================= */
 
 .admin-products-page .admin-products-header {
@@ -8883,7 +8911,8 @@
 }
 
 
-/* ==================================================   DIGIBILLS — PROFESSIONAL INVOICES PAGE
+/* =========================================================
+   DIGIBILLS — PROFESSIONAL INVOICES PAGE
    ========================================================= */
 
 .admin-invoices-page .admin-invoices-header {
@@ -9324,7 +9353,8 @@
 }
 
 
-/* ==================================================   DIGIBILLS — PROFESSIONAL PAYMENTS PAGE
+/* =========================================================
+   DIGIBILLS — PROFESSIONAL PAYMENTS PAGE
    ========================================================= */
 
 .admin-payments-page .admin-payments-header {
@@ -9779,7 +9809,8 @@
 }
 
 
-/* ==================================================   DigiBills — Returns & Refunds UI
+/* =========================================================
+   DigiBills — Returns & Refunds UI
    ========================================================= */
 
 .admin-returns-page {
@@ -10250,7 +10281,8 @@
 }
 
 
-/* ==================================================   DigiBills — Warranty Page
+/* =========================================================
+   DigiBills — Warranty Page
    ========================================================= */
 
 .admin-warranty-page {
@@ -10703,7 +10735,8 @@ strong {
 }
 
 
-/* ==================================================   DigiBills — Reports & Analytics
+/* =========================================================
+   DigiBills — Reports & Analytics
    ========================================================= */
 
 .admin-reports-page {
@@ -10979,7 +11012,8 @@ strong {
 }
 
 
-/* ==================================================   DigiBills — Audit Logs
+/* =========================================================
+   DigiBills — Audit Logs
    ========================================================= */
 
 .audit-logs-page {
@@ -11400,7 +11434,8 @@ strong {
 }
 
 
-/* ==================================================   DigiBills — System Settings
+/* =========================================================
+   DigiBills — System Settings
    ========================================================= */
 
 .settings-page {
@@ -12188,7 +12223,8 @@ strong {
 
 
 
-/* ==================================================   INVOICE - REGISTER NEW CUSTOMER
+/* =========================================================
+   INVOICE - REGISTER NEW CUSTOMER
    ========================================================= */
 
 .admin-invoices-page .register-customer-section {
@@ -12325,7 +12361,8 @@ strong {
 }
 
 
-/* ==================================================   REGISTER NEW CUSTOMER MODAL
+/* =========================================================
+   REGISTER NEW CUSTOMER MODAL
    ========================================================= */
 
 .admin-invoices-page .customer-registration-modal-backdrop {
@@ -12545,7 +12582,8 @@ strong {
   }
 }
 
-/* ==================================================   RETAILER PURCHASES
+/* =========================================================
+   RETAILER PURCHASES
    ========================================================= */
 
 .retailer-purchases-page {
@@ -12886,7 +12924,8 @@ strong {
 }
 
 
-/* ==================================================   PURCHASE ORDER MODAL — FINAL LAYOUT FIX
+/* =========================================================
+   PURCHASE ORDER MODAL — FINAL LAYOUT FIX
    ========================================================= */
 
 .retailer-purchases-page .modal-backdrop {
@@ -12958,7 +12997,8 @@ strong {
   color: #59687c;
 }
 
-/* ==================================================   TOP FORM AREA
+/* =========================================================
+   TOP FORM AREA
    ========================================================= */
 
 .retailer-purchases-page .purchase-order-modal form,
@@ -13049,7 +13089,8 @@ strong {
   color: #a1aab7;
 }
 
-/* ==================================================   FORCE TOP FIELDS INTO 2 CLEAN COLUMNS
+/* =========================================================
+   FORCE TOP FIELDS INTO 2 CLEAN COLUMNS
    ========================================================= */
 
 .retailer-purchases-page .purchase-order-modal .form-grid,
@@ -13077,7 +13118,8 @@ strong {
   min-width: 0;
 }
 
-/* ==================================================   PRODUCTS SECTION
+/* =========================================================
+   PRODUCTS SECTION
    ========================================================= */
 
 .retailer-purchases-page .roles-section,
@@ -13171,7 +13213,8 @@ strong {
   font-weight: 650;
 }
 
-/* ==================================================   FOOTER
+/* =========================================================
+   FOOTER
    ========================================================= */
 
 .retailer-purchases-page .modal-footer {
@@ -13194,7 +13237,8 @@ strong {
   font-weight: 650;
 }
 
-/* ==================================================   MOBILE
+/* =========================================================
+   MOBILE
    ========================================================= */
 
 @media (max-width: 700px) {
@@ -13547,7 +13591,8 @@ strong {
   }
 }
 
-/* ==================================================   RETAILER SUPPLIER MODAL — FORM FIX
+/* =========================================================
+   RETAILER SUPPLIER MODAL — FORM FIX
    ========================================================= */
 
 .admin-suppliers-page .user-details-modal {
@@ -13649,7 +13694,8 @@ strong {
   }
 }
 
-/* ==================================================   SETTINGS MENU BUTTONS
+/* =========================================================
+   SETTINGS MENU BUTTONS
    ========================================================= */
 
 .settings-menu-item {
@@ -13666,7 +13712,8 @@ strong {
   outline-offset: -2px;
 }
 
-/* ==================================================   SETTINGS — CHANGE PASSWORD
+/* =========================================================
+   SETTINGS — CHANGE PASSWORD
    ========================================================= */
 
 .settings-password-section {
@@ -13689,7 +13736,8 @@ strong {
   margin-top: 20px;
 }
 
-/* ==================================================   RETAILER PURCHASE MODAL — FIT ITEMS TABLE
+/* =========================================================
+   RETAILER PURCHASE MODAL — FIT ITEMS TABLE
    ========================================================= */
 
 .retailer-purchases-page .user-details-modal .payments-table-wrap {
@@ -13752,7 +13800,8 @@ strong {
 
 
 
-/* ==================================================   RETAILER WARRANTY PAGE
+/* =========================================================
+   RETAILER WARRANTY PAGE
    ========================================================= */
 
 .retailer-warranty-page {
@@ -14195,7 +14244,8 @@ strong {
   }
 }
 
-/* ==================================================   RETAILER REPORTS
+/* =========================================================
+   RETAILER REPORTS
    ========================================================= */
 
 .retailer-reports-page {
@@ -14445,7 +14495,8 @@ strong {
 }
 
 
-/* ==================================================   CUSTOMER PROFILE
+/* =========================================================
+   CUSTOMER PROFILE
    ========================================================= */
 
 .customer-profile-page {
@@ -14606,7 +14657,8 @@ strong {
   }
 }
 
-/* ==================================================   CUSTOMER PAYMENTS — PAYMENT DETAILS MODAL
+/* =========================================================
+   CUSTOMER PAYMENTS — PAYMENT DETAILS MODAL
    ========================================================= */
 
 .customer-payment-modal-backdrop {
@@ -14742,7 +14794,8 @@ strong {
 }
 
 
-/* ==================================================   CUSTOMER PRODUCTS
+/* =========================================================
+   CUSTOMER PRODUCTS
    ========================================================= */
 
 .customer-products-heading {
@@ -14776,7 +14829,8 @@ strong {
   margin-top: 18px;
 }
 
-/* ==================================================   PRODUCT STATUS
+/* =========================================================
+   PRODUCT STATUS
    ========================================================= */
 
 .customer-product-status {
@@ -14810,7 +14864,8 @@ strong {
   color: #92400e;
 }
 
-/* ==================================================   PRODUCT DETAILS MODAL
+/* =========================================================
+   PRODUCT DETAILS MODAL
    ========================================================= */
 
 .customer-product-modal-backdrop {
@@ -14883,7 +14938,8 @@ strong {
   grid-column: 1 / -1;
 }
 
-/* ==================================================   RESPONSIVE
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 700px) {
@@ -15183,7 +15239,8 @@ strong {
 }
 
 
-/* ==================================================   CUSTOMER SUPPORT MODALS
+/* =========================================================
+   CUSTOMER SUPPORT MODALS
    ========================================================= */
 
 .customer-support-modal-backdrop {
@@ -15385,7 +15442,8 @@ strong {
 }
 
 
-/* ==================================================   CUSTOMER SETTINGS
+/* =========================================================
+   CUSTOMER SETTINGS
    ========================================================= */
 
 .customer-settings-page {
@@ -15765,7 +15823,8 @@ strong {
   }
 }
 
-/* ==================================================   DIGIBILLS — GLOBAL POLISHED EXPERIENCE
+/* =========================================================
+   DIGIBILLS — GLOBAL POLISHED EXPERIENCE
    Phase 1: Shared application visual system
    ========================================================= */
 
@@ -16238,7 +16297,8 @@ button {
   }
 }
 
-/* ==================================================   CUSTOMER DASHBOARD — POLISHED DESIGN PASS
+/* =========================================================
+   CUSTOMER DASHBOARD — POLISHED DESIGN PASS
    ========================================================= */
 
 .customer-dashboard-page {
@@ -16486,7 +16546,8 @@ button {
   font-size: 13px;
 }
 
-/* ==================================================   ACCOUNT SUMMARY
+/* =========================================================
+   ACCOUNT SUMMARY
    ========================================================= */
 
 .customer-dashboard-page .customer-dashboard-summary {
@@ -16635,7 +16696,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER PAGES — SECOND POLISH PASS
+/* =========================================================
+   CUSTOMER PAGES — SECOND POLISH PASS
    Subscription / Support / Settings
    ========================================================= */
 
@@ -16712,7 +16774,8 @@ button {
   color: #18794e;
 }
 
-/* ==================================================   SUBSCRIPTION
+/* =========================================================
+   SUBSCRIPTION
    ========================================================= */
 
 .customer-subscription-page .customer-current-subscription {
@@ -16916,7 +16979,8 @@ button {
   min-height: 44px;
 }
 
-/* ==================================================   SUPPORT
+/* =========================================================
+   SUPPORT
    ========================================================= */
 
 .customer-support-page .stats-grid.three {
@@ -17120,7 +17184,8 @@ button {
   margin-top: 20px;
 }
 
-/* ==================================================   SETTINGS
+/* =========================================================
+   SETTINGS
    ========================================================= */
 
 .customer-settings-page .customer-settings-grid {
@@ -17276,7 +17341,8 @@ button {
 }
 
 
-/* ==================================================   DIGIBILLS — CUSTOMER OPERATIONAL PAGES
+/* =========================================================
+   DIGIBILLS — CUSTOMER OPERATIONAL PAGES
    Unified visual system
    Profile / Invoices / Payments / Warranty / Transfers
    ========================================================= */
@@ -17470,7 +17536,8 @@ button {
   color: #c24141;
 }
 
-/* ==================================================   CUSTOMER PROFILE
+/* =========================================================
+   CUSTOMER PROFILE
    ========================================================= */
 
 .customer-profile-layout {
@@ -17548,7 +17615,8 @@ button {
   background: var(--db-surface-soft);
 }
 
-/* ==================================================   CUSTOMER INVOICES
+/* =========================================================
+   CUSTOMER INVOICES
    ========================================================= */
 
 .customer-dashboard-page .customer-invoices-panel,
@@ -17574,7 +17642,8 @@ button {
   box-shadow: var(--db-shadow-sm);
 }
 
-/* ==================================================   CUSTOMER MODALS
+/* =========================================================
+   CUSTOMER MODALS
    ========================================================= */
 
 .customer-payment-modal-backdrop,
@@ -17660,7 +17729,8 @@ button {
   border-top: 1px solid var(--db-border);
 }
 
-/* ==================================================   CUSTOMER RESPONSIVE
+/* =========================================================
+   CUSTOMER RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1000px) {
@@ -17724,7 +17794,8 @@ button {
 }
 
 
-/* ==================================================   DIGIBILLS — RETAILER CORE OPERATIONS UI
+/* =========================================================
+   DIGIBILLS — RETAILER CORE OPERATIONS UI
    Dashboard + Inventory + Customers
    UI ONLY — no business logic changes
    ========================================================= */
@@ -18745,7 +18816,8 @@ button {
   }
 }
 
-/* ==================================================   DIGIBILLS — RETAILER OPERATIONS
+/* =========================================================
+   DIGIBILLS — RETAILER OPERATIONS
    Payments + Returns + Warranty + Settings
    UI ONLY
    ========================================================= */
@@ -19550,7 +19622,8 @@ button {
   }
 }
 
-/* ==================================================   DIGIBILLS — FINAL RETAILER PAGES
+/* =========================================================
+   DIGIBILLS — FINAL RETAILER PAGES
    Purchases + Suppliers + Reports
    UI ONLY
    ========================================================= */
@@ -20032,7 +20105,8 @@ button {
   }
 }
 
-/* ==================================================   DIGIBILLS — ADMIN CORE UI
+/* =========================================================
+   DIGIBILLS — ADMIN CORE UI
    Invoices + Customers + Retailers + Payments + Returns
    + Settings
    UI ONLY
@@ -20996,7 +21070,8 @@ button {
   }
 }
 
-/* ==================================================   DIGIBILLS — ADMIN DASHBOARD FINAL POLISH
+/* =========================================================
+   DIGIBILLS — ADMIN DASHBOARD FINAL POLISH
    UI ONLY — no business logic changes
    ========================================================= */
 
@@ -21794,7 +21869,8 @@ button {
   }
 }
 
-/* ==================================================   FIX — ADMIN RETAILERS SEARCH TOOLBAR
+/* =========================================================
+   FIX — ADMIN RETAILERS SEARCH TOOLBAR
    ========================================================= */
 
 .retailers-toolbar {
@@ -21878,12 +21954,14 @@ button {
   }
 }
 
-/* ==================================================   DIGIBILLS — FINAL REMAINING PAGES POLISH
+/* =========================================================
+   DIGIBILLS — FINAL REMAINING PAGES POLISH
    Admin Audit / Products / Reports / Users / Warranty
    Customer Products / Settings / Subscription / Support
    ========================================================= */
 
-/* ==================================================   ADMIN AUDIT LOGS
+/* =========================================================
+   ADMIN AUDIT LOGS
    ========================================================= */
 
 .audit-logs-page,
@@ -22070,7 +22148,8 @@ button {
 }
 
 
-/* ==================================================   ADMIN PRODUCTS
+/* =========================================================
+   ADMIN PRODUCTS
    ========================================================= */
 
 .product-stats-grid {
@@ -22217,7 +22296,8 @@ button {
 }
 
 
-/* ==================================================   ADMIN USERS
+/* =========================================================
+   ADMIN USERS
    ========================================================= */
 
 .retailer-filters {
@@ -22325,7 +22405,8 @@ button {
 }
 
 
-/* ==================================================   ADMIN REPORTS
+/* =========================================================
+   ADMIN REPORTS
    ========================================================= */
 
 .admin-reports-page .reports-header {
@@ -22402,7 +22483,8 @@ button {
 }
 
 
-/* ==================================================   ADMIN WARRANTY
+/* =========================================================
+   ADMIN WARRANTY
    ========================================================= */
 
 .warranty-toolbar {
@@ -22425,7 +22507,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER PRODUCTS
+/* =========================================================
+   CUSTOMER PRODUCTS
    ========================================================= */
 
 .customer-product-stats {
@@ -22465,7 +22548,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER SETTINGS
+/* =========================================================
+   CUSTOMER SETTINGS
    ========================================================= */
 
 .customer-settings-grid {
@@ -22512,7 +22596,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER SUBSCRIPTION
+/* =========================================================
+   CUSTOMER SUBSCRIPTION
    ========================================================= */
 
 .customer-subscription-page .settings-status {
@@ -22632,7 +22717,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER SUPPORT
+/* =========================================================
+   CUSTOMER SUPPORT
    ========================================================= */
 
 .customer-support-error {
@@ -22690,7 +22776,8 @@ button {
 }
 
 
-/* ==================================================   SHARED MODAL POLISH FOR THESE PAGES
+/* =========================================================
+   SHARED MODAL POLISH FOR THESE PAGES
    ========================================================= */
 
 .audit-details-modal,
@@ -22735,7 +22822,8 @@ button {
 }
 
 
-/* ==================================================   RESPONSIVE
+/* =========================================================
+   RESPONSIVE
    ========================================================= */
 
 @media (max-width: 1100px) {
@@ -22851,7 +22939,8 @@ button {
   }
 }
 
-/* ==================================================   ACCOUNT TYPE / AUTH FLOW
+/* =========================================================
+   ACCOUNT TYPE / AUTH FLOW
    ========================================================= */
 
 .account-type-page {
@@ -23118,7 +23207,8 @@ button {
   }
 }
 
-/* ==================================================   RETAILER EMPLOYEES
+/* =========================================================
+   RETAILER EMPLOYEES
    ========================================================= */
 
 .retailer-employees-header {
@@ -23620,7 +23710,8 @@ button {
   }
 }
 
-/* ==================================================   CUSTOMER APP — DASHBOARD REDESIGN
+/* =========================================================
+   CUSTOMER APP — DASHBOARD REDESIGN
    ========================================================= */
 
 .customer-dashboard-page {
@@ -24449,7 +24540,8 @@ button {
   }
 }
 
-/* ==================================================   CUSTOMER APP — MOBILE NAVIGATION DRAWER
+/* =========================================================
+   CUSTOMER APP — MOBILE NAVIGATION DRAWER
    ========================================================= */
 
 .mobile-menu-button,
@@ -24706,7 +24798,8 @@ button {
   }
 }
 
-/* ==================================================   CUSTOMER APP — PROFILE SCREEN
+/* =========================================================
+   CUSTOMER APP — PROFILE SCREEN
    Matches finalized Customer UI reference
    ========================================================= */
 
@@ -25047,7 +25140,8 @@ button {
   }
 }
 
-/* ==================================================   CUSTOMER SCREEN 3 — FINALIZED DASHBOARD REFERENCE
+/* =========================================================
+   CUSTOMER SCREEN 3 — FINALIZED DASHBOARD REFERENCE
    ========================================================= */
 
 .customer-dashboard-reference {
@@ -25669,7 +25763,8 @@ button {
 }
 
 
-/* ==================================================   CUSTOMER MOBILE — PERMANENT BOTTOM NAV
+/* =========================================================
+   CUSTOMER MOBILE — PERMANENT BOTTOM NAV
    Keep all 5 items on ONE row
    ========================================================= */
 
@@ -25774,1982 +25869,5 @@ button {
   .customer-permanent-bottom-nav button svg {
     width: 18px;
     height: 18px;
-  }
-}
-
-/* ---------- Admin Branding Preview ---------- */
-
-.admin-settings-page .brand-preview {
-  width: min(100%, 420px);
-  min-height: 250px;
-  margin-top: 8px;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  box-sizing: border-box;
-  border: 1px solid var(--db-border-light);
-  border-radius: 18px;
-  overflow: hidden;
-  text-align: center;
-  box-shadow: var(--db-shadow-sm);
-}
-
-.admin-settings-page .brand-preview-logo {
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 16px;
-  color: #fff;
-  font-size: 22px;
-  font-weight: 800;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.admin-settings-page .brand-preview-logo img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;
-  background: #fff;
-}
-
-.admin-settings-page .brand-preview-content {
-  width: 100%;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-}
-
-.admin-settings-page .brand-preview-content strong {
-  max-width: 100%;
-  color: var(--db-navy);
-  font-size: 19px;
-  line-height: 1.25;
-  font-weight: 800;
-  overflow-wrap: anywhere;
-}
-
-.admin-settings-page .brand-preview-content span {
-  max-width: 320px;
-  color: var(--db-text-secondary);
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-
-.admin-settings-page .brand-preview button {
-  width: min(100%, 220px);
-  min-height: 42px;
-  margin-top: 4px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 9px;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: default;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-@media (max-width: 600px) {
-  .admin-settings-page .brand-preview {
-    width: 100%;
-    min-height: 230px;
-    padding: 22px 16px;
-  }
-
-  .admin-settings-page .brand-preview-content strong {
-    font-size: 17px;
-  }
-}
-
-/* ==================================================   CUSTOMER LOGIN — FINAL CUSTOMER APP
-   ========================================================= */
-
-.customer-login-page {
-  min-height: 100vh;
-  padding: 34px;
-  background:
-    radial-gradient(circle at 12% 20%, rgba(115, 82, 214, 0.14), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(115, 82, 214, 0.08), transparent 32%),
-    #f6f8fc;
-}
-
-.customer-login-shell {
-  width: min(1120px, 100%);
-  min-height: 650px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: 0.92fr 1.08fr;
-  overflow: hidden;
-  border-radius: 30px;
-  background: #ffffff;
-  box-shadow: 0 28px 80px rgba(31, 42, 68, 0.14);
-}
-
-.customer-login-visual {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(145deg, #7652e8 0%, #603bd7 52%, #4e2dc2 100%);
-  color: #ffffff;
-}
-
-.customer-login-glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.customer-login-glow-one {
-  width: 390px;
-  height: 390px;
-  top: -150px;
-  right: -130px;
-  background: rgba(255, 255, 255, 0.09);
-}
-
-.customer-login-glow-two {
-  width: 520px;
-  height: 520px;
-  left: -270px;
-  bottom: -290px;
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.customer-login-visual-content {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  padding: 58px 48px;
-  display: flex;
-  flex-direction: column;
-}
-
-.customer-login-visual-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.customer-login-visual-logo-mark {
-  width: 39px;
-  height: 39px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  font-size: 21px;
-}
-
-.customer-login-visual-content h2 {
-  margin: 80px 0 14px;
-  font-size: 43px;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
-}
-
-.customer-login-visual-content p {
-  max-width: 390px;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.customer-login-illustration {
-  position: relative;
-  flex: 1;
-  min-height: 250px;
-  margin-top: 28px;
-}
-
-.customer-login-illustration-card {
-  position: absolute;
-  left: 18px;
-  bottom: 20px;
-  width: 225px;
-  height: 155px;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 22px 45px rgba(37, 17, 102, 0.24);
-  color: #18235a;
-  transform: rotate(-5deg);
-}
-
-.customer-login-illustration-card-top {
-  display: flex;
-  gap: 5px;
-}
-
-.customer-login-illustration-card-top span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d9d2fa;
-}
-
-.customer-login-illustration-lines {
-  margin-top: 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.customer-login-illustration-lines i {
-  display: block;
-  width: 75%;
-  height: 7px;
-  border-radius: 5px;
-  background: #ebe8fa;
-}
-
-.customer-login-illustration-lines i:nth-child(2) {
-  width: 58%;
-}
-
-.customer-login-illustration-lines i:nth-child(3) {
-  width: 68%;
-}
-
-.customer-login-illustration-lines i:nth-child(4) {
-  width: 42%;
-}
-
-.customer-login-illustration-total {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.customer-login-illustration-total small {
-  color: #8992ad;
-  font-size: 9px;
-}
-
-.customer-login-illustration-total strong {
-  margin-top: 3px;
-  color: #6344d7;
-  font-size: 17px;
-}
-
-.customer-login-illustration-phone {
-  position: absolute;
-  right: 45px;
-  bottom: 2px;
-  width: 145px;
-  height: 245px;
-  padding: 35px 14px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 5px solid rgba(255, 255, 255, 0.9);
-  border-radius: 27px;
-  background: #ffffff;
-  color: #18235a;
-  box-shadow: 0 24px 48px rgba(37, 17, 102, 0.28);
-  transform: rotate(4deg);
-}
-
-.customer-login-phone-notch {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  width: 52px;
-  height: 10px;
-  transform: translateX(-50%);
-  border-radius: 10px;
-  background: #1b2351;
-}
-
-.customer-login-phone-logo {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  background: #eee9ff;
-  color: #6845df;
-  font-size: 26px;
-}
-
-.customer-login-illustration-phone strong {
-  margin-top: 10px;
-  font-size: 15px;
-}
-
-.customer-login-illustration-phone > span {
-  margin-top: 5px;
-  color: #8a92a8;
-  font-size: 8px;
-  text-align: center;
-}
-
-.customer-login-card {
-  width: auto;
-  max-width: none;
-  margin: 0;
-  padding: 54px 70px 48px;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.customer-login-card .login-back-button {
-  align-self: flex-start;
-  margin-bottom: 30px;
-}
-
-.customer-login-card .brand.large {
-  color: #17234f;
-  font-size: 28px;
-}
-
-.customer-login-card .brand-mark {
-  width: 42px;
-  height: 42px;
-  display: inline-grid;
-  place-items: center;
-  border-radius: 12px;
-  background: #f0ecff;
-  color: #6745d8;
-}
-
-.customer-login-card .account-login-heading {
-  margin: 42px 0 28px;
-}
-
-.customer-login-card .account-login-heading h1 {
-  font-size: 32px;
-}
-
-.customer-login-field {
-  display: block;
-  margin-bottom: 18px;
-  color: #293451;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.customer-login-input-wrap {
-  position: relative;
-  height: 52px;
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 0 15px;
-  border: 1px solid #dce2ee;
-  border-radius: 11px;
-  background: #ffffff;
-  color: #78839a;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.customer-login-input-wrap:focus-within {
-  border-color: #7352d6;
-  box-shadow: 0 0 0 3px rgba(115, 82, 214, 0.11);
-}
-
-.customer-login-input-wrap input {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #172033;
-  font-size: 13px;
-}
-
-.customer-login-input-wrap input::placeholder {
-  color: #a3adbd;
-}
-
-.customer-login-lock-icon {
-  width: 18px;
-  color: #78839a;
-  font-size: 17px;
-  text-align: center;
-}
-
-.customer-login-password-toggle {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #78839a;
-  cursor: pointer;
-}
-
-.customer-login-password-toggle:hover {
-  color: #6242c2;
-}
-
-.customer-login-options {
-  margin: 3px 0 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.customer-login-remember {
-  position: relative;
-  display: inline-flex !important;
-  align-items: center;
-  gap: 8px;
-  margin: 0 !important;
-  color: #68738a !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  cursor: pointer;
-}
-
-.customer-login-remember input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.customer-login-checkmark {
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #d6dceb;
-  border-radius: 5px;
-  color: #ffffff;
-  background: #ffffff;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.customer-login-remember input:checked + .customer-login-checkmark {
-  border-color: #7352d6;
-  background: #7352d6;
-}
-
-.customer-login-forgot {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #6344d7;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.customer-login-forgot:hover {
-  text-decoration: underline;
-}
-
-.customer-login-submit {
-  width: 100%;
-  height: 52px;
-  margin-top: 2px;
-  border-radius: 11px;
-  font-size: 14px;
-  font-weight: 750;
-  box-shadow: 0 10px 22px rgba(115, 82, 214, 0.2);
-}
-
-.customer-login-register {
-  margin-top: 21px;
-  color: #69748a;
-  font-size: 12px;
-}
-
-.customer-login-register a {
-  color: #6242d4;
-}
-
-@media (max-width: 900px) {
-  .customer-login-page {
-    padding: 18px;
-  }
-
-  .customer-login-shell {
-    grid-template-columns: 1fr;
-    max-width: 560px;
-    min-height: auto;
-  }
-
-  .customer-login-visual {
-    display: none;
-  }
-
-  .customer-login-card {
-    min-height: 680px;
-    padding: 38px 38px 34px;
-    border-radius: 30px;
-  }
-}
-
-@media (max-width: 520px) {
-  .customer-login-page {
-    padding: 0;
-    background: #ffffff;
-  }
-
-  .customer-login-shell {
-    min-height: 100vh;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .customer-login-card {
-    min-height: 100vh;
-    padding: 28px 22px 30px;
-    justify-content: flex-start;
-  }
-
-  .customer-login-card .login-back-button {
-    margin-bottom: 25px;
-  }
-
-  .customer-login-card .brand.large {
-    font-size: 25px;
-  }
-
-  .customer-login-card .account-login-heading {
-    margin: 40px 0 27px;
-  }
-
-  .customer-login-card .account-login-heading h1 {
-    font-size: 27px;
-  }
-
-  .customer-login-options {
-    gap: 8px;
-  }
-}
-
-
-/* Customer Login checkbox alignment fix */
-.customer-login-card .customer-login-remember {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  width: auto !important;
-  min-height: 20px;
-}
-
-.customer-login-card .customer-login-remember > span {
-  display: inline-flex;
-  align-items: center;
-}
-
-.customer-login-card .customer-login-checkmark {
-  flex: 0 0 18px;
-}
-
-.customer-login-lock-icon {
-  flex: 0 0 18px;
-  color: #78839a;
-}
-
-
-/* ==================================================   CUSTOMER REGISTRATION — FINAL CUSTOMER APP
-   ========================================================= */
-
-.customer-registration-page {
-  min-height: 100vh;
-  padding: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at 10% 20%, rgba(115, 82, 214, 0.13), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(115, 82, 214, 0.08), transparent 32%),
-    #f6f8fc;
-}
-
-.customer-registration-shell {
-  width: min(1120px, 100%);
-  min-height: 700px;
-  display: grid;
-  grid-template-columns: 0.88fr 1.12fr;
-  overflow: hidden;
-  border-radius: 30px;
-  background: #ffffff;
-  box-shadow: 0 28px 80px rgba(31, 42, 68, 0.14);
-}
-
-.customer-registration-visual {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(145deg, #7652e8 0%, #603bd7 52%, #4e2dc2 100%);
-  color: #ffffff;
-}
-
-.customer-registration-glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.customer-registration-glow-one {
-  width: 420px;
-  height: 420px;
-  top: -150px;
-  right: -180px;
-  background: rgba(255, 255, 255, 0.09);
-}
-
-.customer-registration-glow-two {
-  width: 520px;
-  height: 520px;
-  left: -300px;
-  bottom: -280px;
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.customer-registration-visual-content {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  padding: 54px 46px;
-  display: flex;
-  flex-direction: column;
-}
-
-.customer-registration-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.customer-registration-brand-mark {
-  width: 39px;
-  height: 39px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  font-size: 21px;
-}
-
-.customer-registration-message {
-  margin-top: 92px;
-}
-
-.customer-registration-message h2 {
-  margin: 0 0 16px;
-  font-size: 42px;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
-}
-
-.customer-registration-message p {
-  max-width: 390px;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.84);
-  font-size: 15px;
-  line-height: 1.7;
-}
-
-.customer-registration-card-art {
-  position: relative;
-  flex: 1;
-  min-height: 265px;
-  margin-top: 30px;
-}
-
-.customer-registration-paper {
-  position: absolute;
-  left: 10px;
-  bottom: 26px;
-  width: 225px;
-  height: 150px;
-  padding: 17px;
-  border-radius: 17px;
-  background: rgba(255, 255, 255, 0.94);
-  color: #18235a;
-  box-shadow: 0 22px 45px rgba(37, 17, 102, 0.25);
-  transform: rotate(-5deg);
-}
-
-.customer-registration-paper-dot-row {
-  display: flex;
-  gap: 5px;
-}
-
-.customer-registration-paper-dot-row i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #d9d2fa;
-}
-
-.customer-registration-paper-title {
-  margin-top: 17px;
-  color: #7050d8;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.customer-registration-paper-line {
-  width: 55%;
-  height: 6px;
-  margin-top: 9px;
-  border-radius: 5px;
-  background: #ebe8fa;
-}
-
-.customer-registration-paper-line.long {
-  width: 78%;
-}
-
-.customer-registration-paper-line.medium {
-  width: 67%;
-}
-
-.customer-registration-paper-total {
-  position: absolute;
-  right: 16px;
-  bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.customer-registration-paper-total small {
-  color: #8992ad;
-  font-size: 9px;
-}
-
-.customer-registration-paper-total strong {
-  color: #6344d7;
-  font-size: 17px;
-}
-
-.customer-registration-phone-art {
-  position: absolute;
-  right: 38px;
-  bottom: 5px;
-  width: 145px;
-  height: 245px;
-  padding: 34px 14px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 5px solid rgba(255, 255, 255, 0.92);
-  border-radius: 27px;
-  background: #ffffff;
-  color: #18235a;
-  box-shadow: 0 24px 48px rgba(37, 17, 102, 0.28);
-  transform: rotate(4deg);
-}
-
-.customer-registration-phone-notch {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  width: 52px;
-  height: 10px;
-  transform: translateX(-50%);
-  border-radius: 10px;
-  background: #1b2351;
-}
-
-.customer-registration-phone-logo {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  background: #eee9ff;
-  color: #6845df;
-  font-size: 26px;
-}
-
-.customer-registration-phone-art strong {
-  margin-top: 10px;
-  font-size: 15px;
-}
-
-.customer-registration-phone-art > span {
-  margin-top: 5px;
-  color: #8a92a8;
-  font-size: 8px;
-  text-align: center;
-}
-
-.customer-registration-phone-check {
-  width: 34px;
-  height: 34px;
-  margin-top: 18px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #eee9ff;
-  color: #6845df;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.customer-registration-card {
-  padding: 42px 66px 38px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.customer-registration-back {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 22px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #8792a1;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.customer-registration-back:hover {
-  color: #172033;
-}
-
-.customer-registration-top-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #17234f;
-  font-size: 27px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-}
-
-.customer-registration-top-brand span {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border: 2px solid #7352d6;
-  border-radius: 12px;
-  background: #f5f1ff;
-  color: #6745d8;
-  font-size: 20px;
-}
-
-.customer-registration-heading {
-  margin: 31px 0 25px;
-}
-
-.customer-registration-heading h1 {
-  margin: 0 0 8px;
-  color: #172033;
-  font-size: 31px;
-  line-height: 1.15;
-  letter-spacing: -0.035em;
-}
-
-.customer-registration-heading p {
-  margin: 0;
-  color: #718097;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.customer-registration-field {
-  display: block;
-  margin-bottom: 13px;
-  color: #293451;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.customer-registration-field > span:first-child {
-  display: block;
-  margin-bottom: 7px;
-}
-
-.customer-registration-field small {
-  color: #98a1b1;
-  font-size: 10px;
-  font-weight: 500;
-}
-
-.customer-registration-input {
-  height: 49px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  border: 1px solid #dce2ee;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #78839a;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.customer-registration-input:focus-within {
-  border-color: #7352d6;
-  box-shadow: 0 0 0 3px rgba(115, 82, 214, 0.1);
-}
-
-.customer-registration-input input {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #172033;
-  font-size: 12px;
-}
-
-.customer-registration-input input::placeholder {
-  color: #a3adbd;
-}
-
-.customer-registration-eye {
-  width: 27px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #78839a;
-  cursor: pointer;
-}
-
-.customer-registration-eye:hover {
-  color: #6242c2;
-}
-
-.customer-registration-terms {
-  position: relative;
-  display: flex !important;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0 18px;
-  color: #68738a !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  cursor: pointer;
-}
-
-.customer-registration-terms input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.customer-registration-checkbox {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #d6dceb;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.customer-registration-terms input:checked + .customer-registration-checkbox {
-  border-color: #7352d6;
-  background: #7352d6;
-}
-
-.customer-registration-terms-link {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #6242d4;
-  font-size: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.customer-registration-terms-link:hover {
-  text-decoration: underline;
-}
-
-.customer-registration-error {
-  margin-bottom: 13px;
-}
-
-.customer-registration-submit {
-  width: 100%;
-  height: 50px;
-  border: 0;
-  border-radius: 10px;
-  background: #7352d6;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 750;
-  cursor: pointer;
-  box-shadow: 0 10px 22px rgba(115, 82, 214, 0.2);
-  transition: background 0.18s ease, transform 0.18s ease;
-}
-
-.customer-registration-submit:hover:not(:disabled) {
-  background: #6344c2;
-  transform: translateY(-1px);
-}
-
-.customer-registration-submit:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.customer-registration-footer {
-  margin-top: 17px;
-  color: #69748a;
-  font-size: 11px;
-  text-align: center;
-}
-
-.customer-registration-footer a {
-  color: #6242d4;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.customer-registration-footer a:hover {
-  text-decoration: underline;
-}
-
-.customer-registration-success {
-  width: min(520px, 100%);
-  padding: 48px;
-  text-align: center;
-  border-radius: 26px;
-  background: #ffffff;
-  box-shadow: 0 28px 80px rgba(31, 42, 68, 0.14);
-}
-
-.customer-registration-success-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #17234f;
-  font-size: 25px;
-  font-weight: 800;
-}
-
-.customer-registration-success-brand span {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: #f0ecff;
-  color: #6745d8;
-}
-
-.customer-registration-success-icon {
-  width: 64px;
-  height: 64px;
-  margin: 34px auto 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #eee9ff;
-  color: #6845df;
-  font-size: 28px;
-  font-weight: 800;
-}
-
-.customer-registration-success h1 {
-  margin: 0 0 10px;
-  color: #172033;
-  font-size: 27px;
-}
-
-.customer-registration-success > p {
-  margin: 0;
-  color: #718097;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.customer-registration-result {
-  margin: 28px 0;
-  display: grid;
-  gap: 10px;
-}
-
-.customer-registration-result > div {
-  padding: 13px 15px;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  border-radius: 10px;
-  background: #f7f8fc;
-  text-align: left;
-}
-
-.customer-registration-result span {
-  color: #7b8799;
-  font-size: 11px;
-}
-
-.customer-registration-result strong {
-  color: #26314c;
-  font-size: 11px;
-}
-
-@media (max-width: 900px) {
-  .customer-registration-page {
-    padding: 18px;
-  }
-
-  .customer-registration-shell {
-    max-width: 560px;
-    min-height: auto;
-    grid-template-columns: 1fr;
-  }
-
-  .customer-registration-visual {
-    display: none;
-  }
-
-  .customer-registration-card {
-    min-height: 700px;
-    padding: 38px 38px 34px;
-  }
-}
-
-@media (max-width: 520px) {
-  .customer-registration-page {
-    padding: 0;
-    background: #ffffff;
-  }
-
-  .customer-registration-shell {
-    min-height: 100vh;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .customer-registration-card {
-    min-height: 100vh;
-    padding: 27px 22px 30px;
-    justify-content: flex-start;
-  }
-
-  .customer-registration-back {
-    margin-bottom: 24px;
-  }
-
-  .customer-registration-top-brand {
-    font-size: 25px;
-  }
-
-  .customer-registration-top-brand span {
-    width: 40px;
-    height: 40px;
-  }
-
-  .customer-registration-heading {
-    margin: 32px 0 24px;
-  }
-
-  .customer-registration-heading h1 {
-    font-size: 27px;
-  }
-
-  .customer-registration-field {
-    margin-bottom: 14px;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-
-  .customer-registration-success {
-    min-height: 100vh;
-    width: 100%;
-    padding: 35px 22px;
-    border-radius: 0;
-    box-shadow: none;
-  }
-}
-
-/* ==================================================
-   CUSTOMER APP — EDIT PROFILE SCREEN
-   Matches finalized Customer UI reference
-   ================================================== */
-
-.customer-edit-profile-screen {
-  --edit-purple: #7352d6;
-  --edit-purple-dark: #5e42b8;
-  --edit-purple-soft: #f1edff;
-  --edit-border: #e8eaf1;
-  --edit-text: #172033;
-  --edit-muted: #7b8798;
-  width: 100%;
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 8px 28px 40px;
-}
-
-.customer-edit-profile-card {
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid var(--edit-border);
-  border-radius: 18px;
-  box-shadow: 0 8px 28px rgba(31, 41, 71, 0.06);
-  padding: 28px;
-}
-
-.customer-edit-profile-intro {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--edit-border);
-}
-
-.customer-edit-profile-icon {
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 13px;
-  background: var(--edit-purple-soft);
-  color: var(--edit-purple);
-}
-
-.customer-edit-profile-intro h2 {
-  margin: 0 0 4px;
-  color: var(--edit-text);
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.customer-edit-profile-intro p {
-  margin: 0;
-  color: var(--edit-muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.customer-edit-profile-error {
-  margin-top: 20px;
-  padding: 12px 14px;
-  border: 1px solid #f0c9c9;
-  border-radius: 10px;
-  background: #fff6f6;
-  color: #b42318;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.customer-edit-profile-fields {
-  display: grid;
-  gap: 20px;
-  padding: 24px 0;
-}
-
-.customer-edit-profile-field {
-  display: block;
-}
-
-.customer-edit-profile-field > span {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--edit-text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.customer-edit-profile-input-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 14px;
-  border: 1px solid #dfe2ea;
-  border-radius: 11px;
-  background: #ffffff;
-  color: #8a94a6;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.customer-edit-profile-input-wrap:focus-within {
-  border-color: var(--edit-purple);
-  box-shadow: 0 0 0 3px rgba(115, 82, 214, 0.10);
-}
-
-.customer-edit-profile-input-wrap input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--edit-text);
-  font: inherit;
-  font-size: 14px;
-}
-
-.customer-edit-profile-input-wrap input::placeholder {
-  color: #a1a9b8;
-}
-
-.customer-edit-profile-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  padding-top: 20px;
-  border-top: 1px solid var(--edit-border);
-}
-
-.customer-edit-profile-cancel {
-  min-height: 42px;
-  padding: 0 18px;
-  border: 1px solid #dfe2ea;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #596579;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.customer-edit-profile-cancel:hover {
-  background: #f7f8fc;
-}
-
-.customer-edit-profile-cancel:disabled,
-.customer-edit-profile-save:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.customer-edit-profile-save {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 18px;
-}
-
-@media (max-width: 600px) {
-  .customer-edit-profile-screen {
-    padding: 10px 15px 24px;
-  }
-
-  .customer-edit-profile-card {
-    border-radius: 15px;
-    padding: 20px 16px;
-  }
-
-  .customer-edit-profile-intro {
-    gap: 11px;
-    padding-bottom: 18px;
-  }
-
-  .customer-edit-profile-icon {
-    width: 42px;
-    height: 42px;
-    flex-basis: 42px;
-    border-radius: 11px;
-  }
-
-  .customer-edit-profile-intro h2 {
-    font-size: 16px;
-  }
-
-  .customer-edit-profile-intro p {
-    font-size: 12px;
-  }
-
-  .customer-edit-profile-fields {
-    gap: 17px;
-    padding: 20px 0;
-  }
-
-  .customer-edit-profile-input-wrap {
-    min-height: 46px;
-    padding: 0 12px;
-  }
-
-  .customer-edit-profile-actions {
-    display: grid;
-    grid-template-columns: 1fr 1.35fr;
-    gap: 10px;
-  }
-
-  .customer-edit-profile-cancel,
-  .customer-edit-profile-save {
-    width: 100%;
-  }
-}
-
-@media (max-width: 400px) {
-  .customer-edit-profile-screen {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .customer-edit-profile-card {
-    padding-left: 14px;
-    padding-right: 14px;
-  }
-
-  .customer-edit-profile-actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* CUSTOMER MOBILE BOTTOM NAV — DESKTOP HIDE */
-@media (min-width: 601px) {
-  .customer-permanent-bottom-nav {
-    display: none !important;
-  }
-}
-
-/* ==================================================
-   CUSTOMER APP — MY ORDERS
-   Billing / purchase records — not e-commerce
-   ================================================== */
-
-.customer-orders-page {
-  padding: 24px 28px 40px;
-}
-
-.customer-orders-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 18px;
-}
-
-.customer-orders-heading h1 {
-  margin: 4px 0 5px;
-  color: #172033;
-  font-size: 22px;
-  line-height: 1.2;
-}
-
-.customer-orders-heading p {
-  margin: 0;
-  color: #7b8798;
-  font-size: 12px;
-}
-
-.customer-orders-heading .secondary-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.customer-orders-panel {
-  overflow: hidden;
-}
-
-.customer-orders-panel-header {
-  padding: 18px 20px;
-  border-bottom: 1px solid #e8eaf1;
-}
-
-.customer-orders-panel-header h2 {
-  margin: 0 0 4px;
-  color: #172033;
-  font-size: 15px;
-}
-
-.customer-orders-panel-header p {
-  margin: 0;
-  color: #8a94a6;
-  font-size: 11px;
-}
-
-.customer-orders-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.customer-orders-table {
-  width: 100%;
-  min-width: 850px;
-  border-collapse: collapse;
-}
-
-.customer-orders-table th {
-  padding: 12px 16px;
-  background: #fafbfc;
-  border-bottom: 1px solid #e8eaf1;
-  color: #8a94a6;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.customer-orders-table td {
-  padding: 15px 16px;
-  border-bottom: 1px solid #eef0f4;
-  color: #526075;
-  font-size: 11px;
-  vertical-align: middle;
-}
-
-.customer-orders-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.customer-orders-table tbody tr:hover {
-  background: #fcfcfe;
-}
-
-.customer-orders-table td strong {
-  color: #172033;
-  font-size: 11px;
-}
-
-.customer-orders-items {
-  display: block;
-  max-width: 230px;
-  overflow: hidden;
-  color: #667085;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.customer-order-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 24px;
-  padding: 3px 8px;
-  border-radius: 7px;
-  font-size: 9px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.customer-order-payment-paid,
-.customer-order-order-completed,
-.customer-order-order-paid,
-.customer-order-payment-success {
-  background: #e8f8f0;
-  color: #16865b;
-}
-
-.customer-order-payment-pending,
-.customer-order-order-pending {
-  background: #fff5e5;
-  color: #b87913;
-}
-
-.customer-order-payment-failed,
-.customer-order-payment-cancelled,
-.customer-order-order-cancelled {
-  background: #fff0f0;
-  color: #c94b4b;
-}
-
-.customer-order-payment-refunded,
-.customer-order-order-refunded {
-  background: #f1edff;
-  color: #7352d6;
-}
-
-.customer-orders-view-button {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e0e3eb;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #7352d6;
-  cursor: pointer;
-}
-
-.customer-orders-view-button:hover {
-  background: #f1edff;
-  border-color: #d8cff8;
-}
-
-.customer-orders-empty {
-  min-height: 220px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 30px;
-  text-align: center;
-  color: #8a94a6;
-  font-size: 12px;
-}
-
-.customer-orders-empty strong {
-  color: #172033;
-  font-size: 14px;
-}
-
-.customer-orders-error {
-  margin: 20px;
-  padding: 14px;
-  border: 1px solid #f0c9c9;
-  border-radius: 10px;
-  background: #fff6f6;
-  color: #b42318;
-  font-size: 12px;
-}
-
-@media (max-width: 600px) {
-  .customer-orders-page {
-    padding: 15px;
-  }
-
-  .customer-orders-heading {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .customer-orders-heading h1 {
-    font-size: 19px;
-  }
-
-  .customer-orders-heading .secondary-button {
-    align-self: flex-start;
-  }
-
-  .customer-orders-panel-header {
-    padding: 16px;
-  }
-
-  .customer-orders-table {
-    min-width: 780px;
-  }
-
-  .customer-orders-table th,
-  .customer-orders-table td {
-    padding: 11px 12px;
-  }
-}
-
-/* =========================================================
-   CUSTOMER NOTIFICATIONS
-   ========================================================= */
-
-.customer-notifications-page {
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
-.customer-notifications-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.customer-notifications-back {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e5e7ef;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #4f566b;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.customer-notifications-back:hover {
-  background: #f8f7ff;
-  border-color: #dcd6f8;
-  transform: translateX(-1px);
-}
-
-.customer-notifications-header h1 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 4px 0 6px;
-  color: #1f2430;
-  font-size: 28px;
-  line-height: 1.2;
-}
-
-.customer-notifications-header p {
-  margin: 0;
-  color: #7a8294;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.customer-notifications-count {
-  min-width: 24px;
-  height: 24px;
-  padding: 0 7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #7352d6;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.customer-notifications-panel {
-  overflow: hidden;
-  border: 1px solid #e9e7f2;
-  border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 8px 28px rgba(38, 32, 70, 0.06);
-}
-
-.customer-notifications-empty {
-  min-height: 300px;
-  padding: 48px 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  text-align: center;
-  color: #7352d6;
-}
-
-.customer-notifications-empty strong {
-  color: #252a38;
-  font-size: 16px;
-}
-
-.customer-notifications-empty span {
-  max-width: 430px;
-  color: #858b9b;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.customer-notifications-refresh {
-  margin-top: 8px;
-  min-height: 40px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 10px;
-  background: #7352d6;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.customer-notifications-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.customer-notification-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 18px 20px;
-  border-bottom: 1px solid #efedf4;
-  background: #ffffff;
-  transition: background 0.2s ease;
-}
-
-.customer-notification-item:last-child {
-  border-bottom: 0;
-}
-
-.customer-notification-item.unread {
-  background: #faf8ff;
-}
-
-.customer-notification-item.clickable {
-  cursor: pointer;
-}
-
-.customer-notification-item.clickable:hover {
-  background: #f6f3ff;
-}
-
-.customer-notification-icon {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: #f0ebff;
-  color: #7352d6;
-}
-
-.customer-notification-content {
-  min-width: 0;
-  flex: 1;
-}
-
-.customer-notification-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
-
-.customer-notification-title-row strong {
-  color: #252a38;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.customer-notification-unread {
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #7352d6;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.customer-notification-content p {
-  margin: 0 0 7px;
-  color: #687084;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.customer-notification-content small {
-  color: #9a9eaa;
-  font-size: 11px;
-}
-
-.customer-notifications-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  margin-top: 14px;
-  color: #8a90a0;
-  font-size: 12px;
-}
-
-/* Customer Notifications — mobile */
-@media (max-width: 600px) {
-  .customer-notifications-page {
-    max-width: none;
-    padding: 20px 16px 88px;
-  }
-
-  .customer-notifications-header {
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-
-  .customer-notifications-back {
-    width: 40px;
-    height: 40px;
-    flex-basis: 40px;
-    border-radius: 11px;
-  }
-
-  .customer-notifications-header h1 {
-    margin-top: 2px;
-    font-size: 23px;
-  }
-
-  .customer-notifications-header p {
-    font-size: 12px;
-  }
-
-  .customer-notifications-panel {
-    border-radius: 16px;
-  }
-
-  .customer-notifications-empty {
-    min-height: 250px;
-    padding: 36px 20px;
-  }
-
-  .customer-notification-item {
-    gap: 11px;
-    padding: 15px 14px;
-  }
-
-  .customer-notification-icon {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
-    border-radius: 10px;
-  }
-
-  .customer-notification-title-row {
-    align-items: flex-start;
-    gap: 7px;
-  }
-
-  .customer-notification-title-row strong {
-    font-size: 13px;
-  }
-
-  .customer-notification-content p {
-    font-size: 12px;
-  }
-
-  .customer-notifications-footer {
-    padding: 0 8px;
-    text-align: center;
   }
 }

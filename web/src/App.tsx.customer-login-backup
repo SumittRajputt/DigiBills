@@ -9,9 +9,6 @@ import {
 } from "react-router-dom";
 import {
   ArrowLeft,
-  Eye,
-  EyeOff,
-  LockKeyhole,
   Bell,
   ChevronDown,
   CircleHelp,
@@ -49,9 +46,6 @@ import CustomerSettings from "./pages/CustomerSettings";
 import CustomerSubscription from "./pages/CustomerSubscription";
 import CustomerProducts from "./pages/CustomerProducts";
 import CustomerProfile from "./pages/CustomerProfile";
-import CustomerOrders from "./pages/CustomerOrders";
-import CustomerNotifications from "./pages/CustomerNotifications";
-import CustomerEditProfile from "./pages/CustomerEditProfile";
 import CashierDashboard from "./dashboards/CashierDashboard";
 import AdminRetailers from "./pages/AdminRetailers";
 import AdminUsers from "./pages/AdminUsers";
@@ -68,8 +62,6 @@ import RetailerReports from "./pages/RetailerReports";
 import AdminSettings from "./pages/AdminSettings";
 import RetailerRegistration from "./pages/RetailerRegistration";
 import CustomerRegistration from "./pages/CustomerRegistration";
-import CustomerForgotPassword from "./pages/CustomerForgotPassword";
-import CustomerResetPassword from "./pages/CustomerResetPassword";
 import { apiFetch } from "./api";
 
 type Role =
@@ -228,16 +220,6 @@ function App() {
       />
 
       <Route
-        path="/customer-forgot-password"
-        element={<CustomerForgotPassword />}
-      />
-
-      <Route
-        path="/customer-reset-password"
-        element={<CustomerResetPassword />}
-      />
-
-      <Route
         path="/register"
         element={<AccountTypePage mode="register" />}
       />
@@ -276,20 +258,6 @@ function App() {
             <LoginPage
               onLogin={setUser}
               accountType="customer"
-            />
-          )
-        }
-      />
-
-      <Route
-        path="/login/admin"
-        element={
-          user ? (
-            <NavigateToRole user={user} />
-          ) : (
-            <LoginPage
-              onLogin={setUser}
-              accountType="admin"
             />
           )
         }
@@ -469,11 +437,6 @@ function App() {
                 />
 
                 <Route
-                  path="profile/edit"
-                  element={<CustomerEditProfile />}
-                />
-
-                <Route
                   path="invoices"
                   element={<CustomerInvoices />}
                 />
@@ -481,16 +444,6 @@ function App() {
                 <Route
                   path="invoices/:invoiceId"
                   element={<CustomerInvoices />}
-                />
-
-                <Route
-                  path="orders"
-                  element={<CustomerOrders />}
-                />
-
-                <Route
-                  path="notifications"
-                  element={<CustomerNotifications />}
                 />
 
                 <Route
@@ -576,10 +529,6 @@ function AccountTypePage({
     navigate(isLogin ? "/login/customer" : "/customer-register");
   }
 
-  function handleAdmin() {
-    navigate("/login/admin");
-  }
-
   function handleEmployee() {
     navigate("/login/employee");
   }
@@ -651,27 +600,9 @@ function AccountTypePage({
           </button>
 
           {isLogin && (
-            <>
-              <button
-                type="button"
-                className="account-type-option admin"
-                onClick={handleAdmin}
-              >
-                <span className="account-type-icon">
-                  <ShieldCheck size={22} strokeWidth={1.8} />
-                </span>
-
-                <span className="account-type-content">
-                  <strong>Admin</strong>
-                  <span>Manage DigiBills platform settings</span>
-                </span>
-
-                <span className="account-type-arrow">&rarr;</span>
-              </button>
-
-              <button
-                type="button"
-                className="account-type-option employee"
+            <button
+              type="button"
+              className="account-type-option employee"
               onClick={handleEmployee}
             >
               <span className="account-type-icon">
@@ -684,8 +615,7 @@ function AccountTypePage({
               </span>
 
               <span className="account-type-arrow">→</span>
-              </button>
-            </>
+            </button>
           )}
         </div>
 
@@ -712,21 +642,16 @@ function LoginPage({
   accountType,
 }: {
   onLogin: (user: User) => void;
-  accountType: "admin" | "retailer" | "customer" | "employee";
+  accountType: "retailer" | "customer" | "employee";
 }) {
   const navigate = useNavigate();
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const isRetailer = accountType === "retailer";
-  const isAdmin = accountType === "admin";
-  const isEmployee = accountType === "employee";
-  const isCustomer = accountType === "customer";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -760,13 +685,9 @@ function LoginPage({
       sessionStorage.removeItem("digibills_token");
 
       setError(
-        isAdmin
-          ? "Invalid admin phone number or password."
-          : isRetailer
-            ? "Invalid retailer phone number or password."
-            : isEmployee
-              ? "Invalid employee phone number or password."
-              : "Invalid customer phone number or password."
+        isRetailer
+          ? "Invalid retailer phone number or password."
+          : "Invalid customer phone number or password."
       );
     } finally {
       setSubmitting(false);
@@ -774,202 +695,101 @@ function LoginPage({
   }
 
   return (
-    <div
-      className={`login-page account-login-page ${
-        isCustomer ? "customer-login-page" : ""
-      }`}
-    >
-      <div className="customer-login-shell">
-        {isCustomer && (
-          <div className="customer-login-visual">
-            <div className="customer-login-glow customer-login-glow-one" />
-            <div className="customer-login-glow customer-login-glow-two" />
+    <div className="login-page account-login-page">
+      <div className="login-card account-login-card">
+        <button
+          type="button"
+          className="login-back-button"
+          onClick={() => navigate("/login")}
+        >
+          <ArrowLeft size={17} />
+          Back
+        </button>
 
-            <div className="customer-login-visual-content">
-              <div className="customer-login-visual-logo">
-                <span className="customer-login-visual-logo-mark">✣</span>
-                <span>DigiBills</span>
-              </div>
+        <div className="brand large">
+          <span className="brand-mark">✣</span> DigiBills
+        </div>
 
-              <h2>Your Bills.<br />Always With You.</h2>
-
-              <p>
-                Keep your invoices, payments, warranties and purchases
-                together in one simple place.
-              </p>
-
-              <div className="customer-login-illustration">
-                <div className="customer-login-illustration-card">
-                  <div className="customer-login-illustration-card-top">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-
-                  <div className="customer-login-illustration-lines">
-                    <i />
-                    <i />
-                    <i />
-                    <i />
-                  </div>
-
-                  <div className="customer-login-illustration-total">
-                    <small>Total</small>
-                    <strong>₹24,560</strong>
-                  </div>
-                </div>
-
-                <div className="customer-login-illustration-phone">
-                  <div className="customer-login-phone-notch" />
-                  <div className="customer-login-phone-logo">✣</div>
-                  <strong>DigiBills</strong>
-                  <span>Your bills, always with you</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="login-card account-login-card customer-login-card">
-          <button
-            type="button"
-            className="login-back-button"
-            onClick={() => navigate("/login")}
+        <div className="account-login-heading">
+          <span
+            className={`account-login-badge ${
+              isRetailer ? "retailer" : "customer"
+            }`}
           >
-            <ArrowLeft size={17} />
-            Back
-          </button>
-
-          <div className="brand large">
-            <span className="brand-mark">✣</span>
-            DigiBills
-          </div>
-
-          <div className="account-login-heading">
-            <span
-              className={`account-login-badge ${
-                isRetailer ? "retailer" : "customer"
-              }`}
-            >
-              <UserRound size={15} />
-              {isRetailer ? "Retailer" : "Customer"}
-            </span>
-
-            <h1>
-              {isRetailer
-                ? "Retailer sign in"
-                : "Welcome back!"}
-            </h1>
-
-            <p>
-              {isRetailer
-                ? "Sign in to continue to your DigiBills store."
-                : "Sign in to manage your bills and purchases."}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-            <label className="customer-login-field">
-              <span>Email or Mobile Number</span>
-
-              <div className="customer-login-input-wrap">
-                <UserRound size={18} />
-                <input
-                  type="text"
-                  value={phoneNumber}
-                  onChange={(event) =>
-                    setPhoneNumber(event.target.value)
-                  }
-                  placeholder="Enter mobile number"
-                  autoComplete="tel"
-                  required
-                />
-              </div>
-            </label>
-
-            <label className="customer-login-field">
-              <span>Password</span>
-
-              <div className="customer-login-input-wrap">
-                <LockKeyhole size={18} className="customer-login-lock-icon" />
-
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
-                  placeholder="Enter password"
-                  autoComplete="current-password"
-                  required
-                />
-
-                <button
-                  type="button"
-                  className="customer-login-password-toggle"
-                  onClick={() =>
-                    setShowPassword((current) => !current)
-                  }
-                  aria-label={
-                    showPassword
-                      ? "Hide password"
-                      : "Show password"
-                  }
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
-              </div>
-            </label>
-
-            <div className="customer-login-options">
-              <label className="customer-login-remember">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) =>
-                    setRememberMe(event.target.checked)
-                  }
-                />
-                <span className="customer-login-checkmark">
-                  {rememberMe ? "✓" : ""}
-                </span>
-                <span>Remember me</span>
-              </label>
-
-              <button
-                type="button"
-                className="customer-login-forgot"
-                onClick={() => navigate("/customer-forgot-password")}
-              >
-                Forgot Password?
-              </button>
-            </div>
-
-            {error && (
-              <div className="login-error">
-                {error}
-              </div>
+            {isRetailer ? (
+              <>
+                <Store size={15} />
+                Retailer
+              </>
+            ) : (
+              <>
+                <UserRound size={15} />
+                Customer
+              </>
             )}
+          </span>
 
-            <button
-              className={`login-button ${
-                isRetailer ? "retailer" : "customer"
-              } customer-login-submit`}
-              type="submit"
-              disabled={submitting}
-            >
-              {submitting ? "Signing in..." : "Login"}
-            </button>
-          </form>
+          <h1>
+            {isRetailer
+              ? "Retailer sign in"
+              : "Customer sign in"}
+          </h1>
 
-          <div className="registration-footer customer-login-register">
-            Don't have an account?{" "}
-            <Link to="/customer-register">Register</Link>
-          </div>
+          <p>
+            Sign in to continue to your DigiBills{" "}
+            {isRetailer ? "store" : "account"}.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <label>
+            Phone number
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(event) =>
+                setPhoneNumber(event.target.value)
+              }
+              placeholder="Enter phone number"
+              autoComplete="tel"
+              required
+            />
+          </label>
+
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
+              placeholder="Enter password"
+              autoComplete="current-password"
+              required
+            />
+          </label>
+
+          {error && (
+            <div className="login-error">
+              {error}
+            </div>
+          )}
+
+          <button
+            className={`login-button ${
+              isRetailer ? "retailer" : "customer"
+            }`}
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+
+        <div className="registration-footer">
+          Don't have a DigiBills account?{" "}
+          <Link to="/register">Register</Link>
         </div>
       </div>
     </div>
@@ -1053,51 +873,6 @@ function DashboardFrame({
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [customerUnreadNotifications, setCustomerUnreadNotifications] =
-    useState(0);
-
-  useEffect(() => {
-    if (role !== "customer") {
-      setCustomerUnreadNotifications(0);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadCustomerUnreadNotifications() {
-      try {
-        const payload = await apiFetch<
-          Array<{ is_read: boolean }>
-        >("/customer/notifications");
-
-        if (cancelled) {
-          return;
-        }
-
-        const unreadCount = Array.isArray(payload)
-          ? payload.filter(
-              (notification) => !notification.is_read
-            ).length
-          : 0;
-
-        setCustomerUnreadNotifications(unreadCount);
-      } catch (error) {
-        if (!cancelled) {
-          console.error(
-            "Failed to load customer notification count:",
-            error
-          );
-          setCustomerUnreadNotifications(0);
-        }
-      }
-    }
-
-    loadCustomerUnreadNotifications();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [role]);
 
   const nav = {
     super_admin: [
@@ -1130,12 +905,10 @@ function DashboardFrame({
       "Settings",
     ],
     customer: [
-      "Dashboard",
-      "My Profile",
-      "My Invoices",
-      "My Payments",
       "My Orders",
-      "My Warranty",
+      "My Payments",
+      "My Products",
+      "My Returns",
       "Transfer Bills",
       "Subscription",
       "Support",
@@ -1324,14 +1097,9 @@ function DashboardFrame({
                     navigate("/admin/returns");
                   } else if (
                     role === "customer" &&
-                    item === "My Profile"
+                    item === "My Orders"
                   ) {
-                    navigate("/customer/profile");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Invoices"
-                  ) {
-                    navigate("/customer/invoices");
+                    navigate("/customer/orders");
                   } else if (
                     role === "customer" &&
                     item === "My Payments"
@@ -1339,14 +1107,14 @@ function DashboardFrame({
                     navigate("/customer/payments");
                   } else if (
                     role === "customer" &&
-                    item === "My Orders"
+                    item === "My Products"
                   ) {
-                    navigate("/customer/orders");
+                    navigate("/customer/products");
                   } else if (
                     role === "customer" &&
-                    item === "My Warranty"
+                    item === "My Returns"
                   ) {
-                    navigate("/customer/warranty");
+                    navigate("/customer/returns");
                   } else if (
                     role === "customer" &&
                     item === "Transfer Bills"
@@ -1606,11 +1374,6 @@ function DashboardFrame({
                     item === "My Payments"
                   ) {
                     navigate("/customer/payments");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Orders"
-                  ) {
-                    navigate("/customer/orders");
                   } else if (index === 0) {
                     navigate(
                       role === "super_admin"
@@ -1668,18 +1431,9 @@ function DashboardFrame({
             </div>
 
             <div className="top-actions">
-              <button
-                className="icon-button"
-                type="button"
-                aria-label="Notifications"
-                onClick={() => navigate("/customer/notifications")}
-              >
+              <button className="icon-button" type="button">
                 <Bell size={18} />
-                {role === "customer" && customerUnreadNotifications > 0 && (
-                  <span className="notification-dot">
-                    {customerUnreadNotifications}
-                  </span>
-                )}
+                <span className="notification-dot">3</span>
               </button>
 
               <button className="icon-button" type="button">
@@ -1780,7 +1534,3 @@ function getInitials(value: string): string {
 }
 
 export default App;
-
-
-
-
