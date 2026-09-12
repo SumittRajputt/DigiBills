@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Store, CheckCircle2 } from "lucide-react";
+import { Store, CheckCircle2, ArrowLeft } from "lucide-react";
 import { apiFetch } from "../api";
 
 type RegistrationResponse = {
@@ -114,6 +114,15 @@ export default function RetailerRegistration() {
   return (
     <div className="login-page">
       <div className="login-card retailer-registration-card">
+        <button
+          type="button"
+          className="retailer-registration-back"
+          onClick={() => navigate("/retailer-landing")}
+        >
+          <ArrowLeft size={17} />
+          Back
+        </button>
+
         <div className="brand large">
           <span className="brand-mark">✣</span> DigiBills
         </div>

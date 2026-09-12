@@ -2528,3 +2528,22 @@
   font-size: 12px;
   line-height: 1.5;
 }
+
+/* Retailer registration back button */
+.retailer-registration-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  color: #78839a;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 22px;
+  cursor: pointer;
+}
+
+.retailer-registration-back:hover {
+  color: #3525cd;
+}
