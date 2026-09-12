@@ -385,7 +385,7 @@ export default function CustomerSubscription() {
 
                 <div>
                   <h2>
-                    {currentPlan?.name || "DigiBills Pro"}
+                    DigiBills Pro
                   </h2>
 
                   <p>Your Active Subscription</p>
@@ -394,7 +394,7 @@ export default function CustomerSubscription() {
 
               <span className="customer-subscription-active-status">
                 <span />
-                {currentSubscription.status || "Active"}
+                {currentSubscription.status === "trialing" ? "Trial Active" : currentSubscription.status || "Active"}
               </span>
             </div>
 
@@ -403,7 +403,7 @@ export default function CustomerSubscription() {
                 <span>Plan</span>
 
                 <strong>
-                  {currentPlan?.name || "DigiBills Pro"}
+                  DigiBills Pro
                 </strong>
 
                 <p>
