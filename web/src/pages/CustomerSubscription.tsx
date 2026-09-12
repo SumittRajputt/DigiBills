@@ -1,5 +1,14 @@
-import { useEffect, useState } from "react";
-import { Check, CreditCard } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Check,
+  Cloud,
+  CreditCard,
+  Crown,
+  FileText,
+  ShieldCheck,
+} from "lucide-react";
 
 import { apiFetch } from "../api";
 
@@ -43,7 +52,6 @@ export default function CustomerSubscription() {
 
   const [loading, setLoading] = useState(true);
   const [creatingPlan, setCreatingPlan] = useState("");
-  const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -72,7 +80,6 @@ export default function CustomerSubscription() {
             setCurrentSubscription(subscription);
           }
         } catch {
-          // 404 simply means the customer has no active subscription.
           if (!cancelled) {
             setCurrentSubscription(null);
           }
@@ -99,27 +106,6 @@ export default function CustomerSubscription() {
     };
   }, []);
 
-  function formatPrice(plan: CustomerPlan) {
-    if (plan.billing_type === "monthly") {
-      return {
-        amount: plan.monthly_price,
-        suffix: "/month",
-      };
-    }
-
-    if (plan.billing_type === "yearly") {
-      return {
-        amount: plan.yearly_price,
-        suffix: "/year",
-      };
-    }
-
-    return {
-      amount: plan.per_bill_price,
-      suffix: "/bill",
-    };
-  }
-
   function parseFeatures(features: string | null): string[] {
     if (!features) {
       return [];
@@ -145,9 +131,30 @@ export default function CustomerSubscription() {
 
     return new Date(value).toLocaleDateString("en-IN", {
       day: "2-digit",
-      month: "short",
+      month: "long",
       year: "numeric",
     });
+  }
+
+  function getPrice(plan: CustomerPlan) {
+    if (plan.billing_type === "monthly") {
+      return {
+        amount: plan.monthly_price,
+        suffix: "/ month",
+      };
+    }
+
+    if (plan.billing_type === "yearly") {
+      return {
+        amount: plan.yearly_price,
+        suffix: "/ year",
+      };
+    }
+
+    return {
+      amount: plan.per_bill_price,
+      suffix: "/ bill",
+    };
   }
 
   async function choosePlan(plan: CustomerPlan) {
@@ -171,9 +178,7 @@ export default function CustomerSubscription() {
 
       setCurrentSubscription(subscription);
 
-      setSuccess(
-        `${plan.name} subscription started successfully.`
-      );
+      setSuccess(`${plan.name} subscription started successfully.`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -184,28 +189,68 @@ export default function CustomerSubscription() {
       setCreatingPlan("");
     }
   }
-  const currentPlan = currentSubscription
-    ? plans.find(
-        (plan) => plan.id === currentSubscription.plan_id
-      )
+
+  const currentPlan = useMemo(() => {
+    if (!currentSubscription) {
+      return null;
+    }
+
+    return (
+      plans.find(
+        (plan) =>
+          plan.id === currentSubscription.plan_id ||
+          plan.plan_id === currentSubscription.plan_id
+      ) ?? null
+    );
+  }, [plans, currentSubscription]);
+
+  const purchasePlan = useMemo(() => {
+    if (plans.length === 0) {
+      return null;
+    }
+
+    return (
+      plans.find((plan) => plan.billing_type === "yearly") ??
+      plans[0]
+    );
+  }, [plans]);
+
+  const purchasePrice = purchasePlan
+    ? getPrice(purchasePlan)
     : null;
+
+  const purchaseFeatures = purchasePlan
+    ? parseFeatures(purchasePlan.features)
+    : [];
+
+  const benefitFeatures =
+    purchaseFeatures.length > 0
+      ? purchaseFeatures.slice(0, 3)
+      : [
+          "Keep all your bills safe",
+          "Track warranties easily",
+          "Access anytime, anywhere",
+        ];
+
+  const benefitIcons = [FileText, ShieldCheck, Cloud];
 
   return (
     <section className="dashboard customer-dashboard-page customer-subscription-page">
-      <div className="page-heading customer-subscription-heading">
+      <div className="customer-subscription-final-heading">
         <div>
           <span className="page-eyebrow">SUBSCRIPTION</span>
-          <h1>Choose Your Plan</h1>
+          <h1>Subscription</h1>
           <p>
-            Select the DigiBills customer plan that works best
-            for you.
+            {currentSubscription
+              ? "Manage your DigiBills subscription."
+              : "Get more with DigiBills."}
           </p>
         </div>
       </div>
 
       {loading && (
         <div className="settings-status">
-          Loading subscription plans...
+          Loading subscription...
         </div>
       )}
 
@@ -221,127 +266,214 @@ export default function CustomerSubscription() {
         </div>
       )}
 
-      {!loading && currentSubscription && (
-        <div className="panel customer-current-subscription">
-          <div className="customer-current-subscription-header">
-            <div>
-              <span className="page-eyebrow">CURRENT PLAN</span>
-              <h2>
-                {currentPlan?.name ?? currentSubscription.plan_id}
-              </h2>
-            </div>
+      {!loading && !error && purchasePlan && !currentSubscription && (
+        <>
+          <div className="customer-subscription-purchase-card">
+            <div className="customer-subscription-purchase-main">
+              <div className="customer-subscription-purchase-copy">
+                <div className="customer-subscription-crown">
+                  <Crown size={30} strokeWidth={2.2} />
+                </div>
 
-            <span className="customer-subscription-status">
-              {currentSubscription.status}
-            </span>
-          </div>
+                <div>
+                  <span className="customer-subscription-mini-label">
+                    DIGIBILLS
+                  </span>
 
-          {currentPlan && (
-            <p>
-              {currentPlan.description}
-            </p>
-          )}
+                  <h2>
+                    {purchasePlan.name || "DigiBills Pro"}
+                  </h2>
 
-          <div className="customer-current-subscription-details">
-            <div>
-              <strong>Started</strong>
-              <span>
-                {formatDate(currentSubscription.started_at)}
-              </span>
-            </div>
-
-            <div>
-              <strong>Period ends</strong>
-              <span>
-                {formatDate(
-                  currentSubscription.current_period_end
-                )}
-              </span>
-            </div>
-
-            {currentSubscription.trial_ends_at && (
-              <div>
-                <strong>Trial ends</strong>
-                <span>
-                  {formatDate(
-                    currentSubscription.trial_ends_at
-                  )}
-                </span>
+                  <p>
+                    Store, manage and access all your bills,
+                    warranties and more — in one place.
+                  </p>
+                </div>
               </div>
-            )}
+
+              <div className="customer-subscription-purchase-price">
+                <strong>₹{purchasePrice?.amount}</strong>
+                <span>{purchasePrice?.suffix}</span>
+              </div>
+
+              <button
+                type="button"
+                className="customer-subscription-buy-button"
+                disabled={creatingPlan !== ""}
+                onClick={() => void choosePlan(purchasePlan)}
+              >
+                {creatingPlan === purchasePlan.plan_id
+                  ? "Subscribing..."
+                  : "Subscribe Now"}
+                <ArrowRight size={21} />
+              </button>
+            </div>
+
+            <div className="customer-subscription-benefits">
+              {benefitFeatures.map((feature, index) => {
+                const Icon = benefitIcons[index];
+
+                return (
+                  <div
+                    className="customer-subscription-benefit"
+                    key={`${purchasePlan.plan_id}-benefit-${index}`}
+                  >
+                    <span>
+                      <Icon size={19} />
+                    </span>
+
+                    <strong>{feature}</strong>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          <div className="customer-subscription-your-heading">
+            <h2>Your Subscription</h2>
+          </div>
+
+          <div className="customer-subscription-empty-card">
+            <div className="customer-subscription-empty-icon">
+              <Crown size={30} />
+            </div>
+
+            <h3>No Active Subscription</h3>
+
+            <p>
+              Subscribe to DigiBills Pro to unlock all features.
+            </p>
+
+            <button
+              type="button"
+              className="customer-subscription-empty-button"
+              disabled={creatingPlan !== ""}
+              onClick={() => void choosePlan(purchasePlan)}
+            >
+              {creatingPlan === purchasePlan.plan_id
+                ? "Subscribing..."
+                : "Subscribe Now"}
+              <ArrowRight size={20} />
+            </button>
+          </div>
+
+          <div className="customer-subscription-info-row">
+            <div className="customer-subscription-info-icon">
+              <Check size={20} />
+            </div>
+
+            <div>
+              <strong>Subscription Benefits</strong>
+              <span>
+                Securely keep your bills and warranty records together.
+              </span>
+            </div>
+
+            <ArrowRight size={20} />
+          </div>
+        </>
+      )}
+
+      {!loading && !error && currentSubscription && (
+        <>
+          <div className="customer-subscription-active-card">
+            <div className="customer-subscription-active-top">
+              <div className="customer-subscription-active-brand">
+                <div className="customer-subscription-active-crown">
+                  <Crown size={30} />
+                </div>
+
+                <div>
+                  <h2>
+                    {currentPlan?.name || "DigiBills Pro"}
+                  </h2>
+
+                  <p>Your Active Subscription</p>
+                </div>
+              </div>
+
+              <span className="customer-subscription-active-status">
+                <span />
+                {currentSubscription.status || "Active"}
+              </span>
+            </div>
+
+            <div className="customer-subscription-active-details">
+              <div className="customer-subscription-active-plan">
+                <span>Plan</span>
+
+                <strong>
+                  {currentPlan?.name || "DigiBills Pro"}
+                </strong>
+
+                <p>
+                  {currentPlan?.description ||
+                    "All the features you need for your business."}
+                </p>
+              </div>
+
+              <div className="customer-subscription-active-divider" />
+
+              <div className="customer-subscription-active-meta">
+                <div>
+                  <CalendarDays size={27} />
+
+                  <div>
+                    <span>Next Billing Date</span>
+                    <strong>
+                      {formatDate(
+                        currentSubscription.current_period_end
+                      )}
+                    </strong>
+                  </div>
+                </div>
+
+                <div>
+                  <CreditCard size={27} />
+
+                  <div>
+                    <span>Billing Cycle</span>
+                    <strong>
+                      {currentPlan?.billing_type === "monthly"
+                        ? "Monthly"
+                        : currentPlan?.billing_type === "yearly"
+                          ? "Yearly"
+                          : "Per Bill"}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="customer-subscription-manage-button"
+            >
+              <span>Manage Subscription</span>
+              <ArrowRight size={23} />
+            </button>
+          </div>
+
+          <div className="customer-subscription-info-row">
+            <div className="customer-subscription-info-icon">
+              <Check size={20} />
+            </div>
+
+            <div>
+              <strong>Subscription Benefits</strong>
+              <span>
+                Your DigiBills subscription is currently active.
+              </span>
+            </div>
+
+            <ArrowRight size={20} />
+          </div>
+        </>
       )}
 
       {!loading && !error && plans.length === 0 && (
         <div className="panel">
           <p>No subscription plans are currently available.</p>
-        </div>
-      )}
-
-      {!loading && plans.length > 0 && !currentSubscription && (
-        <div className="customer-subscription-grid">
-          {plans.map((plan) => {
-            const price = formatPrice(plan);
-            const features = parseFeatures(plan.features);
-            const isCreating = creatingPlan === plan.plan_id;
-
-            return (
-              <div
-                className="customer-subscription-card"
-                key={plan.plan_id}
-              >
-                <div className="customer-subscription-card-header">
-                  <div className="customer-subscription-icon">
-                    <CreditCard size={20} />
-                  </div>
-
-                  <div>
-                    <span className="customer-subscription-badge">
-                      {plan.billing_type.replace("_", " ")}
-                    </span>
-
-                    <h2>{plan.name}</h2>
-                  </div>
-                </div>
-
-                <p className="customer-subscription-description">
-                  {plan.description}
-                </p>
-
-                <div className="customer-subscription-price">
-                  <span>₹{price.amount}</span>
-                  <small>{price.suffix}</small>
-                </div>
-
-                {plan.trial_days > 0 && (
-                  <div className="customer-subscription-trial">
-                    {plan.trial_days}-day free trial
-                  </div>
-                )}
-
-                {features.length > 0 && (
-                  <div className="customer-subscription-features">
-                    {features.map((feature, index) => (
-                      <div key={`${plan.plan_id}-${index}`}>
-                        <Check size={16} />
-                        <span>{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  className="primary-button customer-subscription-button"
-                  disabled={creatingPlan !== ""}
-                  onClick={() => void choosePlan(plan)}
-                >
-                  {isCreating ? "Starting..." : "Choose Plan"}
-                </button>
-              </div>
-            );
-          })}
         </div>
       )}
     </section>

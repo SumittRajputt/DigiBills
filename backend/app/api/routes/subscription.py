@@ -116,6 +116,11 @@ def list_subscription_plans_endpoint(
 ):
     customer_type = customer_type.strip().lower()
 
+    if customer_type == "customer":
+        from app.services.customer_plan_service import ensure_customer_plans
+
+        ensure_customer_plans(db)
+
     if customer_type not in {"retailer", "customer"}:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

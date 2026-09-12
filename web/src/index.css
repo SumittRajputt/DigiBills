@@ -2547,3 +2547,634 @@
 .retailer-registration-back:hover {
   color: #3525cd;
 }
+
+/* =========================================================
+   CUSTOMER SUBSCRIPTION — FINAL UI
+   ========================================================= */
+
+.customer-subscription-page {
+  max-width: 1180px;
+}
+
+.customer-subscription-final-heading {
+  margin-bottom: 28px;
+}
+
+.customer-subscription-final-heading h1 {
+  margin: 6px 0 5px;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #12172a;
+}
+
+.customer-subscription-final-heading p {
+  margin: 0;
+  color: #626579;
+  font-size: 14px;
+}
+
+/* ---------- NOT ACTIVE: PURCHASE CARD ---------- */
+
+.customer-subscription-purchase-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #3525cd 0%, #665cf0 100%);
+  box-shadow: 0 24px 70px rgba(36, 28, 110, 0.16);
+  color: #fff;
+  margin-bottom: 30px;
+}
+
+.customer-subscription-purchase-card::after {
+  content: "";
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  right: -110px;
+  top: -175px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.customer-subscription-purchase-main {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 28px;
+  padding: 34px 36px;
+}
+
+.customer-subscription-purchase-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  min-width: 0;
+}
+
+.customer-subscription-crown {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.customer-subscription-mini-label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  font-weight: 800;
+  opacity: 0.72;
+}
+
+.customer-subscription-purchase-copy h2 {
+  margin: 0 0 8px;
+  font-size: 25px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.customer-subscription-purchase-copy p {
+  max-width: 520px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.customer-subscription-purchase-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  white-space: nowrap;
+}
+
+.customer-subscription-purchase-price strong {
+  font-size: 27px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.customer-subscription-purchase-price span {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.customer-subscription-buy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 13px;
+  background: #fff;
+  color: #3525cd;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.customer-subscription-buy-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(18, 23, 42, 0.16);
+}
+
+.customer-subscription-buy-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.customer-subscription-benefits {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.customer-subscription-benefit {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 17px 25px;
+}
+
+.customer-subscription-benefit + .customer-subscription-benefit {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.customer-subscription-benefit span {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.customer-subscription-benefit strong {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+/* ---------- YOUR SUBSCRIPTION EMPTY STATE ---------- */
+
+.customer-subscription-your-heading {
+  margin: 0 0 14px;
+}
+
+.customer-subscription-your-heading h2 {
+  margin: 0;
+  color: #12172a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.customer-subscription-empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 34px 24px;
+  border: 1px solid #e7e8f1;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgba(36, 28, 110, 0.06);
+}
+
+.customer-subscription-empty-icon {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: #f1f2ff;
+  color: #3525cd;
+  margin-bottom: 15px;
+}
+
+.customer-subscription-empty-card h3 {
+  margin: 0 0 6px;
+  color: #12172a;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.customer-subscription-empty-card p {
+  margin: 0 0 18px;
+  color: #626579;
+  font-size: 13px;
+}
+
+.customer-subscription-empty-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #3525cd;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.customer-subscription-empty-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.customer-subscription-info-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid #e7e8f1;
+  border-radius: 17px;
+  background: #fff;
+  color: #12172a;
+}
+
+.customer-subscription-info-icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f1f2ff;
+  color: #3525cd;
+}
+
+.customer-subscription-info-row > div:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.customer-subscription-info-row strong,
+.customer-subscription-info-row span {
+  display: block;
+}
+
+.customer-subscription-info-row strong {
+  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-subscription-info-row span {
+  color: #626579;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ---------- ACTIVE SUBSCRIPTION CARD ---------- */
+
+.customer-subscription-active-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #3525cd 0%, #665cf0 100%);
+  box-shadow: 0 24px 70px rgba(36, 28, 110, 0.16);
+  color: #fff;
+}
+
+.customer-subscription-active-card::after {
+  content: "";
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  right: -120px;
+  top: -180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.customer-subscription-active-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 30px 34px 24px;
+}
+
+.customer-subscription-active-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.customer-subscription-active-crown {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.customer-subscription-active-brand h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.customer-subscription-active-brand p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.customer-subscription-active-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.customer-subscription-active-status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a7f3d0;
+}
+
+.customer-subscription-active-details {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(330px, 0.8fr);
+  gap: 28px;
+  align-items: center;
+  padding: 24px 34px 30px;
+}
+
+.customer-subscription-active-plan > span,
+.customer-subscription-active-meta span {
+  display: block;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.customer-subscription-active-plan > strong {
+  display: block;
+  margin: 7px 0 5px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.customer-subscription-active-plan > p {
+  max-width: 430px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.customer-subscription-active-divider {
+  width: 1px;
+  height: 86px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.customer-subscription-active-meta {
+  display: grid;
+  gap: 19px;
+}
+
+.customer-subscription-active-meta > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-subscription-active-meta > div > svg {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.customer-subscription-active-meta strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-subscription-manage-button {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 0 27px;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+  .customer-subscription-purchase-main {
+    grid-template-columns: 1fr auto;
+  }
+
+  .customer-subscription-buy-button {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+
+  .customer-subscription-active-details {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-subscription-active-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+@media (max-width: 767px) {
+  .customer-subscription-page {
+    width: 100%;
+    max-width: none;
+  }
+
+  .customer-subscription-final-heading {
+    margin-bottom: 20px;
+  }
+
+  .customer-subscription-final-heading h1 {
+    font-size: 24px;
+  }
+
+  .customer-subscription-final-heading p {
+    font-size: 13px;
+  }
+
+  .customer-subscription-purchase-card,
+  .customer-subscription-active-card {
+    border-radius: 22px;
+  }
+
+  .customer-subscription-purchase-main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 25px 21px 22px;
+  }
+
+  .customer-subscription-purchase-copy {
+    gap: 13px;
+  }
+
+  .customer-subscription-crown {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 15px;
+  }
+
+  .customer-subscription-purchase-copy h2 {
+    font-size: 21px;
+  }
+
+  .customer-subscription-purchase-copy p {
+    font-size: 12px;
+  }
+
+  .customer-subscription-purchase-price {
+    align-items: flex-start;
+  }
+
+  .customer-subscription-purchase-price strong {
+    font-size: 25px;
+  }
+
+  .customer-subscription-buy-button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .customer-subscription-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-subscription-benefit {
+    padding: 12px 17px;
+  }
+
+  .customer-subscription-benefit + .customer-subscription-benefit {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .customer-subscription-your-heading {
+    margin-top: 24px;
+  }
+
+  .customer-subscription-empty-card {
+    padding: 28px 18px;
+    border-radius: 19px;
+  }
+
+  .customer-subscription-active-top {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 23px 20px 20px;
+  }
+
+  .customer-subscription-active-brand {
+    gap: 12px;
+  }
+
+  .customer-subscription-active-crown {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+    border-radius: 15px;
+  }
+
+  .customer-subscription-active-brand h2 {
+    font-size: 21px;
+  }
+
+  .customer-subscription-active-details {
+    gap: 19px;
+    padding: 20px;
+  }
+
+  .customer-subscription-active-plan > p {
+    font-size: 11px;
+  }
+
+  .customer-subscription-active-divider {
+    height: 1px;
+  }
+
+  .customer-subscription-manage-button {
+    min-height: 54px;
+    padding: 0 20px;
+  }
+
+  .customer-subscription-info-row {
+    padding: 14px;
+  }
+}
