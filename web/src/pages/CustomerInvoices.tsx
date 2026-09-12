@@ -114,7 +114,7 @@ export default function CustomerInvoices() {
     const token = sessionStorage.getItem("digibills_token");
 
     if (!token) {
-      navigate("/login");
+      navigate("/login/customer");
       return;
     }
 

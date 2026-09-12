@@ -172,7 +172,7 @@ export default function CustomerDashboard() {
     const token = sessionStorage.getItem("digibills_token");
 
     if (!token) {
-      navigate("/login");
+      navigate("/login/customer");
       return;
     }
 

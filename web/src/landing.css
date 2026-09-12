@@ -1,0 +1,113 @@
+.customer-landing-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: #11152a;
+}
+
+.customer-landing-page html {
+  scroll-behavior: smooth;
+}
+
+.customer-landing-page .grid-bg {
+  background-image:
+    linear-gradient(rgba(76, 60, 220, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(76, 60, 220, 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+.customer-landing-page .gradient-text {
+  background: linear-gradient(100deg, #3424cf, #735cf2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.customer-landing-page .shadow-soft {
+  box-shadow: 0 24px 70px rgba(30, 24, 110, 0.12);
+}
+
+.customer-landing-page .phone-shadow {
+  box-shadow: 0 35px 90px rgba(24, 20, 75, 0.2);
+}
+
+.customer-landing-page .glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+}
+
+.customer-landing-page .login-menu {
+  position: relative;
+}
+
+.customer-landing-page .login-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  width: 310px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 24px 60px rgba(30, 24, 110, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: 0.18s ease;
+  z-index: 100;
+}
+
+.customer-landing-page .login-menu:hover .login-menu-panel,
+.customer-landing-page .login-menu:focus-within .login-menu-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.customer-landing-page .login-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border-radius: 14px;
+  text-decoration: none;
+}
+
+.customer-landing-page .login-option:hover {
+  background: #f5f5ff;
+}
+
+.customer-landing-page .login-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #eef0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex: none;
+}
+
+.customer-landing-page .login-option-title {
+  font-weight: 800;
+  color: #11152a;
+  font-size: 14px;
+}
+
+.customer-landing-page .login-option-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.customer-landing-page .login-chevron {
+  font-size: 11px;
+  color: #6366f1;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .customer-landing-page .login-menu-panel {
+    width: 280px;
+  }
+}

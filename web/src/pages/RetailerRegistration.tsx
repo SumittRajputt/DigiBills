@@ -102,7 +102,7 @@ export default function RetailerRegistration() {
           <button
             className="login-button"
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/login/retailer")}
           >
             Go to Sign in
           </button>
@@ -232,7 +232,7 @@ export default function RetailerRegistration() {
 
         <div className="registration-footer">
           Already have an account?{" "}
-          <Link to="/login">Sign in</Link>
+          <Link to="/login/retailer">Sign in</Link>
         </div>
       </div>
     </div>

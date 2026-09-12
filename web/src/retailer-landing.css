@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.retailer-landing-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: #fbfaff;
+  color: #12172a;
+}
+
+.retailer-landing-page .gridbg {
+  background-image:
+    linear-gradient(rgba(53, 37, 205, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53, 37, 205, 0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.retailer-landing-page .glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.retailer-landing-page .grad {
+  background: linear-gradient(100deg, #3525cd, #756cf3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.retailer-landing-page .device {
+  box-shadow: 0 35px 90px rgba(20, 22, 45, 0.16);
+}
+
+.retailer-landing-page .float {
+  animation: retailer-float 6s ease-in-out infinite;
+}
+
+@keyframes retailer-float {
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.retailer-landing-page .login-menu {
+  position: relative;
+}
+
+.retailer-landing-page .login-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  width: 310px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 24px 60px rgba(30, 24, 110, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: 0.18s ease;
+  z-index: 100;
+}
+
+.retailer-landing-page .login-menu:hover .login-menu-panel,
+.retailer-landing-page .login-menu:focus-within .login-menu-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.retailer-landing-page .login-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border-radius: 14px;
+  text-decoration: none;
+}
+
+.retailer-landing-page .login-option:hover {
+  background: #f5f5ff;
+}
+
+.retailer-landing-page .login-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #eef0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex: none;
+}
+
+.retailer-landing-page .login-option-title {
+  font-weight: 800;
+  color: #11152a;
+  font-size: 14px;
+}
+
+.retailer-landing-page .login-option-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.retailer-landing-page .login-chevron {
+  font-size: 11px;
+  color: #6366f1;
+  margin-left: auto;
+}
+
+.retailer-landing-page .fadeup {
+  animation: retailer-fadeup 0.8s ease both;
+}
+
+@keyframes retailer-fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+.retailer-landing-page .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "liga";
+}
+
+.retailer-landing-page .material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+/* Mobile refinement for retailer hero product preview */
+@media (max-width: 640px) {
+  .retailer-landing-page .device {
+    width: 100%;
+    border-radius: 22px;
+  }
+
+  .retailer-landing-page .device .grid-cols-\[1fr_220px\] {
+    grid-template-columns: minmax(0, 1fr) 175px;
+    gap: 10px;
+  }
+
+  .retailer-landing-page .device .grid-cols-3 {
+    gap: 6px;
+  }
+
+  .retailer-landing-page .device .grid-cols-3 > div {
+    padding: 8px;
+    border-radius: 14px;
+  }
+
+  .retailer-landing-page .device .grid-cols-3 .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  .retailer-landing-page .device .p-5 {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .retailer-landing-page .device .grid-cols-3 > div > div:nth-child(2) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+    min-height: 28px;
+  }
+
+  .retailer-landing-page .device .grid-cols-3 > div > div:nth-child(3) {
+    white-space: nowrap;
+  }
+}
+
+
+/* Mobile-only POS layout fix */
+@media (max-width: 767px) {
+  .retailer-landing-page .retailer-hero-pos-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .retailer-landing-page .retailer-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .retailer-landing-page .retailer-product-grid > div {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .retailer-landing-page .retailer-product-grid > div .h-16 {
+    height: 58px !important;
+  }
+
+  .retailer-landing-page .retailer-product-grid > div .text-\[11px\] {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: normal !important;
+  }
+}

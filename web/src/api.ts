@@ -17,7 +17,7 @@ export async function apiFetch<T>(
 
   if (response.status === 401) {
     sessionStorage.removeItem("digibills_token");
-    window.location.href = "/login";
+    window.location.href = "/";
     throw new Error("Session expired. Please log in again.");
   }
 

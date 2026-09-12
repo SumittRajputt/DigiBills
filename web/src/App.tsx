@@ -71,6 +71,8 @@ import CustomerRegistration from "./pages/CustomerRegistration";
 import CustomerForgotPassword from "./pages/CustomerForgotPassword";
 import CustomerResetPassword from "./pages/CustomerResetPassword";
 import { apiFetch } from "./api";
+import CustomerLandingPage from "./pages/CustomerLandingPage";
+import RetailerLandingPage from "./pages/RetailerLandingPage";
 
 type Role =
   | "super_admin"
@@ -238,22 +240,6 @@ function App() {
       />
 
       <Route
-        path="/register"
-        element={<AccountTypePage mode="register" />}
-      />
-
-      <Route
-        path="/login"
-        element={
-          user ? (
-            <NavigateToRole user={user} />
-          ) : (
-            <AccountTypePage mode="login" />
-          )
-        }
-      />
-
-      <Route
         path="/login/retailer"
         element={
           user ? (
@@ -296,7 +282,35 @@ function App() {
       />
 
       <Route
+        path="/admin-login"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="admin"
+            />
+          )
+        }
+      />
+
+      <Route
         path="/login/employee"
+        element={
+          user ? (
+            <NavigateToRole user={user} />
+          ) : (
+            <LoginPage
+              onLogin={setUser}
+              accountType="employee"
+            />
+          )
+        }
+      />
+
+      <Route
+        path="/employee-login"
         element={
           user ? (
             <NavigateToRole user={user} />
@@ -536,12 +550,17 @@ function App() {
       />
 
       <Route
+        path="/retailer-landing"
+        element={<RetailerLandingPage />}
+      />
+
+      <Route
         path="/"
         element={
           user ? (
             <NavigateToRole user={user} />
           ) : (
-            <Navigate to="/login" replace />
+            <CustomerLandingPage />
           )
         }
       />
@@ -552,7 +571,7 @@ function App() {
           user ? (
             <NavigateToRole user={user} />
           ) : (
-            <Navigate to="/login" replace />
+            <Navigate to="/" replace />
           )
         }
       />
@@ -577,11 +596,11 @@ function AccountTypePage({
   }
 
   function handleAdmin() {
-    navigate("/login/admin");
+    navigate("/admin-login");
   }
 
   function handleEmployee() {
-    navigate("/login/employee");
+    navigate("/employee-login");
   }
 
   return (
@@ -693,7 +712,7 @@ function AccountTypePage({
           {isLogin ? (
             <>
               Don't have a DigiBills account?{" "}
-              <Link to="/register">Register</Link>
+              <Link to="/customer-register">Register</Link>
             </>
           ) : (
             <>
@@ -834,7 +853,17 @@ function LoginPage({
           <button
             type="button"
             className="login-back-button"
-            onClick={() => navigate("/login")}
+            onClick={() => {
+              if (isRetailer) {
+                navigate("/retailer-landing");
+              } else if (isCustomer) {
+                navigate("/");
+              } else if (isAdmin) {
+                navigate("/admin-login");
+              } else if (isEmployee) {
+                navigate("/employee-login");
+              }
+            }}
           >
             <ArrowLeft size={17} />
             Back
@@ -848,23 +877,43 @@ function LoginPage({
           <div className="account-login-heading">
             <span
               className={`account-login-badge ${
-                isRetailer ? "retailer" : "customer"
+                isAdmin
+                  ? "admin"
+                  : isRetailer
+                    ? "retailer"
+                    : isEmployee
+                      ? "employee"
+                      : "customer"
               }`}
             >
               <UserRound size={15} />
-              {isRetailer ? "Retailer" : "Customer"}
+              {isAdmin
+                ? "Admin"
+                : isRetailer
+                  ? "Retailer"
+                  : isEmployee
+                    ? "Employee"
+                    : "Customer"}
             </span>
 
             <h1>
-              {isRetailer
-                ? "Retailer sign in"
-                : "Welcome back!"}
+              {isAdmin
+                ? "Admin sign in"
+                : isRetailer
+                  ? "Retailer sign in"
+                  : isEmployee
+                    ? "Employee sign in"
+                    : "Welcome back!"}
             </h1>
 
             <p>
-              {isRetailer
-                ? "Sign in to continue to your DigiBills store."
-                : "Sign in to manage your bills and purchases."}
+              {isAdmin
+                ? "Sign in to manage your DigiBills platform."
+                : isRetailer
+                  ? "Sign in to continue to your DigiBills store."
+                  : isEmployee
+                    ? "Sign in to continue to your assigned work dashboard."
+                    : "Sign in to manage your bills and purchases."}
             </p>
           </div>
 
@@ -990,7 +1039,7 @@ function ProtectedRoute({
   if (!user) {
     return (
       <Navigate
-        to="/login"
+        to="/"
         replace
         state={{ from: location.pathname }}
       />
@@ -1037,7 +1086,7 @@ function getRolePath(user: User): string {
     return "/employee/salesman";
   }
 
-  return "/login";
+  return "/";
 }
 
 function DashboardFrame({
@@ -1191,7 +1240,7 @@ function DashboardFrame({
 
   function logout() {
     sessionStorage.removeItem("digibills_token");
-    navigate("/login", { replace: true });
+    navigate("/", { replace: true });
   }
 
   function closeMobileMenu() {
