@@ -1814,7 +1814,13 @@ function DashboardFrame({
                 )}
               </button>
 
-              <button className="icon-button" type="button">
+              <button
+                className="icon-button"
+                type="button"
+                onClick={() => role === "customer" && navigate("/customer/support")}
+                aria-label="Help and Support"
+                title="Help and Support"
+              >
                 <CircleHelp size={18} />
               </button>
 

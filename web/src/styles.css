@@ -30991,3 +30991,54 @@ button {
   }
 }
 
+
+/* Customer Dashboard — Spending period selector */
+.customer-reference-total-top .customer-dashboard-spending-period {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 31px;
+  padding: 0 9px 0 10px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #5943b4;
+  cursor: pointer;
+}
+
+.customer-reference-total-top .customer-dashboard-spending-period select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 88px;
+  min-height: 31px;
+  padding: 0 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #5943b4;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 31px;
+  cursor: pointer;
+}
+
+.customer-reference-total-top .customer-dashboard-spending-period svg {
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .customer-reference-total-top .customer-dashboard-spending-period {
+    min-height: 30px;
+    padding: 0 8px;
+  }
+
+  .customer-reference-total-top .customer-dashboard-spending-period select {
+    width: 82px;
+    min-height: 30px;
+    font-size: 10px;
+  }
+}

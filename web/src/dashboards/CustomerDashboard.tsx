@@ -119,6 +119,9 @@ export default function CustomerDashboard() {
   const [customerUnreadNotifications, setCustomerUnreadNotifications] =
     useState(0);
 
+  const [spendingPeriod, setSpendingPeriod] =
+    useState("this_month");
+
   async function loadDashboard() {
     try {
       setLoading(true);
@@ -296,8 +299,82 @@ export default function CustomerDashboard() {
   const spendingTrend =
     dashboard.spending_trend || [];
 
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  const periodStart = (() => {
+    switch (spendingPeriod) {
+      case "last_month":
+        return new Date(currentYear, currentMonth - 1, 1);
+
+      case "last_3_months":
+        return new Date(currentYear, currentMonth - 2, 1);
+
+      case "last_6_months":
+        return new Date(currentYear, currentMonth - 5, 1);
+
+      case "this_year":
+        return new Date(currentYear, 0, 1);
+
+      case "all_time":
+        return null;
+
+      case "this_month":
+      default:
+        return new Date(currentYear, currentMonth, 1);
+    }
+  })();
+
+  const filteredSpendingTrend = spendingTrend.filter((item) => {
+    if (!periodStart) return true;
+
+    const itemDate = new Date(`${item.date}T00:00:00`);
+
+    if (Number.isNaN(itemDate.getTime())) {
+      return false;
+    }
+
+    if (spendingPeriod === "last_month") {
+      const lastMonth = new Date(
+        currentYear,
+        currentMonth - 1,
+        1
+      );
+
+      const nextMonth = new Date(
+        currentYear,
+        currentMonth,
+        1
+      );
+
+      return itemDate >= lastMonth && itemDate < nextMonth;
+    }
+
+    if (spendingPeriod === "last_3_months") {
+      return itemDate >= periodStart && itemDate <= now;
+    }
+
+    if (spendingPeriod === "last_6_months") {
+      return itemDate >= periodStart && itemDate <= now;
+    }
+
+    if (spendingPeriod === "this_year") {
+      return itemDate >= periodStart && itemDate <= now;
+    }
+
+    return itemDate >= periodStart && itemDate <= now;
+  });
+
+  const filteredSpendingTotal =
+    filteredSpendingTrend.reduce(
+      (total, item) =>
+        total + Number(item.amount || 0),
+      0
+    );
+
   const maxSpendingAmount = Math.max(
-    ...spendingTrend.map((item) =>
+    ...filteredSpendingTrend.map((item) =>
       Number(item.amount || 0)
     ),
     1
@@ -371,14 +448,27 @@ export default function CustomerDashboard() {
         <div className="customer-reference-total-top">
           <span>Total Spent</span>
 
-          <button type="button">
-            This Month
+          <label className="customer-dashboard-spending-period">
+            <select
+              value={spendingPeriod}
+              onChange={(event) =>
+                setSpendingPeriod(event.target.value)
+              }
+              aria-label="Spending period"
+            >
+              <option value="this_month">This Month</option>
+              <option value="last_month">Last Month</option>
+              <option value="last_3_months">Last 3 Months</option>
+              <option value="last_6_months">Last 6 Months</option>
+              <option value="this_year">This Year</option>
+              <option value="all_time">All Time</option>
+            </select>
             <ChevronDown size={14} />
-          </button>
+          </label>
         </div>
 
         <strong>
-          {formatAmount(dashboard.total_purchases)}
+          {formatAmount(filteredSpendingTotal)}
         </strong>
 
         <div className="customer-reference-bars">
@@ -539,18 +629,18 @@ export default function CustomerDashboard() {
           </div>
 
           <span>
-            {spendingTrend.length} record
-            {spendingTrend.length === 1 ? "" : "s"}
+            {filteredSpendingTrend.length} record
+            {filteredSpendingTrend.length === 1 ? "" : "s"}
           </span>
         </div>
 
-        {spendingTrend.length === 0 ? (
+        {filteredSpendingTrend.length === 0 ? (
           <div className="customer-dashboard-spending-empty">
             No spending data available yet.
           </div>
         ) : (
           <div className="customer-dashboard-spending-chart">
-            {spendingTrend.map((item) => {
+            {filteredSpendingTrend.map((item) => {
               const amount = Number(item.amount || 0);
 
               const height = Math.max(
