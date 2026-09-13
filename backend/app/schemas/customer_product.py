@@ -27,3 +27,6 @@ class CustomerProductResponse(BaseModel):
     acquired_at: datetime
     released_at: Optional[datetime]
     source: str
+
+    invoice_id: Optional[str] = None
+    invoice_date: Optional[datetime] = None

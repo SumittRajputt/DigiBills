@@ -12,8 +12,23 @@ from app.models.retailer import Retailer
 from app.models.warranty import Warranty
 
 
-def generate_warranty_id() -> str:
-    return f"WAR-{uuid.uuid4().hex[:10].upper()}"
+def generate_warranty_id(db: Session) -> str:
+    import secrets
+
+    while True:
+        warranty_id = str(
+            secrets.randbelow(9_000_000_000_000_000)
+            + 1_000_000_000_000_000
+        )
+
+        existing = db.execute(
+            select(Warranty).where(
+                Warranty.warranty_id == warranty_id
+            )
+        ).scalar_one_or_none()
+
+        if existing is None:
+            return warranty_id
 
 
 def get_warranty_by_reference(
@@ -178,7 +193,7 @@ def create_warranty(
         )
 
     warranty = Warranty(
-        warranty_id=generate_warranty_id(),
+        warranty_id=generate_warranty_id(db),
         invoice_id=invoice.id,
         product_variant_id=product_variant.id,
         customer_id=invoice.customer_id,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Eye, RefreshCw } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 
@@ -44,6 +44,15 @@ type CustomerInvoiceDetail = CustomerInvoice & {
   items: InvoiceItem[];
 };
 
+type CustomerIdentity = {
+  customer_id: string;
+  full_name: string;
+  phone_number: string;
+  email: string | null;
+  profile_image_url: string | null;
+};
+
+
 function money(value: string | number | null | undefined) {
   const amount = Number(value ?? 0);
 
@@ -79,14 +88,21 @@ function statusClass(value: string) {
 
 export default function CustomerInvoices() {
   const navigate = useNavigate();
-  const { invoiceId } = useParams();
+  const { invoiceId, orderId } = useParams();
+  const detailReference = orderId || invoiceId;
+  const isOrderDetails = Boolean(orderId);
 
   const [invoices, setInvoices] = useState<CustomerInvoice[]>([]);
   const [detail, setDetail] =
     useState<CustomerInvoiceDetail | null>(null);
 
+  const [customerIdentity, setCustomerIdentity] =
+    useState<CustomerIdentity | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [mobileInvoiceSearch, setMobileInvoiceSearch] = useState("");
+  const [mobileInvoiceStatus, setMobileInvoiceStatus] = useState("all");
 
   async function loadInvoices() {
     try {
@@ -171,19 +187,23 @@ export default function CustomerInvoices() {
   }
 
   async function loadInvoiceDetail() {
-    if (!invoiceId) return;
+    if (!detailReference) return;
 
     try {
       setLoading(true);
       setError("");
       setDetail(null);
 
-      const result =
-        await apiFetch<CustomerInvoiceDetail>(
-          `/customer/invoices/${encodeURIComponent(invoiceId)}`
-        );
+      const [result, customerResult] =
+        await Promise.all([
+          apiFetch<CustomerInvoiceDetail>(
+            `/customer/invoices/${encodeURIComponent(detailReference)}`
+          ),
+          apiFetch<CustomerIdentity>("/customers/me"),
+        ]);
 
       setDetail(result);
+      setCustomerIdentity(customerResult);
     } catch (err) {
       setError(
         err instanceof Error
@@ -196,23 +216,46 @@ export default function CustomerInvoices() {
   }
 
   useEffect(() => {
-    if (invoiceId) {
+    if (detailReference) {
       loadInvoiceDetail();
     } else {
       loadInvoices();
     }
-  }, [invoiceId]);
+  }, [detailReference]);
 
-  if (invoiceId) {
+  const filteredMobileInvoices = invoices.filter((invoice) => {
+    const search = mobileInvoiceSearch.trim().toLowerCase();
+
+    const matchesSearch =
+      !search ||
+      (invoice.invoice_number || "").toLowerCase().includes(search) ||
+      (invoice.invoice_id || "").toLowerCase().includes(search) ||
+      (invoice.item_names || [])
+        .join(" ")
+        .toLowerCase()
+        .includes(search);
+
+    const matchesStatus =
+      mobileInvoiceStatus === "all" ||
+      invoice.payment_status?.toLowerCase() === mobileInvoiceStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  if (detailReference) {
     if (loading) {
       return (
         <section className="dashboard customer-dashboard-page">
           <div className="page-heading">
-            <span className="page-eyebrow">
-              CUSTOMER ACCOUNT
-            </span>
-            <h1>Invoice Details</h1>
-            <p>Loading invoice...</p>
+            
+            <h1>
+              {isOrderDetails ? "Order Details" : "Invoice Details"}
+            </h1>
+            <p>
+              {isOrderDetails
+                ? "Loading purchase details..."
+                : "Loading invoice..."}
+            </p>
           </div>
         </section>
       );
@@ -222,10 +265,10 @@ export default function CustomerInvoices() {
       return (
         <section className="dashboard customer-dashboard-page">
           <div className="page-heading">
-            <span className="page-eyebrow">
-              CUSTOMER ACCOUNT
-            </span>
-            <h1>Invoice Details</h1>
+            
+            <h1>
+              {isOrderDetails ? "Order Details" : "Invoice Details"}
+            </h1>
             <p>{error}</p>
           </div>
 
@@ -250,7 +293,7 @@ export default function CustomerInvoices() {
     if (!detail) return null;
 
     return (
-      <section className="dashboard customer-dashboard-page">
+      <section className="dashboard customer-dashboard-page customer-order-details-page">
         <div
           className="page-heading"
           style={{
@@ -261,12 +304,14 @@ export default function CustomerInvoices() {
           }}
         >
           <div>
-            <span className="page-eyebrow">
-              CUSTOMER ACCOUNT
-            </span>
-            <h1>Invoice Details</h1>
+            
+            <h1>
+              {isOrderDetails ? "Order Details" : "Invoice Details"}
+            </h1>
             <p>
-              View the complete details of your invoice.
+              {isOrderDetails
+                ? "View the complete details of your purchase record."
+                : "View the complete details of your invoice."}
             </p>
           </div>
 
@@ -274,11 +319,15 @@ export default function CustomerInvoices() {
             className="secondary-button"
             type="button"
             onClick={() =>
-              navigate("/customer/invoices")
+              navigate(
+                isOrderDetails
+                  ? "/customer/orders"
+                  : "/customer/invoices"
+              )
             }
           >
             <ArrowLeft size={16} />
-            Back to My Invoices
+            {isOrderDetails ? "Back to My Orders" : "Back to My Invoices"}
           </button>
         </div>
 
@@ -302,7 +351,7 @@ export default function CustomerInvoices() {
                   marginBottom: "6px",
                 }}
               >
-                INVOICE
+                {isOrderDetails ? "ORDER" : "INVOICE"}
               </div>
 
               <h2
@@ -320,7 +369,7 @@ export default function CustomerInvoices() {
                   color: "#64748b",
                 }}
               >
-                Invoice date:{" "}
+                Purchase date:{" "}
                 <strong>
                   {formatDate(detail.invoice_date)}
                 </strong>
@@ -342,26 +391,38 @@ export default function CustomerInvoices() {
               gap: "18px",
             }}
           >
-            <div>
-              <small>Customer ID</small>
-              <strong>{detail.customer_id}</strong>
+            <div className="customer-order-detail-field">
+              <span className="customer-order-detail-label">
+                Customer ID
+              </span>
+              <strong className="customer-order-detail-value">
+                {customerIdentity?.customer_id || detail.customer_id}
+              </strong>
             </div>
 
-            <div>
-              <small>Invoice Number</small>
-              <strong>
+            <div className="customer-order-detail-field">
+              <span className="customer-order-detail-label">
+                Invoice Number
+              </span>
+              <strong className="customer-order-detail-value">
                 {detail.invoice_number || detail.invoice_id}
               </strong>
             </div>
 
-            <div>
-              <small>Invoice Status</small>
-              <strong>{statusLabel(detail.status)}</strong>
+            <div className="customer-order-detail-field">
+              <span className="customer-order-detail-label">
+                Invoice Status
+              </span>
+              <strong className="customer-order-detail-value">
+                {statusLabel(detail.status)}
+              </strong>
             </div>
 
-            <div>
-              <small>Payment Status</small>
-              <strong>
+            <div className="customer-order-detail-field">
+              <span className="customer-order-detail-label">
+                Payment Status
+              </span>
+              <strong className="customer-order-detail-value">
                 {statusLabel(detail.payment_status)}
               </strong>
             </div>
@@ -374,13 +435,70 @@ export default function CustomerInvoices() {
               <h3>Items</h3>
               <span>
                 {detail.items.length} item
-                {detail.items.length === 1 ? "" : "s"} on this invoice
+                {detail.items.length === 1 ? "" : "s"} in this purchase
               </span>
             </div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table className="data-table">
+          <div className="customer-order-items-responsive">
+            <div className="customer-order-items-mobile">
+              {detail.items.length === 0 ? (
+                <div className="customer-order-item-mobile-empty">
+                  No items found for this purchase.
+                </div>
+              ) : (
+                detail.items.map((item) => (
+                  <article
+                    className="customer-order-item-mobile-card"
+                    key={`mobile-item-${item.id}`}
+                  >
+                    <div className="customer-order-item-mobile-title">
+                      <span>PRODUCT</span>
+                      <strong>{item.product_name}</strong>
+                    </div>
+
+                    <div className="customer-order-item-mobile-grid">
+                      <div>
+                        <span>SKU</span>
+                        <strong>{item.sku || "—"}</strong>
+                      </div>
+
+                      <div>
+                        <span>QUANTITY</span>
+                        <strong>{item.quantity}</strong>
+                      </div>
+
+                      <div>
+                        <span>UNIT PRICE</span>
+                        <strong>{money(item.unit_price)}</strong>
+                      </div>
+
+                      <div>
+                        <span>TAXABLE VALUE</span>
+                        <strong>{money(item.taxable_amount)}</strong>
+                      </div>
+
+                      <div>
+                        <span>TAX</span>
+                        <strong>
+                          {money(item.tax_amount)}
+                          <small>{item.tax_rate}%</small>
+                        </strong>
+                      </div>
+
+                      <div className="customer-order-item-mobile-total">
+                        <span>LINE TOTAL</span>
+                        <strong>{money(item.line_total)}</strong>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+
+            <div className="customer-order-items-desktop">
+              <div style={{ overflowX: "auto" }}>
+                <table className="data-table">
               <thead>
                 <tr>
                   <th>Product</th>
@@ -438,11 +556,13 @@ export default function CustomerInvoices() {
                   ))
                 )}
               </tbody>
-            </table>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div
+            </div>
+<div
+          className="customer-order-summary-grid"
           style={{
             display: "grid",
             gridTemplateColumns:
@@ -454,19 +574,19 @@ export default function CustomerInvoices() {
             <div className="panel-header">
               <div>
                 <h3>Notes</h3>
-                <span>Invoice information</span>
+                <span>{isOrderDetails ? "Purchase information" : "Invoice information"}</span>
               </div>
             </div>
 
             <div style={{ padding: "24px" }}>
-              {detail.notes || "No notes were added to this invoice."}
+              {detail.notes || "No notes were added to this purchase."}
             </div>
           </div>
 
           <div className="panel">
             <div className="panel-header">
               <div>
-                <h3>Invoice Summary</h3>
+                <h3>{isOrderDetails ? "Order Summary" : "Invoice Summary"}</h3>
                 <span>Amount breakdown</span>
               </div>
             </div>
@@ -539,27 +659,11 @@ export default function CustomerInvoices() {
         }}
       >
         <div>
-          <span className="page-eyebrow">
-            CUSTOMER ACCOUNT
-          </span>
+          
 
           <h1>My Invoices</h1>
 
-          <p>
-            View all invoices associated with your DigiBills
-            customer account.
-          </p>
         </div>
-
-        <button
-          className="secondary-button"
-          type="button"
-          onClick={loadInvoices}
-          disabled={loading}
-        >
-          <RefreshCw size={16} />
-          Refresh
-        </button>
       </div>
 
       {loading ? (
@@ -587,79 +691,194 @@ export default function CustomerInvoices() {
             </div>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {invoices.length === 0 ? (
+          <div className="customer-invoices-desktop-table">
+            <div style={{ overflowX: "auto" }}>
+              <table className="data-table">
+                <thead>
                   <tr>
-                    <td colSpan={5}>
-                      You do not have any invoices yet.
-                    </td>
+                    <th>Item</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
-                ) : (
-                  invoices.map((invoice) => (
-                    <tr key={invoice.id}>
-                      <td>
+                </thead>
+
+                <tbody>
+                  {invoices.length === 0 ? (
+                    <tr>
+                      <td colSpan={5}>
+                        You do not have any invoices yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    invoices.map((invoice) => (
+                      <tr key={invoice.id}>
+                        <td>
+                          <strong>
+                            {invoice.item_names?.length
+                              ? invoice.item_names.join(", ")
+                              : "No items"}
+                          </strong>
+                        </td>
+
+                        <td>
+                          {formatDate(invoice.invoice_date)}
+                        </td>
+
+                        <td>
+                          <strong>
+                            {money(invoice.total_amount)}
+                          </strong>
+                        </td>
+
+                        <td>
+                          <span
+                            className={statusClass(
+                              invoice.payment_status
+                            )}
+                          >
+                            {statusLabel(
+                              invoice.payment_status
+                            )}
+                          </span>
+                        </td>
+
+                        <td>
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            onClick={() =>
+                              openInvoicePdf(
+                                invoice.invoice_id
+                              )
+                            }
+                          >
+                            <Eye size={15} />
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="customer-invoices-mobile-content">
+
+            <div className="customer-invoices-mobile-controls">
+              <div className="customer-invoices-mobile-search">
+                <span>⌕</span>
+                <input
+                  type="search"
+                  placeholder="Search invoices..."
+                  value={mobileInvoiceSearch}
+                  onChange={(event) =>
+                    setMobileInvoiceSearch(event.target.value)
+                  }
+                  aria-label="Search invoices"
+                />
+              </div>
+
+              <select
+                value={mobileInvoiceStatus}
+                onChange={(event) =>
+                  setMobileInvoiceStatus(event.target.value)
+                }
+                aria-label="Filter invoices by status"
+              >
+                <option value="all">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="partial">Partial</option>
+                <option value="unpaid">Unpaid</option>
+              </select>
+            </div>
+
+            {loading ? (
+              <div className="customer-invoices-mobile-empty">
+                Loading your invoices...
+              </div>
+            ) : filteredMobileInvoices.length === 0 ? (
+              <div className="customer-invoices-mobile-empty">
+                No invoices found.
+              </div>
+            ) : (
+              <div className="customer-invoices-mobile-list">
+                {filteredMobileInvoices.map((invoice) => (
+                  <article
+                    className="customer-invoice-mobile-card"
+                    key={invoice.id}
+                  >
+                    <div className="customer-invoice-mobile-card-top">
+                      <div className="customer-invoice-mobile-icon">
+                        <span>▤</span>
+                      </div>
+
+                      <div className="customer-invoice-mobile-main">
                         <strong>
-                          {invoice.item_names?.length
-                            ? invoice.item_names.join(", ")
-                            : "No items"}
+                          #
+                          {invoice.invoice_number ||
+                            invoice.invoice_id}
                         </strong>
-                      </td>
 
-                      <td>
-                        {formatDate(invoice.invoice_date)}
-                      </td>
+                        <small>
+                          {formatDate(invoice.invoice_date)}
+                        </small>
+                      </div>
 
-                      <td>
+                      <span
+                        className={`customer-invoice-mobile-status ${
+                          invoice.payment_status
+                            ?.toLowerCase() || ""
+                        }`}
+                      >
+                        {statusLabel(
+                          invoice.payment_status || "pending"
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="customer-invoice-mobile-divider" />
+
+                    <div className="customer-invoice-mobile-item">
+                      <small>ITEM</small>
+                      <strong>
+                        {invoice.item_names?.length
+                          ? invoice.item_names.join(", ")
+                          : "No items"}
+                      </strong>
+                    </div>
+
+                    <div className="customer-invoice-mobile-bottom">
+                      <div>
+                        <small>AMOUNT</small>
                         <strong>
                           {money(invoice.total_amount)}
                         </strong>
-                      </td>
+                      </div>
 
-                      <td>
-                        <span
-                          className={statusClass(
-                            invoice.payment_status
-                          )}
-                        >
-                          {statusLabel(
-                            invoice.payment_status
-                          )}
-                        </span>
-                      </td>
+                      <button
+                        type="button"
+                        className="customer-invoice-mobile-view"
+                        onClick={() =>
+                          openInvoicePdf(
+                            invoice.invoice_id
+                          )
+                        }
+                      >
+                        <Eye size={15} />
+                        View Invoice
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
-                      <td>
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          onClick={() =>
-                            openInvoicePdf(
-                              invoice.invoice_id
-                            )
-                          }
-                        >
-                          <Eye size={15} />
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
           </div>
-        </div>
+          </div>
       )}
     </section>
   );

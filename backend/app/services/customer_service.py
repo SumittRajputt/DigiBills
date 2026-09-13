@@ -1,3 +1,4 @@
+from datetime import date
 import uuid
 from typing import Optional
 
@@ -10,8 +11,32 @@ from app.models.user import User
 from app.models.role import Role
 
 
-def generate_customer_id() -> str:
-    return f"CUST-{uuid.uuid4().hex[:10].upper()}"
+def generate_customer_id(db: Session) -> str:
+    """
+    Generate a unique 11-digit customer-facing ID.
+
+    The ID is:
+    - exactly 11 digits
+    - system generated
+    - unique
+    - independent from the internal customer UUID
+    """
+    import secrets
+
+    while True:
+        customer_id = str(
+            secrets.randbelow(90_000_000_000)
+            + 10_000_000_000
+        )
+
+        existing = db.execute(
+            select(Customer).where(
+                Customer.customer_id == customer_id
+            )
+        ).scalar_one_or_none()
+
+        if existing is None:
+            return customer_id
 
 
 def get_customer_by_id(
@@ -85,7 +110,7 @@ def create_customer(
         )
 
     customer = Customer(
-        customer_id=generate_customer_id(),
+        customer_id=generate_customer_id(db),
         user_id=user_id,
         full_name=full_name,
         phone_number=phone_number,
@@ -238,7 +263,7 @@ def create_customer_for_retailer(
         )
 
     customer = Customer(
-        customer_id=generate_customer_id(),
+        customer_id=generate_customer_id(db),
         user_id=user.id,
         full_name=full_name.strip(),
         phone_number=phone_number,
@@ -251,3 +276,27 @@ def create_customer_for_retailer(
     db.refresh(customer)
 
     return customer
+
+
+def update_customer(
+    db: Session,
+    customer: Customer,
+    full_name: str,
+    phone_number: str,
+    email: Optional[str] = None,
+    profile_image_url: Optional[str] = None,
+    date_of_birth: Optional[date] = None,
+) -> Customer:
+    customer.full_name = full_name.strip()
+    customer.phone_number = phone_number.strip()
+    customer.email = email
+    customer.profile_image_url = profile_image_url
+    customer.date_of_birth = date_of_birth
+
+    try:
+        db.commit()
+        db.refresh(customer)
+        return customer
+    except Exception:
+        db.rollback()
+        raise

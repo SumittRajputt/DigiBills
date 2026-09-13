@@ -164,6 +164,7 @@ def get_me(
         status=current_user.status,
         is_phone_verified=current_user.is_phone_verified,
         roles=[role.name for role in roles],
+        last_login_at=current_user.last_login_at,
     )
 
 

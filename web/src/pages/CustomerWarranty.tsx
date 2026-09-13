@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  CalendarDays,
   Eye,
+  FileText,
+  Hash,
+  Package,
   RefreshCw,
+  Search,
   ShieldCheck,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
@@ -13,6 +19,11 @@ type Warranty = {
   warranty_id: string;
   invoice_id: string;
   product_variant_id: string;
+  product_unit_id: string | null;
+  product_name: string | null;
+  variant_name: string | null;
+  sku: string | null;
+  serial_number: string | null;
   customer_id: string;
   start_date: string;
   end_date: string;
@@ -57,6 +68,11 @@ export default function CustomerWarranty() {
   const [warranties, setWarranties] = useState<Warranty[]>([]);
   const [selectedWarranty, setSelectedWarranty] =
     useState<Warranty | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [draftFilterStatus, setDraftFilterStatus] = useState("all");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -105,13 +121,45 @@ export default function CustomerWarranty() {
     [warranties]
   );
 
+  const filteredWarranties = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    return warranties.filter((warranty) => {
+      const matchesSearch =
+        !query ||
+        [
+          warranty.product_name,
+          warranty.variant_name,
+          warranty.invoice_id,
+          warranty.warranty_id,
+          warranty.sku,
+          warranty.serial_number,
+        ]
+          .filter(Boolean)
+          .some((value) =>
+            String(value).toLowerCase().includes(query)
+          );
+
+      const matchesStatus =
+        filterStatus === "all"
+          ? true
+          : filterStatus === "transferable"
+            ? warranty.is_transferable &&
+              warranty.status === "active"
+            : filterStatus === "expired_cancelled"
+              ? warranty.status === "expired" ||
+                warranty.status === "cancelled"
+              : warranty.status === filterStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [warranties, searchTerm, filterStatus]);
+
   return (
     <section className="dashboard customer-dashboard-page customer-warranty-page">
       <div className="page-heading customer-warranty-heading">
         <div>
-          <span className="page-eyebrow">
-            CUSTOMER ACCOUNT
-          </span>
+          
 
           <h1>My Warranty</h1>
 
@@ -184,14 +232,33 @@ export default function CustomerWarranty() {
       </div>
 
       <div className="panel customer-warranty-panel">
-        <div className="panel-header">
-          <div>
-            <h3>Warranty Records</h3>
-            <span>
-              {warranties.length} warranty
-              {warranties.length === 1 ? "" : "ies"} found
-            </span>
-          </div>
+        <div className="customer-warranty-search-row">
+          <label className="customer-warranty-search">
+            <Search size={19} />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) =>
+                setSearchTerm(event.target.value)
+              }
+              placeholder="Search by product, invoice..."
+              aria-label="Search warranties"
+            />
+          </label>
+
+          <button
+            type="button"
+            className={`customer-warranty-filter-button${
+              filterStatus !== "all" ? " active" : ""
+            }`}
+            aria-label="Filter warranties"
+            onClick={() => {
+              setDraftFilterStatus(filterStatus);
+              setFilterOpen(true);
+            }}
+          >
+            <SlidersHorizontal size={20} />
+          </button>
         </div>
 
         {loading ? (
@@ -202,7 +269,7 @@ export default function CustomerWarranty() {
           <div className="table-state negative">
             {error}
           </div>
-        ) : warranties.length === 0 ? (
+        ) : filteredWarranties.length === 0 ? (
           <div className="table-state">
             <ShieldCheck size={22} />
 
@@ -215,90 +282,205 @@ export default function CustomerWarranty() {
             </div>
           </div>
         ) : (
-          <div className="customer-warranty-table-wrap">
-            <table className="data-table customer-warranty-table">
-              <thead>
-                <tr>
-                  <th>Warranty ID</th>
-                  <th>Invoice</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Duration</th>
-                  <th>Transferable</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
+          <div className="customer-warranty-card-grid">
+            {filteredWarranties.map((warranty) => (
+              <button
+                key={warranty.id}
+                type="button"
+                className="customer-ewarranty-card"
+                onClick={() =>
+                  setSelectedWarranty(warranty)
+                }
+              >
+                <div className="customer-ewarranty-card-top">
+                  <div className="customer-ewarranty-brand">
+                    <div className="customer-ewarranty-icon">
+                      <ShieldCheck size={20} />
+                    </div>
 
-              <tbody>
-                {warranties.map((warranty) => (
-                  <tr key={warranty.id}>
-                    <td>
+                    <div>
+                      <span>E-WARRANTY</span>
                       <strong>
-                        {warranty.warranty_id}
+                        {warranty.product_name ||
+                          "Digital Warranty"}
                       </strong>
-                    </td>
+                    </div>
+                  </div>
 
-                    <td>
-                      {warranty.invoice_id}
-                    </td>
+                  <span
+                    className={statusClass(
+                      warranty.status
+                    )}
+                  >
+                    {label(warranty.status)}
+                  </span>
+                </div>
 
-                    <td>
-                      {formatDate(warranty.start_date)}
-                    </td>
+                <div className="customer-ewarranty-product">
+                  <span>PRODUCT</span>
+                  <strong>
+                    {warranty.product_name ||
+                      "Warranty Coverage"}
+                  </strong>
 
-                    <td>
+                  {warranty.variant_name && (
+                    <small>{warranty.variant_name}</small>
+                  )}
+                </div>
+
+                <div className="customer-ewarranty-info">
+                  <div>
+                    <span>WARRANTY NUMBER</span>
+                    <strong>
+                      {warranty.warranty_id.replace(
+                        /(\d{4})(?=\d)/g,
+                        "$1 "
+                      )}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>VALID UP TO</span>
+                    <strong>
                       {formatDate(warranty.end_date)}
-                    </td>
+                    </strong>
+                  </div>
+                </div>
 
-                    <td>
-                      {warranty.duration_months} months
-                    </td>
+                <div className="customer-ewarranty-card-footer">
+                  <span>
+                    {warranty.duration_months} month
+                    {warranty.duration_months === 1
+                      ? ""
+                      : "s"}{" "}
+                    coverage
+                  </span>
 
-                    <td>
-                      {warranty.is_transferable
-                        ? "Yes"
-                        : "No"}
-                    </td>
-
-                    <td>
-                      <span
-                        className={statusClass(
-                          warranty.status
-                        )}
-                      >
-                        {label(warranty.status)}
-                      </span>
-                    </td>
-
-                    <td>
-                      <button
-                        className="table-action-button"
-                        type="button"
-                        title="View warranty"
-                        onClick={() =>
-                          setSelectedWarranty(warranty)
-                        }
-                      >
-                        <Eye size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  <span className="customer-ewarranty-view">
+                    View Details
+                    <Eye size={16} />
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         )}
       </div>
 
-      <button
-        className="secondary-button customer-warranty-back"
-        type="button"
-        onClick={() => navigate("/customer")}
-      >
-        <ArrowLeft size={15} />
-        Back to Dashboard
-      </button>
+
+      {filterOpen && (
+        <div
+          className="customer-warranty-filter-backdrop"
+          onClick={() => setFilterOpen(false)}
+        >
+          <div
+            className="customer-warranty-filter-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="customer-warranty-filter-header">
+              <div>
+                <span className="page-eyebrow">
+                  WARRANTY FILTERS
+                </span>
+                <h2>Filter Warranties</h2>
+              </div>
+
+              <button
+                type="button"
+                className="customer-warranty-filter-close"
+                onClick={() => setFilterOpen(false)}
+                aria-label="Close filters"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="customer-warranty-filter-content">
+              <div className="customer-warranty-filter-group">
+                <strong>Status</strong>
+
+                <div className="customer-warranty-filter-options">
+                  {[
+                    ["all", "All"],
+                    ["active", "Active"],
+                    ["transferable", "Transferable"],
+                    ["expired_cancelled", "Expired / Cancelled"],
+                  ].map(([value, labelText]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={
+                        draftFilterStatus === value
+                          ? "selected"
+                          : ""
+                      }
+                      onClick={() =>
+                        setDraftFilterStatus(value)
+                      }
+                    >
+                      <span className="customer-warranty-filter-option-icon">
+                        <ShieldCheck size={18} />
+                      </span>
+                      <span>{labelText}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="customer-warranty-filter-group">
+                <strong>Product Type</strong>
+
+                <select
+                  className="customer-warranty-filter-select"
+                  defaultValue="all"
+                  aria-label="Product type"
+                >
+                  <option value="all">All Products</option>
+                </select>
+              </div>
+
+              <div className="customer-warranty-filter-group">
+                <strong>Purchase Date</strong>
+
+                <div className="customer-warranty-filter-dates">
+                  <input
+                    type="date"
+                    aria-label="Purchase from date"
+                  />
+                  <input
+                    type="date"
+                    aria-label="Purchase to date"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="customer-warranty-filter-actions">
+              <button
+                type="button"
+                className="customer-warranty-filter-apply"
+                onClick={() => {
+                  setFilterStatus(draftFilterStatus);
+                  setFilterOpen(false);
+                }}
+              >
+                Apply Filters
+              </button>
+
+              <button
+                type="button"
+                className="customer-warranty-filter-reset"
+                onClick={() => {
+                  setDraftFilterStatus("all");
+                  setFilterStatus("all");
+                }}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedWarranty && (
         <div
@@ -313,14 +495,15 @@ export default function CustomerWarranty() {
               event.stopPropagation()
             }
           >
-            <div className="customer-warranty-modal-header">
+            <div className="customer-ewarranty-modal-header">
               <div>
                 <span className="page-eyebrow">
-                  WARRANTY DETAILS
+                  E-WARRANTY DETAILS
                 </span>
 
                 <h2>
-                  {selectedWarranty.warranty_id}
+                  {selectedWarranty.product_name ||
+                    "Warranty Details"}
                 </h2>
               </div>
 
@@ -330,82 +513,197 @@ export default function CustomerWarranty() {
                 onClick={() =>
                   setSelectedWarranty(null)
                 }
+                aria-label="Close warranty details"
               >
                 ×
               </button>
             </div>
 
-            <div className="customer-warranty-detail-grid">
-              <div>
-                <small>Warranty ID</small>
-                <strong>
-                  {selectedWarranty.warranty_id}
-                </strong>
+            <div className="customer-ewarranty-modal-hero">
+              <div className="customer-ewarranty-modal-product-icon">
+                <Package size={28} />
               </div>
 
-              <div>
-                <small>Invoice</small>
+              <div className="customer-ewarranty-modal-product-copy">
+                <span>E-WARRANTY</span>
                 <strong>
-                  {selectedWarranty.invoice_id}
+                  {selectedWarranty.product_name ||
+                    "Warranty Coverage"}
                 </strong>
+
+                {selectedWarranty.variant_name && (
+                  <small>
+                    {selectedWarranty.variant_name}
+                  </small>
+                )}
               </div>
 
+              <span
+                className={statusClass(
+                  selectedWarranty.status
+                )}
+              >
+                {label(selectedWarranty.status)}
+              </span>
+            </div>
+
+            <div className="customer-ewarranty-modal-number">
               <div>
-                <small>Start Date</small>
+                <span>WARRANTY NUMBER</span>
                 <strong>
-                  {formatDate(
-                    selectedWarranty.start_date
+                  {selectedWarranty.warranty_id.replace(
+                    /(\d{4})(?=\d)/g,
+                    "$1 "
                   )}
                 </strong>
               </div>
 
               <div>
-                <small>End Date</small>
+                <span>VALID UP TO</span>
                 <strong>
                   {formatDate(
                     selectedWarranty.end_date
                   )}
                 </strong>
               </div>
+            </div>
 
-              <div>
-                <small>Duration</small>
-                <strong>
-                  {selectedWarranty.duration_months} months
-                </strong>
+            <div className="customer-ewarranty-detail-section">
+              <div className="customer-ewarranty-detail-section-title">
+                <Package size={17} />
+                <strong>Product Information</strong>
               </div>
 
-              <div>
-                <small>Transferable</small>
-                <strong>
-                  {selectedWarranty.is_transferable
-                    ? "Yes"
-                    : "No"}
-                </strong>
-              </div>
+              <div className="customer-ewarranty-detail-list">
+                <div>
+                  <span>Product Name</span>
+                  <strong>
+                    {selectedWarranty.product_name ||
+                      "—"}
+                  </strong>
+                </div>
 
-              <div>
-                <small>Status</small>
-                <span
-                  className={statusClass(
-                    selectedWarranty.status
-                  )}
-                >
-                  {label(
-                    selectedWarranty.status
-                  )}
-                </span>
-              </div>
+                <div>
+                  <span>Variant</span>
+                  <strong>
+                    {selectedWarranty.variant_name ||
+                      "—"}
+                  </strong>
+                </div>
 
-              <div>
-                <small>Created</small>
-                <strong>
-                  {formatDate(
-                    selectedWarranty.created_at
-                  )}
-                </strong>
+                <div>
+                  <span>SKU</span>
+                  <strong>
+                    {selectedWarranty.sku || "—"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Serial Number</span>
+                  <strong>
+                    {selectedWarranty.serial_number ||
+                      "Not available"}
+                  </strong>
+                </div>
               </div>
             </div>
+
+            <div className="customer-ewarranty-detail-section">
+              <div className="customer-ewarranty-detail-section-title">
+                <FileText size={17} />
+                <strong>Purchase & Warranty Information</strong>
+              </div>
+
+              <div className="customer-ewarranty-detail-list">
+                <div>
+                  <span>Invoice Number</span>
+                  <strong>
+                    {selectedWarranty.invoice_id}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Warranty Start Date</span>
+                  <strong>
+                    {formatDate(
+                      selectedWarranty.start_date
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Warranty End Date</span>
+                  <strong>
+                    {formatDate(
+                      selectedWarranty.end_date
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Duration</span>
+                  <strong>
+                    {selectedWarranty.duration_months}{" "}
+                    month
+                    {selectedWarranty.duration_months === 1
+                      ? ""
+                      : "s"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Transferable</span>
+                  <strong>
+                    {selectedWarranty.is_transferable
+                      ? "Yes"
+                      : "No"}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Created</span>
+                  <strong>
+                    {formatDate(
+                      selectedWarranty.created_at
+                    )}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="customer-ewarranty-status-section">
+              <div className="customer-ewarranty-detail-section-title">
+                <ShieldCheck size={17} />
+                <strong>Warranty Status</strong>
+              </div>
+
+              <div
+                className={`customer-ewarranty-status-box customer-ewarranty-status-box-${selectedWarranty.status}`}
+              >
+                <span>
+                  <span className="customer-ewarranty-status-dot" />
+                  {label(selectedWarranty.status)}
+                </span>
+
+                <small>
+                  {selectedWarranty.status === "active"
+                    ? "Your product is under warranty coverage."
+                    : selectedWarranty.status === "expired"
+                      ? "This warranty coverage has expired."
+                      : "This warranty is no longer active."}
+                </small>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="customer-ewarranty-modal-close"
+              onClick={() =>
+                setSelectedWarranty(null)
+              }
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

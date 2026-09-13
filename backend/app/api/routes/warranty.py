@@ -1,5 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.models.product_unit import ProductUnit
+from app.models.product_variant import ProductVariant
+from app.models.product import Product
 
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
@@ -27,12 +32,61 @@ router = APIRouter(
 )
 
 
-def warranty_to_response(warranty):
+def warranty_to_response(warranty, db: Session):
+    product_variant = db.execute(
+        select(ProductVariant).where(
+            ProductVariant.id == warranty.product_variant_id
+        )
+    ).scalar_one_or_none()
+
+    product = None
+
+    if product_variant is not None:
+        product = db.execute(
+            select(Product).where(
+                Product.id == product_variant.product_id
+            )
+        ).scalar_one_or_none()
+
+    product_unit = None
+
+    if warranty.product_unit_id is not None:
+        product_unit = db.execute(
+            select(ProductUnit).where(
+                ProductUnit.id == warranty.product_unit_id
+            )
+        ).scalar_one_or_none()
+
     return WarrantyResponse(
         id=str(warranty.id),
         warranty_id=warranty.warranty_id,
         invoice_id=str(warranty.invoice_id),
         product_variant_id=str(warranty.product_variant_id),
+        product_unit_id=(
+            str(warranty.product_unit_id)
+            if warranty.product_unit_id is not None
+            else None
+        ),
+        product_name=(
+            product.name
+            if product is not None
+            else None
+        ),
+        variant_name=(
+            product_variant.variant_name
+            if product_variant is not None
+            else None
+        ),
+        sku=(
+            product_variant.sku
+            if product_variant is not None
+            else None
+        ),
+        serial_number=(
+            product_unit.serial_number
+            if product_unit is not None
+            else None
+        ),
         customer_id=str(warranty.customer_id),
         start_date=warranty.start_date,
         end_date=warranty.end_date,
@@ -102,7 +156,7 @@ def create_warranty_endpoint(
             is_transferable=request.is_transferable,
         )
 
-        return warranty_to_response(warranty)
+        return warranty_to_response(warranty, db)
 
     except ValueError as exc:
         db.rollback()
@@ -140,7 +194,7 @@ def list_warranties_endpoint(
     )
 
     return [
-        warranty_to_response(warranty)
+        warranty_to_response(warranty, db)
         for warranty in warranties
     ]
 
@@ -189,7 +243,7 @@ def get_warranty_endpoint(
             detail="Warranty not found.",
         )
 
-    return warranty_to_response(warranty)
+    return warranty_to_response(warranty, db)
 
 
 @router.post(
@@ -248,7 +302,7 @@ def update_warranty_status_endpoint(
             new_status=request.status,
         )
 
-        return warranty_to_response(warranty)
+        return warranty_to_response(warranty, db)
 
     except ValueError as exc:
         db.rollback()
@@ -315,7 +369,7 @@ def transfer_warranty_endpoint(
             new_customer_id=request.customer_id,
         )
 
-        return warranty_to_response(warranty)
+        return warranty_to_response(warranty, db)
 
     except ValueError as exc:
         db.rollback()

@@ -3178,3 +3178,3143 @@
     padding: 14px;
   }
 }
+
+/* Customer subscription — compact ATM-card proportion */
+@media (max-width: 767px) {
+  .customer-subscription-active-card {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    border-radius: 20px;
+  }
+
+  .customer-subscription-active-top {
+    position: relative;
+    min-height: 88px;
+    padding: 18px 18px 14px;
+    padding-right: 118px;
+  }
+
+  .customer-subscription-active-status {
+    position: absolute;
+    top: 18px;
+    right: 16px;
+    padding: 7px 9px;
+    font-size: 10px;
+  }
+
+  .customer-subscription-active-brand {
+    gap: 11px;
+  }
+
+  .customer-subscription-active-crown {
+    width: 45px;
+    height: 45px;
+    flex-basis: 45px;
+    border-radius: 13px;
+  }
+
+  .customer-subscription-active-brand h2 {
+    font-size: 19px;
+  }
+
+  .customer-subscription-active-brand p {
+    font-size: 10px;
+  }
+
+  .customer-subscription-active-details {
+    gap: 14px;
+    padding: 16px 18px 18px;
+  }
+
+  .customer-subscription-active-plan > strong {
+    margin-top: 5px;
+    font-size: 15px;
+  }
+
+  .customer-subscription-active-plan > p {
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .customer-subscription-active-meta {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .customer-subscription-active-meta > div {
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .customer-subscription-active-meta > div > svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+
+  .customer-subscription-active-meta strong {
+    font-size: 11px;
+  }
+
+  .customer-subscription-active-meta span {
+    font-size: 8px;
+    line-height: 1.25;
+  }
+
+  .customer-subscription-manage-button {
+    min-height: 46px;
+    padding: 0 18px;
+    font-size: 11px;
+  }
+}
+
+/* Customer subscription — move Trial Active to upper-right on mobile */
+@media (max-width: 767px) {
+  .customer-subscription-active-top {
+    position: relative;
+    padding-right: 125px;
+  }
+
+  .customer-subscription-active-status {
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    left: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+  }
+}
+
+/* Customer subscription — expandable benefits */
+.customer-subscription-benefits {
+  margin-top: 16px;
+  border: 1px solid #e3e6f2;
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.customer-subscription-benefits > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.customer-subscription-benefits > summary::-webkit-details-marker {
+  display: none;
+}
+
+.customer-subscription-benefits > summary > svg {
+  transition: transform 0.2s ease;
+}
+
+.customer-subscription-benefits[open] > summary > svg {
+  transform: rotate(90deg);
+}
+
+.customer-subscription-benefits-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid #eceef6;
+  padding: 8px 18px 12px;
+}
+
+.customer-subscription-benefits-list > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 8px;
+}
+
+.customer-subscription-benefits-list > div > svg {
+  flex: 0 0 17px;
+  margin-top: 2px;
+  color: #7352d6;
+}
+
+.customer-subscription-benefits-list > div > div {
+  min-width: 0;
+}
+
+.customer-subscription-benefits-list strong {
+  display: block;
+  color: #182033;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.customer-subscription-benefits-list span {
+  display: block;
+  margin-top: 3px;
+  color: #78839a;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 767px) {
+  .customer-subscription-benefits {
+    margin-top: 14px;
+    border-radius: 16px;
+  }
+
+  .customer-subscription-benefits-list {
+    grid-template-columns: 1fr;
+    padding: 5px 13px 8px;
+  }
+
+  .customer-subscription-benefits-list > div {
+    padding: 11px 5px;
+  }
+
+  .customer-subscription-benefits-list strong {
+    font-size: 11px;
+  }
+
+  .customer-subscription-benefits-list span {
+    font-size: 9px;
+  }
+}
+
+/* Customer subscription — desktop benefits layout fix */
+@media (min-width: 768px) {
+  .customer-subscription-benefits {
+    display: block !important;
+    width: 100%;
+  }
+
+  .customer-subscription-benefits > summary.customer-subscription-info-row {
+    display: flex !important;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 0;
+  }
+
+  .customer-subscription-benefits-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .customer-subscription-benefits-list > div {
+    min-width: 0;
+  }
+}
+
+/* ---------- MANAGE SUBSCRIPTION PANEL ---------- */
+
+.customer-subscription-manage-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(18, 23, 42, 0.48);
+  backdrop-filter: blur(5px);
+}
+
+.customer-subscription-manage-panel {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid #e5e7f0;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 30px 90px rgba(18, 23, 42, 0.2);
+}
+
+.customer-subscription-manage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.customer-subscription-manage-header > div > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #78839a;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.customer-subscription-manage-header h2 {
+  margin: 0;
+  color: #182033;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.customer-subscription-manage-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: 12px;
+  background: #f1f2ff;
+  color: #626579;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.customer-subscription-manage-close:hover {
+  background: #e7e5ff;
+  color: #3525cd;
+}
+
+.customer-subscription-manage-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #e9fff5;
+  color: #087052;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.customer-subscription-manage-status > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #087052;
+}
+
+.customer-subscription-manage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.customer-subscription-manage-grid > div {
+  min-width: 0;
+  padding: 15px 16px;
+  border: 1px solid #e7e8f1;
+  border-radius: 15px;
+  background: #fbfaff;
+}
+
+.customer-subscription-manage-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: #78839a;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.customer-subscription-manage-grid strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #182033;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-subscription-manage-benefits {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #e7e8f1;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.customer-subscription-manage-benefits-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #182033;
+  font-size: 14px;
+}
+
+.customer-subscription-manage-benefits-title svg {
+  color: #3525cd;
+}
+
+.customer-subscription-manage-benefits-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+  margin-top: 15px;
+}
+
+.customer-subscription-manage-benefits-list > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #626579;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.customer-subscription-manage-benefits-list svg {
+  flex: 0 0 16px;
+  color: #7352d6;
+}
+
+.customer-subscription-manage-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 18px;
+  padding: 13px 15px;
+  border-radius: 14px;
+  background: #f1f2ff;
+  color: #626579;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.customer-subscription-manage-note svg {
+  flex: 0 0 18px;
+  color: #3525cd;
+  margin-top: 1px;
+}
+
+@media (max-width: 767px) {
+  .customer-subscription-manage-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .customer-subscription-manage-panel {
+    width: 100%;
+    max-height: 88vh;
+    padding: 22px 18px 24px;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .customer-subscription-manage-header h2 {
+    font-size: 21px;
+  }
+
+  .customer-subscription-manage-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-top: 18px;
+  }
+
+  .customer-subscription-manage-grid > div {
+    padding: 12px;
+    border-radius: 13px;
+  }
+
+  .customer-subscription-manage-grid strong {
+    font-size: 11px;
+  }
+
+  .customer-subscription-manage-benefits {
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .customer-subscription-manage-benefits-list {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .customer-subscription-manage-note {
+    font-size: 9px;
+  }
+}
+
+/* ==================================================
+   CUSTOMER E-WARRANTY CARDS
+   ================================================== */
+
+.customer-warranty-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.customer-ewarranty-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: 22px;
+  border: 0;
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #4f46e5 52%,
+      #6d4de8 100%
+    );
+  color: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow:
+    0 14px 30px rgba(37, 99, 235, 0.18);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.customer-ewarranty-card::after {
+  content: "";
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  right: -70px;
+  bottom: -90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.customer-ewarranty-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 38px rgba(37, 99, 235, 0.24);
+}
+
+.customer-ewarranty-card:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline-offset: 3px;
+}
+
+.customer-ewarranty-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.customer-ewarranty-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.customer-ewarranty-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.customer-ewarranty-brand > div:last-child {
+  min-width: 0;
+}
+
+.customer-ewarranty-brand span,
+.customer-ewarranty-product > span,
+.customer-ewarranty-info span {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.customer-ewarranty-brand span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.customer-ewarranty-brand strong {
+  display: block;
+  margin-top: 3px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-card .customer-warranty-status {
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.customer-ewarranty-product {
+  position: relative;
+  z-index: 1;
+  margin-top: 26px;
+}
+
+.customer-ewarranty-product > span,
+.customer-ewarranty-info span {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.customer-ewarranty-product strong {
+  display: block;
+  margin-top: 6px;
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.customer-ewarranty-info {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(130px, 0.75fr);
+  gap: 18px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.customer-ewarranty-info strong {
+  display: block;
+  margin-top: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  word-break: break-word;
+}
+
+.customer-ewarranty-card-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.customer-ewarranty-card-footer > span:first-child {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.customer-ewarranty-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .customer-warranty-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .customer-ewarranty-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .customer-ewarranty-card-top {
+    gap: 10px;
+  }
+
+  .customer-ewarranty-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .customer-ewarranty-product strong {
+    font-size: 18px;
+  }
+
+  .customer-ewarranty-info {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .customer-ewarranty-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .customer-ewarranty-view {
+    justify-content: flex-start;
+  }
+}
+
+/* Customer E-Warranty card — final responsive layout */
+.customer-warranty-page .customer-ewarranty-card {
+  display: block !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 22px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  background: linear-gradient(
+    135deg,
+    #2563eb 0%,
+    #4f46e5 52%,
+    #6d4de8 100%
+  ) !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  line-height: normal !important;
+  text-align: left !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18) !important;
+}
+
+.customer-warranty-page .customer-ewarranty-card * {
+  box-sizing: border-box;
+}
+
+.customer-warranty-page .customer-ewarranty-card-top {
+  display: flex !important;
+}
+
+.customer-warranty-page .customer-ewarranty-brand {
+  display: flex !important;
+}
+
+.customer-warranty-page .customer-ewarranty-product {
+  display: block !important;
+}
+
+.customer-warranty-page .customer-ewarranty-info {
+  display: grid !important;
+}
+
+.customer-warranty-page .customer-ewarranty-card-footer {
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.customer-warranty-page .customer-ewarranty-card span,
+.customer-warranty-page .customer-ewarranty-card strong,
+.customer-warranty-page .customer-ewarranty-card small {
+  color: inherit;
+}
+
+.customer-warranty-page .customer-ewarranty-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 20px 38px rgba(37, 99, 235, 0.24) !important;
+}
+
+@media (max-width: 900px) {
+  .customer-warranty-page .customer-ewarranty-card {
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .customer-warranty-page .customer-ewarranty-card {
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-card-footer {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-view {
+    justify-content: flex-end !important;
+  }
+}
+
+/* ==================================================
+   CUSTOMER E-WARRANTY DETAILS MODAL
+   ================================================== */
+
+.customer-warranty-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  overflow-y: auto;
+}
+
+.customer-warranty-modal {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e7ebf2;
+  border-radius: 22px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+  color: #17233c;
+}
+
+.customer-warranty-modal::-webkit-scrollbar {
+  width: 7px;
+}
+
+.customer-warranty-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customer-warranty-modal::-webkit-scrollbar-thumb {
+  background: #d5dce8;
+  border-radius: 10px;
+}
+
+.customer-ewarranty-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 28px 22px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.customer-ewarranty-modal-header h2 {
+  margin: 7px 0 0;
+  color: #17233c;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.customer-ewarranty-modal-header .page-eyebrow {
+  display: block;
+  color: #1769ff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.customer-warranty-modal .table-action-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #455368;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.customer-warranty-modal .table-action-button:hover {
+  background: #f8fafc;
+  border-color: #cfd8e5;
+}
+
+.customer-ewarranty-modal-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 22px 0;
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #4f46e5 52%,
+      #6d4de8 100%
+    );
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.customer-ewarranty-modal-hero::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  right: -75px;
+  bottom: -105px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.09);
+  pointer-events: none;
+}
+
+.customer-ewarranty-modal-product-icon {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.customer-ewarranty-modal-product-copy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  flex: 1;
+}
+
+.customer-ewarranty-modal-product-copy > span {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.customer-ewarranty-modal-product-copy strong {
+  display: block;
+  color: #ffffff;
+  font-size: 17px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.customer-ewarranty-modal-product-copy small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.customer-ewarranty-modal-hero .customer-warranty-status {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+}
+
+.customer-ewarranty-modal-number {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(170px, 0.6fr);
+  gap: 24px;
+  margin: 0 22px;
+  padding: 20px 2px 22px;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.customer-ewarranty-modal-number span,
+.customer-ewarranty-detail-list span {
+  display: block;
+  margin-bottom: 6px;
+  color: #718096;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.customer-ewarranty-modal-number strong {
+  display: block;
+  color: #17233c;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+}
+
+.customer-ewarranty-detail-section {
+  margin: 18px 22px 0;
+  padding: 17px 18px;
+  border: 1px solid #e7ebf1;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.customer-ewarranty-detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: #17233c;
+}
+
+.customer-ewarranty-detail-section-title svg {
+  flex: 0 0 auto;
+  color: #1769ff;
+}
+
+.customer-ewarranty-detail-section-title strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-detail-list {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.customer-ewarranty-detail-list > div {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.75fr) minmax(0, 1.25fr);
+  gap: 18px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #edf1f6;
+}
+
+.customer-ewarranty-detail-list > div:first-child {
+  border-top: 0;
+  padding-top: 2px;
+}
+
+.customer-ewarranty-detail-list > div:last-child {
+  padding-bottom: 2px;
+}
+
+.customer-ewarranty-detail-list span {
+  margin: 0;
+}
+
+.customer-ewarranty-detail-list strong {
+  color: #24324b;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 750;
+  word-break: break-word;
+}
+
+.customer-ewarranty-modal .customer-warranty-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-modal > .customer-ewarranty-detail-section:last-of-type {
+  margin-bottom: 18px;
+}
+
+.customer-ewarranty-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 44px);
+  min-height: 40px;
+  margin: 18px 22px 22px;
+  border: 1px solid #dfe5ee;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #455368;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.customer-ewarranty-modal-close:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+@media (max-width: 700px) {
+  .customer-warranty-modal-backdrop {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .customer-warranty-modal {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    border-radius: 18px;
+  }
+
+  .customer-ewarranty-modal-header {
+    padding: 20px 18px 17px;
+  }
+
+  .customer-ewarranty-modal-header h2 {
+    font-size: 19px;
+  }
+
+  .customer-ewarranty-modal-hero {
+    margin: 14px 14px 0;
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .customer-ewarranty-modal-product-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .customer-ewarranty-modal-product-copy strong {
+    font-size: 15px;
+  }
+
+  .customer-ewarranty-modal-number {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 0 14px;
+    padding: 17px 2px 18px;
+  }
+
+  .customer-ewarranty-detail-section {
+    margin: 14px 14px 0;
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .customer-ewarranty-detail-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    padding: 9px 0;
+  }
+
+  .customer-ewarranty-detail-list strong {
+    font-size: 12px;
+  }
+
+  .customer-ewarranty-modal-close {
+    width: calc(100% - 28px);
+    margin: 14px 14px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .customer-warranty-modal-backdrop {
+    padding: 8px;
+  }
+
+  .customer-warranty-modal {
+    max-height: calc(100vh - 16px);
+  }
+
+  .customer-ewarranty-modal-header {
+    padding: 17px 14px 14px;
+  }
+
+  .customer-ewarranty-modal-header h2 {
+    font-size: 17px;
+  }
+
+  .customer-ewarranty-modal-hero {
+    margin: 12px 10px 0;
+  }
+
+  .customer-ewarranty-modal-number {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 0 10px;
+  }
+
+  .customer-ewarranty-detail-section {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .customer-ewarranty-modal-close {
+    width: calc(100% - 20px);
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+
+
+/* ==================================================
+   CUSTOMER E-WARRANTY STATUS SECTION
+   ================================================== */
+
+.customer-ewarranty-detail-section .customer-warranty-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-detail-section .customer-warranty-status.active,
+.customer-ewarranty-detail-section .customer-warranty-status.approved {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.customer-ewarranty-status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 16px;
+  border-radius: 13px;
+  background: #ecfdf3;
+  border: 1px solid #d1fae5;
+}
+
+.customer-ewarranty-status-panel > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.customer-ewarranty-status-panel .status-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.customer-ewarranty-status-panel strong {
+  color: #15803d;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-status-panel p {
+  margin: 0;
+  color: #397052;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .customer-ewarranty-status-panel {
+    padding: 13px 14px;
+    border-radius: 12px;
+  }
+
+  .customer-ewarranty-status-panel strong {
+    font-size: 13px;
+  }
+
+  .customer-ewarranty-status-panel p {
+    font-size: 10px;
+  }
+}
+
+
+/* Customer E-Warranty — Warranty Status */
+.customer-ewarranty-status-section {
+  margin: 18px 22px 0;
+}
+
+.customer-ewarranty-status-section .customer-ewarranty-detail-section-title {
+  margin-bottom: 12px;
+}
+
+.customer-ewarranty-status-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.customer-ewarranty-status-box > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.customer-ewarranty-status-box small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.customer-ewarranty-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+}
+
+.customer-ewarranty-status-box-active {
+  background: #ecfdf3;
+  color: #087a42;
+}
+
+.customer-ewarranty-status-box-active .customer-ewarranty-status-dot {
+  background: #16a34a;
+}
+
+.customer-ewarranty-status-box-expired,
+.customer-ewarranty-status-box-cancelled {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.customer-ewarranty-status-box-expired .customer-ewarranty-status-dot,
+.customer-ewarranty-status-box-cancelled .customer-ewarranty-status-dot {
+  background: #ef4444;
+}
+
+.customer-ewarranty-status-box-active small,
+.customer-ewarranty-status-box-expired small,
+.customer-ewarranty-status-box-cancelled small {
+  color: inherit;
+  opacity: 0.82;
+}
+
+@media (max-width: 700px) {
+  .customer-ewarranty-status-section {
+    margin: 14px 14px 0;
+  }
+
+  .customer-ewarranty-status-box {
+    padding: 13px 14px;
+    border-radius: 12px;
+  }
+}
+
+
+/* Mobile E-Warranty modal — keep Close button visible */
+@media (max-width: 700px) {
+  .customer-warranty-modal {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .customer-ewarranty-modal-header {
+    flex: 0 0 auto !important;
+  }
+
+  .customer-ewarranty-modal-hero,
+  .customer-ewarranty-modal-number,
+  .customer-ewarranty-detail-section,
+  .customer-ewarranty-status-section {
+    flex-shrink: 0;
+  }
+
+  .customer-ewarranty-modal-close {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 20 !important;
+    flex: 0 0 auto !important;
+    background: #ffffff !important;
+    box-shadow: 0 -8px 18px rgba(23, 35, 60, 0.06) !important;
+  }
+}
+
+
+/* FIX: Mobile E-Warranty modal must scroll and keep Close accessible */
+@media (max-width: 700px) {
+  .customer-warranty-modal {
+    display: block !important;
+    width: 100% !important;
+    max-height: calc(100vh - 24px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .customer-ewarranty-modal-close {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: calc(100% - 32px) !important;
+    margin: 12px 16px 16px !important;
+    min-height: 48px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 -8px 18px rgba(15, 23, 42, 0.08) !important;
+  }
+}
+
+
+/* FINAL FIX — Mobile E-Warranty modal above bottom navigation */
+@media (max-width: 700px) {
+  .customer-warranty-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    padding: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .customer-warranty-modal {
+    position: relative !important;
+    z-index: 100000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 24px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: 4px !important;
+  }
+
+  .customer-ewarranty-modal-close {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 100001 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: calc(100% - 32px) !important;
+    min-height: 48px !important;
+    margin: 12px 16px 16px !important;
+    padding: 12px 16px !important;
+    background: #ffffff !important;
+    border: 1px solid #dfe5ef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 -10px 22px rgba(15, 23, 42, 0.10) !important;
+  }
+}
+
+
+/* =========================================================
+   CUSTOMER WARRANTY — GENERATED MOBILE MAIN UI
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .customer-warranty-page {
+    background: #f7f9ff !important;
+  }
+
+  .customer-warranty-heading {
+    display: block !important;
+    margin-bottom: 18px !important;
+  }
+
+  .customer-warranty-heading .secondary-button {
+    display: none !important;
+  }
+
+  .customer-warranty-heading h1 {
+    font-size: 30px !important;
+    line-height: 1.12 !important;
+    margin: 6px 0 8px !important;
+  }
+
+  .customer-warranty-heading p {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    max-width: 330px !important;
+  }
+
+  /* Four summary cards = 2 x 2 */
+  .customer-warranty-page .stats-grid.four {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .customer-warranty-page .stats-grid.four .stat-card {
+    min-height: 76px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    gap: 10px !important;
+  }
+
+  .customer-warranty-page .stats-grid.four .stat-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  .customer-warranty-page .stats-grid.four .stat-card span {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .customer-warranty-page .stats-grid.four .stat-card strong {
+    display: block !important;
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+    margin-top: 4px !important;
+  }
+
+  /* Remove old Warranty Records presentation */
+  .customer-warranty-page .customer-warranty-panel {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .customer-warranty-page .customer-warranty-panel .panel-header {
+    display: none !important;
+  }
+
+  /* Search + filter */
+  .customer-warranty-search-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 48px !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .customer-warranty-search {
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 0 14px !important;
+    border: 1px solid #dce3f0 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #66758f !important;
+  }
+
+  .customer-warranty-search input {
+    width: 100% !important;
+    min-width: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: #17233c !important;
+    font: inherit !important;
+    font-size: 13px !important;
+  }
+
+  .customer-warranty-search input::placeholder {
+    color: #8b97ab !important;
+  }
+
+  .customer-warranty-filter-button {
+    width: 48px !important;
+    height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid #dce3f0 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #17233c !important;
+    cursor: pointer !important;
+  }
+
+  /* Generated card spacing */
+  .customer-warranty-page .customer-warranty-card-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-card {
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-card-top {
+    margin-bottom: 20px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-product {
+    margin-bottom: 16px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-product strong {
+    font-size: 20px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-info {
+    margin-top: 0 !important;
+    padding-top: 14px !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-card-footer {
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+  }
+
+  .customer-warranty-page .customer-warranty-back {
+    display: none !important;
+  }
+}
+
+
+/* =========================================================
+   CUSTOMER WARRANTY — EXACT GENERATED DESKTOP LAYOUT
+   ========================================================= */
+
+@media (min-width: 701px) {
+  .customer-warranty-page .stats-grid.four {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .customer-warranty-page .stats-grid.four .stat-card {
+    min-width: 0 !important;
+  }
+
+  .customer-warranty-page .customer-warranty-panel {
+    width: 100% !important;
+  }
+
+  .customer-warranty-page .customer-warranty-card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    align-items: start !important;
+  }
+
+  .customer-warranty-page .customer-ewarranty-card {
+    width: 100% !important;
+  }
+
+  .customer-warranty-search-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .customer-warranty-search {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 360px !important;
+    height: 46px !important;
+    padding: 0 14px !important;
+    border: 1px solid #dce3f0 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+  }
+
+  .customer-warranty-search input {
+    width: 100% !important;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+  }
+
+  .customer-warranty-filter-button {
+    width: 46px !important;
+    height: 46px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid #dce3f0 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+  }
+}
+
+
+/* =========================================================
+   CUSTOMER WARRANTY — FUNCTIONAL FILTER PANEL
+   ========================================================= */
+
+.customer-warranty-filter-button.active {
+  border-color: #6d4de8 !important;
+  color: #6d4de8 !important;
+  background: #f3efff !important;
+}
+
+.customer-warranty-filter-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99990 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  background: rgba(15, 23, 42, 0.52) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+.customer-warranty-filter-modal {
+  width: min(520px, 100%) !important;
+  max-height: calc(100vh - 48px) !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24) !important;
+}
+
+.customer-warranty-filter-header {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 22px !important;
+  border-bottom: 1px solid #e8edf5 !important;
+}
+
+.customer-warranty-filter-header h2 {
+  margin: 6px 0 0 !important;
+  color: #17233c !important;
+  font-size: 22px !important;
+}
+
+.customer-warranty-filter-close {
+  width: 38px !important;
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #dfe5ef !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+  font-size: 22px !important;
+  cursor: pointer !important;
+}
+
+.customer-warranty-filter-content {
+  padding: 22px !important;
+}
+
+.customer-warranty-filter-group {
+  margin-bottom: 24px !important;
+}
+
+.customer-warranty-filter-group > strong {
+  display: block !important;
+  margin-bottom: 12px !important;
+  color: #17233c !important;
+  font-size: 14px !important;
+}
+
+.customer-warranty-filter-options {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customer-warranty-filter-options button {
+  min-height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  border: 1px solid #e0e6f0 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+  text-align: left !important;
+  cursor: pointer !important;
+}
+
+.customer-warranty-filter-options button.selected {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 1px #2563eb inset !important;
+  background: #f7f9ff !important;
+  color: #2563eb !important;
+}
+
+.customer-warranty-filter-option-icon {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 11px !important;
+  background: #eef4ff !important;
+  color: #2563eb !important;
+}
+
+.customer-warranty-filter-select,
+.customer-warranty-filter-dates input {
+  width: 100% !important;
+  height: 48px !important;
+  padding: 0 13px !important;
+  border: 1px solid #dce3f0 !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+  font: inherit !important;
+}
+
+.customer-warranty-filter-dates {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.customer-warranty-filter-actions {
+  display: grid !important;
+  gap: 10px !important;
+  padding: 0 22px 22px !important;
+}
+
+.customer-warranty-filter-apply,
+.customer-warranty-filter-reset {
+  width: 100% !important;
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+}
+
+.customer-warranty-filter-apply {
+  border: 0 !important;
+  background: linear-gradient(135deg, #2563eb, #6d4de8) !important;
+  color: #ffffff !important;
+}
+
+.customer-warranty-filter-reset {
+  border: 1px solid #dce3f0 !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+}
+
+@media (max-width: 700px) {
+  .customer-warranty-filter-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .customer-warranty-filter-modal {
+    width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  .customer-warranty-filter-header {
+    padding: 20px !important;
+  }
+
+  .customer-warranty-filter-content {
+    padding: 20px !important;
+  }
+
+  .customer-warranty-filter-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .customer-warranty-filter-actions {
+    padding: 0 20px 20px !important;
+  }
+}
+
+
+/* =========================================================
+   CUSTOMER TRANSFER BILLS — TRANSFER REQUEST FORM
+   ========================================================= */
+
+.customer-transfer-primary-action {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 16px;
+}
+
+.customer-transfer-open-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.customer-transfer-form-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  background: rgba(15, 23, 42, 0.52) !important;
+  backdrop-filter: blur(3px) !important;
+}
+
+.customer-transfer-form-modal {
+  width: min(650px, 100%) !important;
+  max-height: calc(100vh - 48px) !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24) !important;
+}
+
+.customer-transfer-form-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 24px !important;
+  border-bottom: 1px solid #e8edf5 !important;
+}
+
+.customer-transfer-form-header h2 {
+  margin: 6px 0 5px !important;
+  color: #17233c !important;
+  font-size: 24px !important;
+}
+
+.customer-transfer-form-header p {
+  margin: 0 !important;
+  color: #7b8799 !important;
+  font-size: 13px !important;
+}
+
+.customer-transfer-form-content {
+  padding: 24px !important;
+}
+
+.customer-transfer-form-section {
+  margin-bottom: 24px !important;
+}
+
+.customer-transfer-section-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  margin-bottom: 12px !important;
+  color: #17233c !important;
+}
+
+.customer-transfer-section-title svg {
+  color: #7352d6 !important;
+}
+
+.customer-transfer-placeholder {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 82px !important;
+  padding: 16px !important;
+  border: 1px dashed #cfd8e8 !important;
+  border-radius: 14px !important;
+  background: #f8f9fc !important;
+  color: #7b8799 !important;
+}
+
+.customer-transfer-placeholder > svg {
+  color: #7352d6 !important;
+}
+
+.customer-transfer-placeholder strong,
+.customer-transfer-placeholder span {
+  display: block !important;
+}
+
+.customer-transfer-placeholder strong {
+  margin-bottom: 4px !important;
+  color: #17233c !important;
+}
+
+.customer-transfer-placeholder span {
+  font-size: 12px !important;
+}
+
+.customer-transfer-field {
+  display: block !important;
+  margin-bottom: 14px !important;
+}
+
+.customer-transfer-field > span {
+  display: block !important;
+  margin-bottom: 7px !important;
+  color: #344054 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.customer-transfer-field > span b {
+  color: #dc2626 !important;
+}
+
+.customer-transfer-field input,
+.customer-transfer-field textarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border: 1px solid #dce3f0 !important;
+  border-radius: 11px !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+  font: inherit !important;
+  outline: none !important;
+}
+
+.customer-transfer-field input {
+  height: 48px !important;
+  padding: 0 14px !important;
+  letter-spacing: 0.04em !important;
+}
+
+.customer-transfer-field textarea {
+  padding: 12px 14px !important;
+  resize: vertical !important;
+}
+
+.customer-transfer-field input:focus,
+.customer-transfer-field textarea:focus {
+  border-color: #7352d6 !important;
+  box-shadow: 0 0 0 3px rgba(115, 82, 214, 0.10) !important;
+}
+
+.customer-transfer-field small {
+  display: block !important;
+  margin-top: 6px !important;
+  color: #8a96a8 !important;
+  font-size: 11px !important;
+}
+
+.customer-transfer-recipient-preview {
+  padding: 13px 14px !important;
+  border: 1px solid #e5eaf2 !important;
+  border-radius: 11px !important;
+  background: #f8f9fc !important;
+}
+
+.customer-transfer-recipient-preview span,
+.customer-transfer-recipient-preview strong {
+  display: block !important;
+}
+
+.customer-transfer-recipient-preview span {
+  margin-bottom: 4px !important;
+  color: #8a96a8 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+.customer-transfer-recipient-preview strong {
+  color: #17233c !important;
+  font-size: 13px !important;
+}
+
+.customer-transfer-form-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 18px 24px 24px !important;
+  border-top: 1px solid #e8edf5 !important;
+}
+
+@media (max-width: 700px) {
+  .customer-transfer-primary-action {
+    justify-content: stretch !important;
+  }
+
+  .customer-transfer-open-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .customer-transfer-form-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .customer-transfer-form-modal {
+    width: 100% !important;
+    max-height: 92vh !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  .customer-transfer-form-header,
+  .customer-transfer-form-content {
+    padding: 20px !important;
+  }
+
+  .customer-transfer-form-footer {
+    padding: 16px 20px 20px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .customer-transfer-form-footer button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+
+/* Customer Transfer Bill — ensure modal controls receive pointer events */
+.customer-transfer-form-backdrop {
+  pointer-events: auto !important;
+}
+
+.customer-transfer-form-modal {
+  position: relative !important;
+  z-index: 2 !important;
+  pointer-events: auto !important;
+}
+
+.customer-transfer-form-modal button,
+.customer-transfer-form-modal input,
+.customer-transfer-form-modal textarea {
+  pointer-events: auto !important;
+}
+
+
+/* Customer Transfer Bill — selectable purchased products */
+
+.customer-transfer-product-list {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.customer-transfer-product-option {
+  position: relative !important;
+  display: grid !important;
+  grid-template-columns: 30px 42px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 78px !important;
+  padding: 12px 14px !important;
+  margin: 0 !important;
+  border: 1px solid #e1e7f0 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  color: #17233c !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-sizing: border-box !important;
+  transition: border-color .18s ease, box-shadow .18s ease,
+    background .18s ease !important;
+}
+
+.customer-transfer-product-option:hover {
+  border-color: #b9a9ef !important;
+  box-shadow: 0 5px 16px rgba(115, 82, 214, .08) !important;
+}
+
+.customer-transfer-product-option-selected {
+  border-color: #7352d6 !important;
+  background: #f7f4ff !important;
+  box-shadow: 0 0 0 2px rgba(115, 82, 214, .08) !important;
+}
+
+.customer-transfer-product-check {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 50% !important;
+  color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+.customer-transfer-product-option-selected
+.customer-transfer-product-check {
+  border-color: #7352d6 !important;
+  background: #7352d6 !important;
+}
+
+.customer-transfer-product-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+  color: #7352d6 !important;
+  background: #f0ecff !important;
+}
+
+.customer-transfer-product-copy {
+  min-width: 0 !important;
+}
+
+.customer-transfer-product-copy strong,
+.customer-transfer-product-copy small {
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.customer-transfer-product-copy strong {
+  margin-bottom: 3px !important;
+  color: #17233c !important;
+  font-size: 13px !important;
+}
+
+.customer-transfer-product-copy small {
+  margin-top: 2px !important;
+  color: #7b8799 !important;
+  font-size: 11px !important;
+}
+
+.customer-transfer-product-action {
+  color: #7352d6 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 700px) {
+  .customer-transfer-product-option {
+    grid-template-columns: 28px 40px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 11px !important;
+  }
+
+  .customer-transfer-product-action {
+    grid-column: 3 !important;
+    justify-self: start !important;
+    margin-top: 2px !important;
+  }
+}
+
+
+/* Customer Transfer — payment payer selection */
+.customer-transfer-payment-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.customer-transfer-payment-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.customer-transfer-payment-option:hover {
+  border-color: #b9a8ed;
+}
+
+.customer-transfer-payment-option.selected {
+  border-color: #7352d6;
+  background: #f7f4ff;
+  box-shadow: 0 0 0 2px rgba(115, 82, 214, 0.08);
+}
+
+.customer-transfer-payment-option input[type="radio"] {
+  margin-top: 2px;
+  accent-color: #7352d6;
+  flex: 0 0 auto;
+}
+
+.customer-transfer-payment-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.customer-transfer-payment-option-content strong {
+  color: #172033;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.customer-transfer-payment-option-content small {
+  color: #78839a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .customer-transfer-payment-options {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .customer-transfer-payment-option {
+    padding: 13px 14px;
+  }
+}
+
+.customer-transfer-detail-secondary {
+  display: block;
+  margin-top: 4px;
+  color: #78839a;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Customer Transfer Bills — mobile card layout */
+
+.customer-transfers-mobile-list {
+  display: none;
+}
+
+.customer-transfer-mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e4e9f2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.06);
+}
+
+.customer-transfer-mobile-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-transfer-mobile-card-header > div {
+  min-width: 0;
+}
+
+.customer-transfer-mobile-card-header .page-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.customer-transfer-mobile-card-header strong {
+  display: block;
+  color: #17233c;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.customer-transfer-mobile-product {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 14px;
+  background: #f7f9fc;
+}
+
+.customer-transfer-mobile-product-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #7352d6;
+  background: #f0ecff;
+}
+
+.customer-transfer-mobile-product > div:last-child {
+  min-width: 0;
+}
+
+.customer-transfer-mobile-product strong,
+.customer-transfer-mobile-product span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-transfer-mobile-product strong {
+  color: #17233c;
+  font-size: 14px;
+}
+
+.customer-transfer-mobile-product span {
+  margin-top: 3px;
+  color: #78839a;
+  font-size: 11px;
+}
+
+.customer-transfer-mobile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.customer-transfer-mobile-info-grid > div {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #e7ebf2;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.customer-transfer-mobile-info-grid small,
+.customer-transfer-mobile-reason small {
+  display: block;
+  margin-bottom: 5px;
+  color: #8490a5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.customer-transfer-mobile-info-grid strong {
+  display: block;
+  overflow: hidden;
+  color: #17233c;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.customer-transfer-mobile-reason {
+  padding: 12px 13px;
+  border-left: 3px solid #7352d6;
+  border-radius: 10px;
+  background: #f7f4ff;
+}
+
+.customer-transfer-mobile-reason p {
+  margin: 0;
+  color: #4d5b73;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.customer-transfer-mobile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.customer-transfer-mobile-payment {
+  color: #78839a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.customer-transfer-mobile-payment-paid {
+  color: #16845b;
+}
+
+.customer-transfer-mobile-payment-unpaid {
+  color: #b06b00;
+}
+
+.customer-transfer-mobile-payment-cancelled {
+  color: #a13b3b;
+}
+
+.customer-transfer-mobile-footer .secondary-button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  .customer-transfers-table-wrap {
+    display: none !important;
+  }
+
+  .customer-transfers-mobile-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .customer-transfer-mobile-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .customer-transfer-mobile-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .customer-transfer-mobile-footer .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =========================================================
+   Customer Transfer Bills — Locked Mobile Statistics Layout
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .customer-transfer-stats.stats-grid.four {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .customer-transfer-stats.stats-grid.four .stat-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 112px !important;
+    box-sizing: border-box !important;
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+
+  .customer-transfer-stats.stats-grid.four .stat-card > div:last-child {
+    min-width: 0 !important;
+  }
+
+  .customer-transfer-stats.stats-grid.four .stat-card span {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .customer-transfer-stats.stats-grid.four .stat-card strong {
+    display: block !important;
+    margin-top: 5px !important;
+    font-size: 24px !important;
+    line-height: 1 !important;
+  }
+}
+
+
+/* =========================================================
+   Customer Transfer Bills — Final Mobile Cards
+   ========================================================= */
+
+.customer-transfer-mobile-payment-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.customer-transfer-mobile-payment-row > div,
+.customer-transfer-mobile-requested {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #e7ebf2;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.customer-transfer-mobile-payment-row small,
+.customer-transfer-mobile-requested small {
+  display: block;
+  margin-bottom: 4px;
+  color: #8490a5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.customer-transfer-mobile-payment-row strong,
+.customer-transfer-mobile-requested strong {
+  display: block;
+  overflow: hidden;
+  color: #17233c;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
+
+.customer-transfer-mobile-requested {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customer-transfer-mobile-requested small {
+  margin-bottom: 0;
+}
+
+.customer-transfer-mobile-info-grid > div span {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #78839a;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-transfer-mobile-reason {
+  padding: 11px 13px;
+}
+
+.customer-transfer-mobile-reason p {
+  margin-top: 0;
+}
+
+.customer-transfer-mobile-view-button {
+  width: 100%;
+  justify-content: center;
+  min-height: 42px;
+}
+
+@media (max-width: 700px) {
+  .customer-transfers-mobile-list {
+    gap: 12px !important;
+  }
+
+  .customer-transfer-mobile-card {
+    gap: 11px !important;
+    padding: 15px !important;
+    border-radius: 18px !important;
+  }
+
+  .customer-transfer-mobile-card-header {
+    gap: 8px !important;
+  }
+
+  .customer-transfer-mobile-product {
+    padding: 11px !important;
+  }
+
+  .customer-transfer-mobile-info-grid {
+    gap: 8px !important;
+  }
+
+  .customer-transfer-mobile-info-grid > div {
+    padding: 10px !important;
+  }
+
+  .customer-transfer-mobile-payment-row {
+    gap: 8px !important;
+  }
+
+  .customer-transfer-mobile-payment-row > div {
+    padding: 10px !important;
+  }
+
+  .customer-transfer-mobile-reason {
+    padding: 11px 12px !important;
+  }
+}
+
+
+/* =========================================================
+   Customer Transfer Bills — Mobile Search & Filter
+   ========================================================= */
+
+.customer-transfers-mobile-controls {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .customer-transfers-mobile-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+
+  .customer-transfers-mobile-search,
+  .customer-transfers-mobile-filter {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #dfe5ef;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #78839a;
+  }
+
+  .customer-transfers-mobile-search {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .customer-transfers-mobile-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #17233c;
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  .customer-transfers-mobile-search input::placeholder {
+    color: #9aa5b8;
+  }
+
+  .customer-transfers-mobile-filter {
+    gap: 6px;
+    padding: 0 10px;
+  }
+
+  .customer-transfers-mobile-filter select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    appearance: none;
+    background: transparent;
+    color: #4d5b73;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}
+
+
+/* =========================================================
+   Customer Support — Approved Mobile UI
+   ========================================================= */
+
+.customer-support-mobile-controls,
+.customer-support-mobile-list {
+  display: none;
+}
+
+.customer-support-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.customer-support-stat-total {
+  color: #2675f5;
+  background: #edf4ff;
+}
+
+.customer-support-stat-open {
+  color: #7047dc;
+  background: #f2edff;
+}
+
+.customer-support-stat-resolved {
+  color: #16a36a;
+  background: #eafaf3;
+}
+
+.customer-support-stat-closed {
+  color: #ef5350;
+  background: #fff0f0;
+}
+
+.customer-support-mobile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #e4e9f2;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.06);
+}
+
+.customer-support-mobile-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.customer-support-mobile-card-header > div {
+  min-width: 0;
+}
+
+.customer-support-mobile-card-header span:first-child {
+  display: block;
+  margin-bottom: 4px;
+  color: #2474f4;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.customer-support-mobile-card-header strong {
+  display: block;
+  color: #17233c;
+  font-size: 16px;
+}
+
+.customer-support-mobile-ticket-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #f7f9fc;
+}
+
+.customer-support-mobile-ticket-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  color: #7352d6;
+  background: #f2edff;
+}
+
+.customer-support-mobile-ticket-main > div:last-child {
+  min-width: 0;
+}
+
+.customer-support-mobile-ticket-main strong {
+  display: block;
+  overflow: hidden;
+  color: #17233c;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-support-mobile-ticket-main span {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #78839a;
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-support-mobile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.customer-support-mobile-info-grid > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e7ebf2;
+  border-radius: 12px;
+}
+
+.customer-support-mobile-info-grid small {
+  display: block;
+  margin-bottom: 4px;
+  color: #8490a5;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.customer-support-mobile-info-grid strong {
+  display: block;
+  overflow: hidden;
+  color: #17233c;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-support-mobile-view-button {
+  width: 100%;
+  justify-content: center;
+  min-height: 42px;
+}
+
+.customer-support-mobile-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 28px 16px;
+  border: 1px solid #e4e9f2;
+  border-radius: 16px;
+  color: #78839a;
+  text-align: center;
+}
+
+.customer-support-mobile-empty strong {
+  color: #17233c;
+  font-size: 14px;
+}
+
+.customer-support-mobile-empty span {
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .customer-support-page {
+    padding-bottom: 92px !important;
+  }
+
+  .customer-support-heading {
+    display: block !important;
+  }
+
+  .customer-support-heading .primary-button {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+    margin-top: 14px;
+  }
+
+  .customer-support-stats.stats-grid.four {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .customer-support-stats.stats-grid.four .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    min-height: 112px;
+    box-sizing: border-box;
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .customer-support-stats.stats-grid.four .stat-card > div:last-child {
+    min-width: 0;
+  }
+
+  .customer-support-stats.stats-grid.four .stat-card span {
+    display: block;
+    overflow: hidden;
+    font-size: 11px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .customer-support-stats.stats-grid.four .stat-card strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .customer-support-mobile-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px;
+    gap: 8px;
+    margin: 0 0 14px;
+  }
+
+  .customer-support-mobile-search,
+  .customer-support-mobile-filter {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 44px;
+    box-sizing: border-box;
+    border: 1px solid #dfe5ef;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #78839a;
+  }
+
+  .customer-support-mobile-search {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .customer-support-mobile-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #17233c;
+    font-family: inherit;
+    font-size: 12px;
+  }
+
+  .customer-support-mobile-search input::placeholder {
+    color: #9aa5b8;
+  }
+
+  .customer-support-mobile-filter {
+    gap: 6px;
+    padding: 0 10px;
+  }
+
+  .customer-support-mobile-filter select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    appearance: none;
+    background: transparent;
+    color: #4d5b73;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .customer-support-table-wrap {
+    display: block;
+  }
+
+  .customer-support-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* =========================================================
+   CUSTOMER SUPPORT — MOBILE DETAILS MODAL FIX
+   Keeps full ticket content accessible above bottom nav.
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .customer-support-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    padding: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .customer-support-modal {
+    position: relative !important;
+    z-index: 100000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 24px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: 8px !important;
+  }
+
+  .customer-support-modal-close {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 100001 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: calc(100% - 32px) !important;
+    min-height: 48px !important;
+    margin: 12px 16px 16px !important;
+    padding: 12px 16px !important;
+    background: #ffffff !important;
+    border: 1px solid #dfe5ef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 -10px 22px rgba(15, 23, 42, 0.10) !important;
+  }
+}
+
+/* =========================================================
+   CUSTOMER TRANSFERS — MOBILE DETAILS MODAL FIX
+   Keeps full transfer details accessible above bottom nav.
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .customer-transfers-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    padding: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .customer-transfers-modal {
+    position: relative !important;
+    z-index: 100000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 24px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: 8px !important;
+  }
+
+  .customer-transfers-modal button:last-child {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 100001 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: calc(100% - 32px) !important;
+    min-height: 48px !important;
+    margin: 12px 16px 16px !important;
+    padding: 12px 16px !important;
+    background: #ffffff !important;
+    border: 1px solid #dfe5ef !important;
+    border-radius: 12px !important;
+    box-shadow: 0 -10px 22px rgba(15, 23, 42, 0.10) !important;
+  }
+}
+
+/* =========================================================
+   CUSTOMER TRANSFER DETAILS — MOBILE MODAL FIX
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .customer-transfer-modal-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    padding: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .customer-transfer-modal {
+    position: relative !important;
+    z-index: 100000 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 24px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: 8px !important;
+  }
+}

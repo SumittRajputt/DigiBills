@@ -18,6 +18,11 @@ class WarrantyResponse(BaseModel):
     warranty_id: str
     invoice_id: str
     product_variant_id: str
+    product_unit_id: Optional[str] = None
+    product_name: Optional[str] = None
+    variant_name: Optional[str] = None
+    sku: Optional[str] = None
+    serial_number: Optional[str] = None
     customer_id: str
     start_date: date
     end_date: date

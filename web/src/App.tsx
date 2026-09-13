@@ -46,11 +46,12 @@ import CustomerWarranty from "./pages/CustomerWarranty";
 import CustomerTransfers from "./pages/CustomerTransfers";
 import CustomerSupport from "./pages/CustomerSupport";
 import CustomerSettings from "./pages/CustomerSettings";
+import CustomerAccountSecurity from "./pages/CustomerAccountSecurity";
 import CustomerSubscription from "./pages/CustomerSubscription";
-import CustomerProducts from "./pages/CustomerProducts";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerOrders from "./pages/CustomerOrders";
 import CustomerNotifications from "./pages/CustomerNotifications";
+import CustomerNotificationDetails from "./pages/CustomerNotificationDetails";
 import CustomerEditProfile from "./pages/CustomerEditProfile";
 import CashierDashboard from "./dashboards/CashierDashboard";
 import AdminRetailers from "./pages/AdminRetailers";
@@ -503,8 +504,19 @@ function App() {
                 />
 
                 <Route
+                  path="orders/:orderId"
+                  element={<CustomerInvoices />}
+                />
+
+
+                <Route
                   path="notifications"
                   element={<CustomerNotifications />}
+                />
+
+                <Route
+                  path="notifications/:notificationId"
+                  element={<CustomerNotificationDetails />}
                 />
 
                 <Route
@@ -533,14 +545,15 @@ function App() {
                 />
 
                 <Route
+                  path="settings/security"
+                  element={<CustomerAccountSecurity />}
+                />
+
+                <Route
                   path="subscription"
                   element={<CustomerSubscription />}
                 />
 
-                <Route
-                  path="products"
-                  element={<CustomerProducts />}
-                />
 
 
               </Routes>
@@ -1105,6 +1118,13 @@ function DashboardFrame({
   const [customerUnreadNotifications, setCustomerUnreadNotifications] =
     useState(0);
 
+  const [customerSidebarProfile, setCustomerSidebarProfile] =
+    useState<{
+      customer_id: string;
+      full_name: string;
+      profile_image_url: string | null;
+    } | null>(null);
+
   useEffect(() => {
     if (role !== "customer") {
       setCustomerUnreadNotifications(0);
@@ -1248,6 +1268,43 @@ function DashboardFrame({
   }
 
   useEffect(() => {
+    if (role !== "customer") {
+      setCustomerSidebarProfile(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadCustomerSidebarProfile() {
+      try {
+        const result = await apiFetch<{
+          customer_id: string;
+          full_name: string;
+          profile_image_url: string | null;
+      }>("/customers/me");
+
+        if (!cancelled) {
+          setCustomerSidebarProfile(result);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error(
+            "Failed to load customer sidebar profile:",
+            err
+          );
+          setCustomerSidebarProfile(null);
+        }
+      }
+    }
+
+    loadCustomerSidebarProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
+
+  useEffect(() => {
     function openMobileMenu() {
       if (role === "customer") {
         setMobileMenuOpen(true);
@@ -1267,12 +1324,24 @@ function DashboardFrame({
     };
   }, [role]);
 
+  const customerDisplayName =
+    customerSidebarProfile?.full_name ||
+    user.email ||
+    user.phone_number;
+
   const initials =
     role === "customer"
-      ? getInitials(user.email || user.phone_number)
+      ? getInitials(customerDisplayName)
       : role === "retailer_owner"
         ? "TZ"
         : "SA";
+
+  const customerProfileImageUrl =
+    customerSidebarProfile?.profile_image_url
+      ? customerSidebarProfile.profile_image_url.startsWith("http")
+        ? customerSidebarProfile.profile_image_url
+        : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}${customerSidebarProfile.profile_image_url}`
+      : "";
 
   return (
     <div className="app-shell">
@@ -1285,12 +1354,24 @@ function DashboardFrame({
         </div>
 
         <div className="profile-mini">
-          <div className="avatar">{initials}</div>
+          <div className="avatar">
+            {role === "customer" && customerProfileImageUrl ? (
+              <img
+                src={customerProfileImageUrl}
+                alt={customerDisplayName}
+              />
+            ) : (
+              initials
+            )}
+          </div>
 
           <div>
             <strong>{meta.label}</strong>
             <small>
-              {user.email || user.phone_number}
+              {role === "customer"
+                ? customerSidebarProfile?.customer_id ||
+                  "Loading Customer ID..."
+                : user.email || user.phone_number}
             </small>
           </div>
         </div>
@@ -1332,6 +1413,8 @@ function DashboardFrame({
                         location.pathname.startsWith("/customer/invoices")) ||
                       (item === "My Payments" &&
                         location.pathname === "/customer/payments") ||
+                      (item === "My Orders" &&
+                        location.pathname.startsWith("/customer/orders")) ||
                       (item === "My Warranty" &&
                         location.pathname === "/customer/warranty") ||
                       (item === "Transfer Bills" &&
@@ -1341,7 +1424,7 @@ function DashboardFrame({
                       (item === "Support" &&
                         location.pathname === "/customer/support") ||
                       (item === "Settings" &&
-                        location.pathname === "/customer/settings")
+                        location.pathname.startsWith("/customer/settings"))
                     )
                   )
                     ? "active"

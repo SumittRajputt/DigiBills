@@ -102,21 +102,15 @@ def get_customer_by_identifier(
 ) -> Optional[Customer]:
     identifier = identifier.strip()
 
-    if not identifier:
+    if not identifier or not identifier.isdigit():
         return None
 
-    # Email lookup
-    if "@" in identifier:
-        return db.execute(
-            select(Customer).where(
-                Customer.email.ilike(identifier)
-            )
-        ).scalar_one_or_none()
+    if len(identifier) != 11:
+        return None
 
-    # Phone lookup
     return db.execute(
         select(Customer).where(
-            Customer.phone_number == identifier
+            Customer.customer_id == identifier
         )
     ).scalar_one_or_none()
 
@@ -183,8 +177,16 @@ def transfer_to_response(
         "id": str(transfer.id),
         "transfer_id": transfer.transfer_id,
         "product_unit_id": str(transfer.product_unit_id),
-        "from_customer_id": str(transfer.from_customer_id),
-        "to_customer_id": str(transfer.to_customer_id),
+        "from_customer_id": (
+            from_customer.customer_id
+            if from_customer
+            else None
+        ),
+        "to_customer_id": (
+            to_customer.customer_id
+            if to_customer
+            else None
+        ),
         "from_customer": customer_data(from_customer),
         "to_customer": customer_data(to_customer),
         "requested_by_user_id": str(
@@ -195,6 +197,7 @@ def transfer_to_response(
         "rejection_reason": transfer.rejection_reason,
         "transfer_fee": transfer.transfer_fee,
         "payment_status": transfer.payment_status,
+        "payment_payer": transfer.payment_payer,
         "payment_invoice_id": (
             payment_invoice.invoice_id
             if payment_invoice
@@ -207,6 +210,60 @@ def transfer_to_response(
         "created_at": transfer.created_at,
         "updated_at": transfer.updated_at,
         "product": product_data,
+    }
+
+
+@router.get(
+    "/verify-customer/{customer_id}",
+    response_model=dict,
+)
+def verify_transfer_recipient(
+    customer_id: str,
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    sender = get_current_customer(
+        db,
+        current_user,
+    )
+
+    customer_id = customer_id.strip()
+
+    if not customer_id.isdigit() or len(customer_id) != 11:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Customer ID must be exactly 11 digits.",
+        )
+
+    receiver = db.execute(
+        select(Customer).where(
+            Customer.customer_id == customer_id
+        )
+    ).scalar_one_or_none()
+
+    if receiver is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer not found.",
+        )
+
+    if receiver.id == sender.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You cannot transfer a product to yourself.",
+        )
+
+    if receiver.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Destination customer is not active.",
+        )
+
+    return {
+        "verified": True,
+        "customer": customer_data(receiver),
     }
 
 
@@ -392,6 +449,12 @@ def create_customer_transfer(
         current_user,
     )
 
+    if request.payment_payer not in {"sender", "receiver"}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Payment payer must be sender or receiver.",
+        )
+
     try:
         product_unit_id = uuid.UUID(
             request.product_unit_id
@@ -437,9 +500,22 @@ def create_customer_transfer(
             detail="You do not currently own this product.",
         )
 
+    recipient_customer_id = (
+        request.to_customer_identifier.strip()
+    )
+
+    if (
+        not recipient_customer_id.isdigit()
+        or len(recipient_customer_id) != 11
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Recipient Customer ID must be exactly 11 digits.",
+        )
+
     receiver = get_customer_by_identifier(
         db,
-        request.to_customer_identifier,
+        recipient_customer_id,
     )
 
     if receiver is None:
@@ -493,9 +569,17 @@ def create_customer_transfer(
             detail="Product ownership changed. Refresh and try again.",
         )
 
+    # The transfer fee is waived if the payer has an active
+    # subscription. Otherwise the configured transfer fee applies.
+    payer_customer = (
+        sender
+        if request.payment_payer == "sender"
+        else receiver
+    )
+
     subscription = get_active_subscription_for_customer(
         db,
-        receiver.id,
+        payer_customer.id,
     )
 
     if subscription is not None:
@@ -529,6 +613,7 @@ def create_customer_transfer(
         rejection_reason=None,
         transfer_fee=transfer_fee,
         payment_status=payment_status,
+        payment_payer=request.payment_payer,
         payment_invoice_id=None,
         payment_reference=None,
         requested_at=__import__(
@@ -555,7 +640,7 @@ def create_customer_transfer(
             invoice_id=generate_invoice_id(),
             retailer_id=None,
             employee_id=None,
-            customer_id=receiver.id,
+            customer_id=payer_customer.id,
             invoice_number=transfer.transfer_id,
             invoice_date=now,
             subtotal=transfer_fee,
@@ -609,10 +694,16 @@ def pay_transfer_fee(
         transfer_id,
     )
 
-    if transfer.to_customer_id != customer.id:
+    expected_payer_id = (
+        transfer.from_customer_id
+        if transfer.payment_payer == "sender"
+        else transfer.to_customer_id
+    )
+
+    if expected_payer_id != customer.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the receiving customer can pay this transfer.",
+            detail="Only the selected transfer-fee payer can pay this transfer.",
         )
 
     if transfer.status != "pending_acceptance":
@@ -825,6 +916,71 @@ def accept_customer_transfer(
 
     transfer.status = "completed"
     transfer.accepted_at = now
+    transfer.completed_at = now
+
+    db.commit()
+    db.refresh(transfer)
+
+    return transfer_to_response(
+        db,
+        transfer,
+    )
+
+
+@router.post(
+    "/{transfer_id}/cancel",
+    response_model=dict,
+)
+def cancel_customer_transfer(
+    transfer_id: str,
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_current_customer(
+        db,
+        current_user,
+    )
+
+    transfer = get_transfer(
+        db,
+        transfer_id,
+    )
+
+    if transfer.from_customer_id != customer.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the sending customer can cancel this transfer.",
+        )
+
+    if transfer.status != "pending_acceptance":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only pending transfers can be cancelled.",
+        )
+
+    if transfer.payment_invoice_id:
+        invoice = db.execute(
+            select(Invoice).where(
+                Invoice.id == transfer.payment_invoice_id
+            )
+        ).scalar_one_or_none()
+
+        if invoice is not None and invoice.payment_status != "paid":
+            invoice.status = "cancelled"
+
+    if transfer.payment_status == "unpaid":
+        transfer.payment_status = "cancelled"
+
+    transfer.status = "cancelled"
+
+    now = __import__(
+        "datetime"
+    ).datetime.now(
+        __import__("datetime").timezone.utc
+    )
+
     transfer.completed_at = now
 
     db.commit()

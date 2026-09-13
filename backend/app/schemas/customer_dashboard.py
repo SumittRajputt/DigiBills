@@ -8,6 +8,7 @@ class CustomerDashboardResponse(BaseModel):
 
     total_purchases: str
     total_invoices: int
+    total_orders: int
     amount_paid: str
     refunds_received: str
     outstanding_amount: str

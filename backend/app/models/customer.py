@@ -1,8 +1,9 @@
+import datetime
 import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import Date, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -17,7 +18,7 @@ class Customer(Base):
     )
 
     customer_id: Mapped[str] = mapped_column(
-        String(30),
+        String(11),
         unique=True,
         index=True,
         nullable=False,
@@ -41,6 +42,16 @@ class Customer(Base):
 
     email: Mapped[Optional[str]] = mapped_column(
         String(255),
+        nullable=True,
+    )
+
+    profile_image_url: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
+    date_of_birth: Mapped[Optional[datetime.date]] = mapped_column(
+        Date,
         nullable=True,
     )
 

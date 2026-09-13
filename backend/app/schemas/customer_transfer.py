@@ -10,6 +10,11 @@ class CustomerTransferCreateRequest(BaseModel):
         max_length=255,
     )
     reason: Optional[str] = None
+    payment_payer: str = Field(
+        default="receiver",
+        min_length=1,
+        max_length=20,
+    )
 
 
 class CustomerTransferPayRequest(BaseModel):

@@ -10,7 +10,8 @@ import {
   MoreHorizontal,
   Package,
   Receipt,
-  ShoppingBag,
+  ShieldCheck,
+  UserRound,
   WalletCards,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -22,14 +23,28 @@ type CustomerDashboardData = {
     full_name: string;
     phone_number: string;
     email: string | null;
+    profile_image_url: string | null;
     status: string;
   };
 
   total_purchases: number;
+  total_orders: number;
   amount_paid: number;
   refunds_received: number;
   active_warranties: number;
   product_transfers: number;
+
+  invoice_status: {
+    paid: number;
+    partial: number;
+    unpaid: number;
+  };
+
+  spending_trend: Array<{
+    date: string;
+    invoice_count: number;
+    amount: number;
+  }>;
 
   recent_invoices: Array<{
     id: string;
@@ -262,11 +277,42 @@ export default function CustomerDashboard() {
 
   const initials = getInitials(customerName);
 
+  const apiBase =
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:8000";
+
+  const profileImageUrl = dashboard.customer?.profile_image_url
+    ? dashboard.customer.profile_image_url.startsWith("http")
+      ? dashboard.customer.profile_image_url
+      : `${apiBase}${dashboard.customer.profile_image_url}`
+    : "";
+
   const totalInvoices =
     dashboard.recent_invoices.length;
 
   const recentInvoices =
     dashboard.recent_invoices.slice(0, 2);
+
+  const spendingTrend =
+    dashboard.spending_trend || [];
+
+  const maxSpendingAmount = Math.max(
+    ...spendingTrend.map((item) =>
+      Number(item.amount || 0)
+    ),
+    1
+  );
+
+  const purchaseStatus = dashboard.invoice_status || {
+    paid: 0,
+    partial: 0,
+    unpaid: 0,
+  };
+
+  const purchaseStatusTotal =
+    purchaseStatus.paid +
+    purchaseStatus.partial +
+    purchaseStatus.unpaid;
 
   return (
     <section className="customer-dashboard-reference">
@@ -302,7 +348,14 @@ export default function CustomerDashboard() {
             aria-label="Open profile"
             onClick={() => navigate("/customer/profile")}
           >
-            {initials}
+            {profileImageUrl ? (
+              <img
+                src={profileImageUrl}
+                alt={customerName}
+              />
+            ) : (
+              initials
+            )}
           </button>
         </div>
       </header>
@@ -359,7 +412,7 @@ export default function CustomerDashboard() {
 
         <button
           type="button"
-          onClick={() => navigate("/customer/products")}
+          onClick={() => navigate("/customer/orders")}
           className="customer-reference-kpi"
         >
           <span className="customer-reference-kpi-icon purple">
@@ -368,7 +421,7 @@ export default function CustomerDashboard() {
 
           <span className="customer-reference-kpi-content">
             <small>Total Orders</small>
-            <strong>—</strong>
+            <strong>{dashboard.total_orders}</strong>
           </span>
         </button>
 
@@ -477,6 +530,223 @@ export default function CustomerDashboard() {
         </div>
       </section>
 
+      {/* Spending Overview */}
+      <section className="customer-dashboard-spending-overview">
+        <div className="customer-dashboard-spending-header">
+          <div>
+            <h2>Spending Overview</h2>
+            <p>Your spending trend across purchase records.</p>
+          </div>
+
+          <span>
+            {spendingTrend.length} record
+            {spendingTrend.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        {spendingTrend.length === 0 ? (
+          <div className="customer-dashboard-spending-empty">
+            No spending data available yet.
+          </div>
+        ) : (
+          <div className="customer-dashboard-spending-chart">
+            {spendingTrend.map((item) => {
+              const amount = Number(item.amount || 0);
+
+              const height = Math.max(
+                12,
+                Math.round(
+                  (amount / maxSpendingAmount) * 100
+                )
+              );
+
+              return (
+                <div
+                  className="customer-dashboard-spending-column"
+                  key={item.date}
+                  title={`${formatDate(item.date)} — ${formatAmount(item.amount)}`}
+                >
+                  <div className="customer-dashboard-spending-value">
+                    {formatAmount(item.amount)}
+                  </div>
+
+                  <div className="customer-dashboard-spending-bar-wrap">
+                    <div
+                      className="customer-dashboard-spending-bar"
+                      style={{ height: `${height}%` }}
+                    />
+                  </div>
+
+                  <small>
+                    {formatDate(item.date)}
+                  </small>
+
+                  <span>
+                    {item.invoice_count} invoice
+                    {item.invoice_count === 1 ? "" : "s"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Purchase Status */}
+      <section className="customer-dashboard-purchase-status">
+        <div className="customer-dashboard-purchase-status-header">
+          <div>
+            <h2>Purchase Status</h2>
+            <p>Payment status across your purchase records.</p>
+          </div>
+
+          <strong>
+            {purchaseStatusTotal} total
+          </strong>
+        </div>
+
+        <div className="customer-dashboard-purchase-status-grid">
+
+          <button
+            type="button"
+            className="customer-dashboard-purchase-status-card paid"
+            onClick={() => navigate("/customer/invoices")}
+          >
+            <span className="customer-dashboard-purchase-status-dot" />
+
+            <span>
+              <small>Paid</small>
+              <strong>{purchaseStatus.paid}</strong>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="customer-dashboard-purchase-status-card partial"
+            onClick={() => navigate("/customer/invoices")}
+          >
+            <span className="customer-dashboard-purchase-status-dot" />
+
+            <span>
+              <small>Partial</small>
+              <strong>{purchaseStatus.partial}</strong>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="customer-dashboard-purchase-status-card unpaid"
+            onClick={() => navigate("/customer/invoices")}
+          >
+            <span className="customer-dashboard-purchase-status-dot" />
+
+            <span>
+              <small>Unpaid</small>
+              <strong>{purchaseStatus.unpaid}</strong>
+            </span>
+          </button>
+
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="customer-dashboard-quick-actions">
+        <div className="customer-dashboard-quick-actions-header">
+          <div>
+            <h2>Quick Actions</h2>
+            <p>Access your most-used customer services.</p>
+          </div>
+        </div>
+
+        <div className="customer-dashboard-quick-actions-grid">
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/invoices")}
+          >
+            <span className="customer-dashboard-quick-action-icon blue">
+              <Receipt size={19} />
+            </span>
+            <span>
+              <strong>View Invoices</strong>
+              <small>Manage your bills</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/payments")}
+          >
+            <span className="customer-dashboard-quick-action-icon green">
+              <WalletCards size={19} />
+            </span>
+            <span>
+              <strong>View Payments</strong>
+              <small>Check payment records</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/warranty")}
+          >
+            <span className="customer-dashboard-quick-action-icon purple">
+              <ShieldCheck size={19} />
+            </span>
+            <span>
+              <strong>My Warranty</strong>
+              <small>View digital warranties</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/transfers")}
+          >
+            <span className="customer-dashboard-quick-action-icon violet">
+              <Package size={19} />
+            </span>
+            <span>
+              <strong>Transfer Bills</strong>
+              <small>Transfer a bill</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/orders")}
+          >
+            <span className="customer-dashboard-quick-action-icon orange">
+              <Gift size={19} />
+            </span>
+            <span>
+              <strong>My Orders</strong>
+              <small>View purchase records</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/customer/support")}
+          >
+            <span className="customer-dashboard-quick-action-icon teal">
+              <Headphones size={19} />
+            </span>
+            <span>
+              <strong>Support</strong>
+              <small>Get help with your account</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+        </div>
+      </section>
+
       {/* Mobile bottom navigation */}
       <nav className="customer-reference-bottom-nav">
 
@@ -499,18 +769,18 @@ export default function CustomerDashboard() {
 
         <button
           type="button"
-          onClick={() => navigate("/customer/products")}
+          onClick={() => navigate("/customer/profile")}
         >
-          <ShoppingBag size={19} />
-          <span>Orders</span>
+          <UserRound size={19} />
+          <span>My Profile</span>
         </button>
 
         <button
           type="button"
-          onClick={() => navigate("/customer/support")}
+          onClick={() => navigate("/customer/warranty")}
         >
-          <Headphones size={19} />
-          <span>Support</span>
+          <ShieldCheck size={19} />
+          <span>My Warranty</span>
         </button>
 
         <button

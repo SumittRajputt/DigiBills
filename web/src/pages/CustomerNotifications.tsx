@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
 
@@ -96,28 +96,16 @@ export default function CustomerNotifications() {
       }
     }
 
-    if (
-      notification.reference_type === "invoice" &&
-      notification.reference_id
-    ) {
-      navigate(
-        `/customer/invoices/${notification.reference_id}`
-      );
-    }
+    navigate(
+      `/customer/notifications/${encodeURIComponent(
+        notification.id
+      )}`
+    );
   }
 
   return (
     <section className="customer-notifications-page">
       <div className="customer-notifications-header">
-        <button
-          type="button"
-          className="customer-notifications-back"
-          onClick={() => navigate("/customer")}
-          aria-label="Back to dashboard"
-        >
-          <ArrowLeft size={18} />
-        </button>
-
         <div>
           <div className="customer-page-eyebrow">
             Customer Notifications
@@ -169,22 +157,28 @@ export default function CustomerNotifications() {
         ) : (
           <div className="customer-notifications-list">
             {notifications.map((notification) => {
-              const isClickable =
-                notification.reference_type === "invoice" &&
-                Boolean(notification.reference_id);
+              const isClickable = true;
 
               return (
                 <article
                   key={notification.id}
                   className={`customer-notification-item ${
                     !notification.is_read ? "unread" : ""
-                  } ${isClickable ? "clickable" : ""}`}
+                  } clickable`}
                   onClick={() =>
-                    isClickable &&
                     handleNotificationClick(notification)
                   }
-                  role={isClickable ? "button" : undefined}
-                  tabIndex={isClickable ? 0 : undefined}
+                  onKeyDown={(event) => {
+                    if (
+                      event.key === "Enter" ||
+                      event.key === " "
+                    ) {
+                      event.preventDefault();
+                      handleNotificationClick(notification);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
                   <div className="customer-notification-icon">
                     <Bell size={18} />

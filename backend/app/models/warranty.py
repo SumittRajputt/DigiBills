@@ -17,7 +17,7 @@ class Warranty(Base):
     )
 
     warranty_id: Mapped[str] = mapped_column(
-        String(30),
+        String(16),
         unique=True,
         index=True,
         nullable=False,
@@ -31,6 +31,12 @@ class Warranty(Base):
     product_variant_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("product_variants.id", ondelete="RESTRICT"),
         nullable=False,
+    )
+
+    product_unit_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("product_units.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
     )
 
     customer_id: Mapped[uuid.UUID] = mapped_column(

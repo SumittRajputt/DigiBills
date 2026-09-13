@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
 from app.models.customer import Customer
+from app.models.invoice import Invoice
+from app.models.invoice_item import InvoiceItem
+from app.models.invoice_item_unit import InvoiceItemUnit
 from app.models.product import Product
 from app.models.product_ownership import ProductOwnership
 from app.models.product_unit import ProductUnit
@@ -53,6 +56,7 @@ def list_customer_products(
             ProductUnit,
             ProductVariant,
             Product,
+            Invoice,
         )
         .join(
             ProductUnit,
@@ -65,6 +69,18 @@ def list_customer_products(
         .join(
             Product,
             Product.id == ProductVariant.product_id,
+        )
+        .outerjoin(
+            InvoiceItemUnit,
+            InvoiceItemUnit.product_unit_id == ProductUnit.id,
+        )
+        .outerjoin(
+            InvoiceItem,
+            InvoiceItem.id == InvoiceItemUnit.invoice_item_id,
+        )
+        .outerjoin(
+            Invoice,
+            Invoice.id == InvoiceItem.invoice_id,
         )
         .where(
             ProductOwnership.customer_id == customer.id,
@@ -99,11 +115,23 @@ def list_customer_products(
             acquired_at=ownership.acquired_at,
             released_at=ownership.released_at,
             source=ownership.source,
+
+            invoice_id=(
+                invoice.invoice_id
+                if invoice is not None
+                else None
+            ),
+            invoice_date=(
+                invoice.invoice_date
+                if invoice is not None
+                else None
+            ),
         )
         for (
             ownership,
             product_unit,
             product_variant,
             product,
+            invoice,
         ) in rows
     ]

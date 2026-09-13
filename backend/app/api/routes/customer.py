@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
@@ -7,12 +7,15 @@ from app.models.user import User
 from app.schemas.customer import (
     CustomerCreateRequest,
     CustomerResponse,
+    CustomerUpdateRequest,
 )
+from app.services.profile_image_service import save_profile_image
 from app.services.customer_service import (
     create_customer,
     create_customer_for_retailer,
     get_all_customers,
     get_customer_by_user_id,
+    update_customer,
 )
 
 
@@ -30,6 +33,8 @@ def customer_to_response(customer):
         full_name=customer.full_name,
         phone_number=customer.phone_number,
         email=customer.email,
+        profile_image_url=customer.profile_image_url,
+        date_of_birth=customer.date_of_birth,
         status=customer.status,
         created_at=customer.created_at,
         updated_at=customer.updated_at,
@@ -121,6 +126,48 @@ def list_customers(
     ]
 
 
+@router.put(
+    "/me",
+    response_model=CustomerResponse,
+)
+def update_my_customer(
+    request: CustomerUpdateRequest,
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_customer_by_user_id(
+        db,
+        current_user.id,
+    )
+
+    if customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer profile not found.",
+        )
+
+    try:
+        updated_customer = update_customer(
+            db=db,
+            customer=customer,
+            full_name=request.full_name,
+            phone_number=request.phone_number,
+            email=request.email,
+            profile_image_url=request.profile_image_url,
+            date_of_birth=request.date_of_birth,
+        )
+
+        return customer_to_response(updated_customer)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+
 @router.get(
     "/me",
     response_model=CustomerResponse,
@@ -143,3 +190,50 @@ def get_my_customer(
         )
 
     return customer_to_response(customer)
+
+@router.post(
+    "/me/profile-image",
+    response_model=CustomerResponse,
+)
+async def upload_my_profile_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_customer_by_user_id(
+        db,
+        current_user.id,
+    )
+
+    if customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer profile not found.",
+        )
+
+    try:
+        image_url = await save_profile_image(
+            upload_file=file,
+            customer_id=customer.customer_id,
+        )
+
+        updated_customer = update_customer(
+            db=db,
+            customer=customer,
+            full_name=customer.full_name,
+            phone_number=customer.phone_number,
+            email=customer.email,
+            profile_image_url=image_url,
+            date_of_birth=customer.date_of_birth,
+        )
+
+        return customer_to_response(updated_customer)
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+

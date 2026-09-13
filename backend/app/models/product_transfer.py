@@ -84,6 +84,13 @@ class ProductTransfer(Base):
         nullable=False,
     )
 
+    payment_payer: Mapped[str] = mapped_column(
+        String(20),
+        default="receiver",
+        server_default="receiver",
+        nullable=False,
+    )
+
     payment_invoice_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         ForeignKey(
             "invoices.id",

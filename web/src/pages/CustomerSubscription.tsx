@@ -52,6 +52,7 @@ export default function CustomerSubscription() {
 
   const [loading, setLoading] = useState(true);
   const [creatingPlan, setCreatingPlan] = useState("");
+  const [showManageSubscription, setShowManageSubscription] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -357,20 +358,72 @@ export default function CustomerSubscription() {
             </button>
           </div>
 
-          <div className="customer-subscription-info-row">
-            <div className="customer-subscription-info-icon">
-              <Check size={20} />
-            </div>
+          <details className="customer-subscription-benefits">
+            <summary className="customer-subscription-info-row">
+              <div className="customer-subscription-info-icon">
+                <Check size={20} />
+              </div>
 
-            <div>
-              <strong>Subscription Benefits</strong>
-              <span>
-                Securely keep your bills and warranty records together.
-              </span>
-            </div>
+              <div>
+                <strong>Subscription Benefits</strong>
+                <span>
+                  See what you get with your DigiBills subscription.
+                </span>
+              </div>
 
-            <ArrowRight size={20} />
-          </div>
+              <ArrowRight size={20} />
+            </summary>
+
+            <div className="customer-subscription-benefits-list">
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Unlimited Bill Access</strong>
+                  <span>Access your digital bills anytime.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Digital Warranty Records</strong>
+                  <span>Keep your E-Warranty records safely in DigiBills.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Purchase History</strong>
+                  <span>View your complete purchase and billing records.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Payment Records</strong>
+                  <span>Keep track of payments associated with your bills.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Bill Transfer</strong>
+                  <span>Transfer eligible bills to another customer when required.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Priority Support</strong>
+                  <span>Get support for your DigiBills account and records.</span>
+                </div>
+              </div>
+            </div>
+          </details>
         </>
       )}
 
@@ -448,32 +501,213 @@ export default function CustomerSubscription() {
             <button
               type="button"
               className="customer-subscription-manage-button"
+              onClick={() => setShowManageSubscription(true)}
             >
               <span>Manage Subscription</span>
               <ArrowRight size={23} />
             </button>
           </div>
 
-          <div className="customer-subscription-info-row">
-            <div className="customer-subscription-info-icon">
-              <Check size={20} />
-            </div>
+          <details className="customer-subscription-benefits">
+            <summary className="customer-subscription-info-row">
+              <div className="customer-subscription-info-icon">
+                <Check size={20} />
+              </div>
 
-            <div>
-              <strong>Subscription Benefits</strong>
-              <span>
-                Your DigiBills subscription is currently active.
-              </span>
-            </div>
+              <div>
+                <strong>Subscription Benefits</strong>
+                <span>
+                  Your DigiBills subscription includes these benefits.
+                </span>
+              </div>
 
-            <ArrowRight size={20} />
-          </div>
+              <ArrowRight size={20} />
+            </summary>
+
+            <div className="customer-subscription-benefits-list">
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Unlimited Bill Access</strong>
+                  <span>Access your digital bills anytime.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Digital Warranty Records</strong>
+                  <span>Keep your E-Warranty records safely in DigiBills.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Purchase History</strong>
+                  <span>View your complete purchase and billing records.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Payment Records</strong>
+                  <span>Keep track of payments associated with your bills.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Bill Transfer</strong>
+                  <span>Transfer eligible bills to another customer when required.</span>
+                </div>
+              </div>
+
+              <div>
+                <Check size={17} />
+                <div>
+                  <strong>Priority Support</strong>
+                  <span>Get support for your DigiBills account and records.</span>
+                </div>
+              </div>
+            </div>
+          </details>
         </>
       )}
 
       {!loading && !error && plans.length === 0 && (
         <div className="panel">
           <p>No subscription plans are currently available.</p>
+        </div>
+      )}
+
+      {showManageSubscription && currentSubscription && (
+        <div
+          className="customer-subscription-manage-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="manage-subscription-title"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setShowManageSubscription(false);
+            }
+          }}
+        >
+          <div className="customer-subscription-manage-panel">
+            <div className="customer-subscription-manage-header">
+              <div>
+                <span>Subscription Management</span>
+                <h2 id="manage-subscription-title">DigiBills Pro</h2>
+              </div>
+
+              <button
+                type="button"
+                className="customer-subscription-manage-close"
+                aria-label="Close subscription management"
+                onClick={() => setShowManageSubscription(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="customer-subscription-manage-status">
+              <span />
+              {currentSubscription.status === "trialing"
+                ? "Trial Active"
+                : currentSubscription.status || "Active"}
+            </div>
+
+            <div className="customer-subscription-manage-grid">
+              <div>
+                <span>Current Plan</span>
+                <strong>DigiBills Pro</strong>
+              </div>
+
+              <div>
+                <span>Billing Cycle</span>
+                <strong>
+                  {currentPlan?.billing_type === "monthly"
+                    ? "Monthly"
+                    : currentPlan?.billing_type === "yearly"
+                      ? "Yearly"
+                      : "Per Bill"}
+                </strong>
+              </div>
+
+              <div>
+                <span>Subscription Started</span>
+                <strong>{formatDate(currentSubscription.started_at)}</strong>
+              </div>
+
+              <div>
+                <span>Next Billing Date</span>
+                <strong>
+                  {formatDate(currentSubscription.current_period_end)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Auto Renewal</span>
+                <strong>
+                  {currentSubscription.auto_renew ? "Enabled" : "Disabled"}
+                </strong>
+              </div>
+
+              <div>
+                <span>Subscription ID</span>
+                <strong>{currentSubscription.subscription_id}</strong>
+              </div>
+            </div>
+
+            <div className="customer-subscription-manage-benefits">
+              <div className="customer-subscription-manage-benefits-title">
+                <Check size={19} />
+                <strong>Included Benefits</strong>
+              </div>
+
+              <div className="customer-subscription-manage-benefits-list">
+                <div>
+                  <Check size={16} />
+                  <span>Unlimited Bill Access</span>
+                </div>
+
+                <div>
+                  <Check size={16} />
+                  <span>Digital Warranty Records</span>
+                </div>
+
+                <div>
+                  <Check size={16} />
+                  <span>Purchase History</span>
+                </div>
+
+                <div>
+                  <Check size={16} />
+                  <span>Payment Records</span>
+                </div>
+
+                <div>
+                  <Check size={16} />
+                  <span>Bill Transfer</span>
+                </div>
+
+                <div>
+                  <Check size={16} />
+                  <span>Priority Support</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="customer-subscription-manage-note">
+              <ShieldCheck size={18} />
+              <span>
+                Your subscription is active. Subscription cancellation is not
+                available while the subscription is active.
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </section>

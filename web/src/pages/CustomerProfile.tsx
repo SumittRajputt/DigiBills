@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
+  CalendarDays,
   Camera,
   Mail,
   Pencil,
@@ -16,6 +17,8 @@ type CustomerProfileData = {
   full_name: string;
   phone_number: string;
   email: string | null;
+  profile_image_url: string | null;
+  date_of_birth: string | null;
   status: string;
 };
 
@@ -149,14 +152,26 @@ export default function CustomerProfile() {
       <div className="customer-profile-hero">
         <div className="customer-profile-photo-wrap">
           <div className="customer-profile-photo">
-            {initials}
+            {customer.profile_image_url ? (
+              <img
+                src={
+                  customer.profile_image_url.startsWith("http")
+                    ? customer.profile_image_url
+                    : `${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"}${customer.profile_image_url}`
+                }
+                alt="Profile"
+              />
+            ) : (
+              initials
+            )}
           </div>
 
           <button
             type="button"
             className="customer-profile-camera"
             aria-label="Change profile photo"
-            title="Profile photo"
+            title="Change profile photo"
+            onClick={() => navigate("/customer/profile/edit")}
           >
             <Camera size={14} />
           </button>
@@ -189,6 +204,37 @@ export default function CustomerProfile() {
             className="customer-profile-edit-button"
             aria-label="Edit full name"
             title="Edit full name"
+            onClick={() => navigate("/customer/profile/edit")}
+          >
+            <Pencil size={16} />
+          </button>
+        </div>
+
+        <div className="customer-profile-detail-row">
+          <div className="customer-profile-detail-icon">
+            <CalendarDays size={17} />
+          </div>
+
+          <div className="customer-profile-detail-content">
+            <span>Date of Birth</span>
+            <strong>
+              {customer.date_of_birth
+                ? new Date(
+                    `${customer.date_of_birth}T00:00:00`
+                  ).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })
+                : "Not provided"}
+            </strong>
+          </div>
+
+          <button
+            type="button"
+            className="customer-profile-edit-button"
+            aria-label="Edit date of birth"
+            title="Edit date of birth"
             onClick={() => navigate("/customer/profile/edit")}
           >
             <Pencil size={16} />

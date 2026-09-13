@@ -3,7 +3,8 @@ import {
   ArrowLeft,
   CreditCard,
   Eye,
-  RefreshCw,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
@@ -86,6 +87,11 @@ export default function CustomerPayments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [mobilePaymentSearch, setMobilePaymentSearch] =
+    useState("");
+  const [mobilePaymentStatus, setMobilePaymentStatus] =
+    useState("all");
+
   async function loadPayments() {
     try {
       setLoading(true);
@@ -142,34 +148,46 @@ export default function CustomerPayments() {
       payment.payment_status === "completed"
   ).length;
 
+  const filteredMobilePayments = useMemo(() => {
+    const search =
+      mobilePaymentSearch.trim().toLowerCase();
+
+    return payments.filter((payment) => {
+      const searchableText = [
+        payment.payment_id,
+        payment.invoice_id,
+        ...(payment.item_names || []),
+        payment.payment_method,
+        payment.payment_status,
+        payment.transaction_reference || "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch =
+        !search || searchableText.includes(search);
+
+      const matchesStatus =
+        mobilePaymentStatus === "all" ||
+        payment.payment_status?.toLowerCase() ===
+          mobilePaymentStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [
+    payments,
+    mobilePaymentSearch,
+    mobilePaymentStatus,
+  ]);
+
   return (
     <section className="dashboard customer-dashboard-page customer-payments-page">
       <div className="page-heading customer-payments-heading">
         <div>
-          <span className="page-eyebrow">
-            CUSTOMER ACCOUNT
-          </span>
+          
 
           <h1>My Payments</h1>
-
-          <p>
-            View payments, transactions, and refunds
-            associated with your invoices.
-          </p>
         </div>
-
-        <button
-          className="secondary-button"
-          type="button"
-          onClick={loadPayments}
-          disabled={loading}
-        >
-          <RefreshCw
-            size={15}
-            className={loading ? "spin" : ""}
-          />
-          Refresh
-        </button>
       </div>
 
       <div className="stats-grid four customer-payment-stats">
@@ -197,7 +215,6 @@ export default function CustomerPayments() {
 
         <div className="stat-card">
           <div className="stat-icon purple">
-            <RefreshCw size={18} />
           </div>
 
           <div>
@@ -242,6 +259,7 @@ export default function CustomerPayments() {
             No payments found.
           </div>
         ) : (
+            <>
           <div className="customer-payments-table-wrap">
             <table className="data-table customer-payments-table">
               <thead>
@@ -325,19 +343,154 @@ export default function CustomerPayments() {
               </tbody>
             </table>
           </div>
+
+          <div className="customer-payments-mobile-content">
+            <div className="customer-payments-mobile-controls">
+              <label className="customer-payments-mobile-search">
+                <Search size={17} />
+                <input
+                  type="search"
+                  placeholder="Search payments..."
+                  value={mobilePaymentSearch}
+                  onChange={(event) =>
+                    setMobilePaymentSearch(
+                      event.target.value
+                    )
+                  }
+                />
+              </label>
+
+              <label className="customer-payments-mobile-filter">
+                <SlidersHorizontal size={16} />
+                <select
+                  value={mobilePaymentStatus}
+                  onChange={(event) =>
+                    setMobilePaymentStatus(
+                      event.target.value
+                    )
+                  }
+                  aria-label="Filter payments by status"
+                >
+                  <option value="all">
+                    All Status
+                  </option>
+                  <option value="completed">
+                    Completed
+                  </option>
+                  <option value="pending">
+                    Pending
+                  </option>
+                  <option value="failed">
+                    Failed
+                  </option>
+                  <option value="refunded">
+                    Refunded
+                  </option>
+                </select>
+              </label>
+            </div>
+
+            {filteredMobilePayments.length === 0 ? (
+              <div className="customer-payments-mobile-empty">
+                No payments found.
+              </div>
+            ) : (
+              <div className="customer-payments-mobile-list">
+                {filteredMobilePayments.map((payment) => (
+                  <article
+                    className="customer-payment-mobile-card"
+                    key={payment.payment_id}
+                  >
+                    <div className="customer-payment-mobile-top">
+                      <div className="customer-payment-mobile-icon">
+                        <CreditCard size={18} />
+                      </div>
+
+                      <div className="customer-payment-mobile-main">
+                        <strong>
+                          {payment.payment_id}
+                        </strong>
+
+                        <small>
+                          {formatDate(payment.paid_at)}
+                        </small>
+                      </div>
+
+                      <span
+                        className={`customer-payment-mobile-status ${
+                          payment.payment_status
+                            ?.toLowerCase() || ""
+                        }`}
+                      >
+                        {label(
+                          payment.payment_status
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="customer-payment-mobile-divider" />
+
+                    <div className="customer-payment-mobile-row">
+                      <div>
+                        <small>ITEM</small>
+                        <strong>
+                          {payment.item_names?.length
+                            ? payment.item_names.join(", ")
+                            : "No items"}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <small>AMOUNT</small>
+                        <strong>
+                          {money(payment.amount)}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <div className="customer-payment-mobile-row">
+                      <div>
+                        <small>METHOD</small>
+                        <strong>
+                          {label(
+                            payment.payment_method
+                          )}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <small>REFUND</small>
+                        <strong>
+                          {Number(
+                            payment.refund_amount || 0
+                          ) > 0
+                            ? money(
+                                payment.refund_amount
+                              )
+                            : "—"}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="customer-payment-mobile-view"
+                      onClick={() =>
+                        setSelectedPayment(payment)
+                      }
+                    >
+                      <Eye size={15} />
+                      View Payment
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
         )}
       </div>
 
-      <button
-        className="secondary-button customer-payments-back"
-        type="button"
-        onClick={() =>
-          navigate("/customer")
-        }
-      >
-        <ArrowLeft size={15} />
-        Back to Dashboard
-      </button>
 
       {selectedPayment && (
         <div

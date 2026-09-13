@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
-import { Eye, Plus, X } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  Eye,
+  Filter,
+  Plus,
+  Search,
+  Ticket,
+  X,
+} from "lucide-react";
 
 type SupportTicket = {
   id: string;
@@ -54,6 +63,11 @@ export default function CustomerSupport() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const [mobileSupportSearch, setMobileSupportSearch] =
+    useState("");
+  const [mobileSupportStatus, setMobileSupportStatus] =
+    useState("all");
 
   const [form, setForm] = useState<CreateTicketForm>({
     subject: "",
@@ -136,10 +150,38 @@ export default function CustomerSupport() {
   ).length;
 
   const resolvedTickets = tickets.filter(
-    (ticket) =>
-      ticket.status === "resolved" ||
-      ticket.status === "closed"
+    (ticket) => ticket.status === "resolved"
   ).length;
+
+  const closedTickets = tickets.filter(
+    (ticket) => ticket.status === "closed"
+  ).length;
+
+  const filteredMobileTickets = tickets.filter((ticket) => {
+    const query = mobileSupportSearch.trim().toLowerCase();
+
+    const searchableText = [
+      ticket.ticket_id,
+      ticket.subject,
+      ticket.description,
+      ticket.category,
+      ticket.priority,
+      ticket.status,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch =
+      query.length === 0 ||
+      searchableText.includes(query);
+
+    const matchesStatus =
+      mobileSupportStatus === "all" ||
+      ticket.status === mobileSupportStatus;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <section className="dashboard customer-dashboard-page customer-support-page">
@@ -170,8 +212,11 @@ export default function CustomerSupport() {
         </div>
       )}
 
-      <div className="stats-grid three">
+      <div className="stats-grid four customer-support-stats">
         <div className="stat-card">
+          <div className="customer-support-stat-icon customer-support-stat-total">
+            <Ticket size={20} />
+          </div>
           <div>
             <span>Total Tickets</span>
             <strong>{tickets.length}</strong>
@@ -179,6 +224,9 @@ export default function CustomerSupport() {
         </div>
 
         <div className="stat-card">
+          <div className="customer-support-stat-icon customer-support-stat-open">
+            <Clock3 size={20} />
+          </div>
           <div>
             <span>Open Tickets</span>
             <strong>{openTickets}</strong>
@@ -186,9 +234,22 @@ export default function CustomerSupport() {
         </div>
 
         <div className="stat-card">
+          <div className="customer-support-stat-icon customer-support-stat-resolved">
+            <CheckCircle2 size={20} />
+          </div>
           <div>
             <span>Resolved</span>
             <strong>{resolvedTickets}</strong>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="customer-support-stat-icon customer-support-stat-closed">
+            <X size={20} />
+          </div>
+          <div>
+            <span>Closed</span>
+            <strong>{closedTickets}</strong>
           </div>
         </div>
       </div>
@@ -203,6 +264,37 @@ export default function CustomerSupport() {
           </div>
         </div>
 
+        <div className="customer-support-mobile-controls">
+          <label className="customer-support-mobile-search">
+            <Search size={16} />
+            <input
+              type="search"
+              value={mobileSupportSearch}
+              onChange={(event) =>
+                setMobileSupportSearch(event.target.value)
+              }
+              placeholder="Search tickets..."
+              aria-label="Search support tickets"
+            />
+          </label>
+
+          <label className="customer-support-mobile-filter">
+            <Filter size={16} />
+            <select
+              value={mobileSupportStatus}
+              onChange={(event) =>
+                setMobileSupportStatus(event.target.value)
+              }
+              aria-label="Filter support tickets by status"
+            >
+              <option value="all">All Status</option>
+              <option value="open">Open</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </label>
+        </div>
+
         {loading ? (
           <div className="table-state">
             Loading support tickets...
@@ -212,6 +304,7 @@ export default function CustomerSupport() {
             No support tickets found.
           </div>
         ) : (
+            <>
           <div className="customer-support-table-wrap">
             <table className="data-table customer-support-table">
               <thead>
@@ -280,6 +373,75 @@ export default function CustomerSupport() {
               </tbody>
             </table>
           </div>
+
+          <div className="customer-support-mobile-list">
+            {filteredMobileTickets.length === 0 ? (
+              <div className="customer-support-mobile-empty">
+                <Search size={22} />
+                <strong>No matching support tickets</strong>
+                <span>
+                  Try another search or change the status filter.
+                </span>
+              </div>
+            ) : (
+              filteredMobileTickets.map((ticket) => (
+                <article
+                  key={`mobile-${ticket.id}`}
+                  className="customer-support-mobile-card"
+                >
+                  <div className="customer-support-mobile-card-header">
+                    <div>
+                      <span>Ticket ID</span>
+                      <strong>{ticket.ticket_id}</strong>
+                    </div>
+
+                    <span className={statusClass(ticket.status)}>
+                      {ticket.status}
+                    </span>
+                  </div>
+
+                  <div className="customer-support-mobile-ticket-main">
+                    <div className="customer-support-mobile-ticket-icon">
+                      <Ticket size={19} />
+                    </div>
+
+                    <div>
+                      <strong>{ticket.subject}</strong>
+                      <span>
+                        {ticket.description || "Support request"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="customer-support-mobile-info-grid">
+                    <div>
+                      <small>Category</small>
+                      <strong>
+                        {ticket.category || "General"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <small>Created On</small>
+                      <strong>
+                        {formatDate(ticket.created_at)}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="secondary-button customer-support-mobile-view-button"
+                    onClick={() => setSelectedTicket(ticket)}
+                  >
+                    <Eye size={15} />
+                    View Details
+                  </button>
+                </article>
+              ))
+            )}
+          </div>
+          </>
         )}
       </div>
 

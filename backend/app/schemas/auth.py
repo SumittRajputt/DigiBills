@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field, model_validator
@@ -65,6 +66,7 @@ class UserResponse(BaseModel):
     status: str
     is_phone_verified: bool
     roles: list[str]
+    last_login_at: Optional[datetime] = None
 
 
 class ForgotPasswordRequest(BaseModel):

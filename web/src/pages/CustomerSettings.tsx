@@ -12,6 +12,7 @@ type AccountUser = {
 
 type CustomerProfile = {
   id: string;
+  customer_id: string;
   user_id: string;
   name: string | null;
   email: string | null;
@@ -214,7 +215,7 @@ export default function CustomerSettings() {
             <div className="settings-field">
               <span>Customer ID</span>
               <strong>
-                {customer?.id || "—"}
+                {customer?.customer_id || "—"}
               </strong>
             </div>
           </div>
@@ -295,6 +296,30 @@ export default function CustomerSettings() {
                 : "Change Password"}
             </button>
           </div>
+        </div>
+
+        <div className="panel customer-settings-security-link">
+          <div className="customer-settings-security-link-icon">
+            <ShieldCheck size={22} />
+          </div>
+
+          <div className="customer-settings-security-link-content">
+            <strong>Account Security</strong>
+            <span>
+              Review your account protection, phone verification,
+              password security, and recent login information.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-button customer-settings-security-link-button"
+            onClick={() =>
+              window.location.assign("/customer/settings/security")
+            }
+          >
+            View Account Security
+          </button>
         </div>
       </div>
     </section>

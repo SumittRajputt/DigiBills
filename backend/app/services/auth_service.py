@@ -138,7 +138,7 @@ def register_user(
 
         # Create the actual DigiBills customer profile.
         customer = Customer(
-            customer_id=generate_customer_id(),
+            customer_id=generate_customer_id(db),
             user_id=user.id,
             full_name=full_name,
             phone_number=phone_number,

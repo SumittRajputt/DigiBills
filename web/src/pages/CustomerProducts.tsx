@@ -104,9 +104,7 @@ export default function CustomerProducts() {
     <section className="dashboard customer-dashboard-page customer-products-page">
       <div className="page-heading customer-products-heading">
         <div>
-          <span className="page-eyebrow">
-            CUSTOMER ACCOUNT
-          </span>
+          
 
           <h1>My Products</h1>
 
@@ -311,16 +309,6 @@ export default function CustomerProducts() {
         )}
       </div>
 
-      <button
-        className="secondary-button customer-products-back"
-        type="button"
-        onClick={() =>
-          navigate("/customer")
-        }
-      >
-        <ArrowLeft size={15} />
-        Back to Dashboard
-      </button>
 
       {selectedProduct && (
         <div
