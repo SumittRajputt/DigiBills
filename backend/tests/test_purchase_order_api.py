@@ -34,7 +34,7 @@ def create_purchase_order_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-PO-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Purchase Order API Retailer",
         phone_number=user.phone_number,
@@ -65,6 +65,7 @@ def create_purchase_order_api_context(db):
     product = Product(
         product_code=f"PROD-PO-API-{uuid4().hex[:6].upper()}",
         name="Purchase Order API Product",
+        retailer_id=retailer.id,
         status="active",
     )
     db.add(product)

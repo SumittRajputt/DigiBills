@@ -35,7 +35,7 @@ def create_audit_log_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-AUD-API-{uuid.uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Audit Log API Retailer",
         phone_number=user.phone_number,
@@ -201,7 +201,7 @@ def test_list_audit_logs_api_is_scoped_to_current_retailer(
     db.flush()
 
     other_retailer = Retailer(
-        retailer_id=f"RET-AUD-OTHER-{uuid.uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=other_user.id,
         business_name="Other Audit Retailer",
         phone_number=other_user.phone_number,
@@ -319,7 +319,7 @@ def test_get_audit_log_api_is_scoped_to_current_retailer(
     db.flush()
 
     other_retailer = Retailer(
-        retailer_id=f"RET-AUD-OTHER-{uuid.uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=other_user.id,
         business_name="Other Audit Retailer",
         phone_number=other_user.phone_number,

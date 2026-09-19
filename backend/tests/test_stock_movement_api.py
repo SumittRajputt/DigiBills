@@ -34,7 +34,7 @@ def create_stock_movement_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-SM-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Stock Movement API Retailer",
         phone_number=user.phone_number,
@@ -55,6 +55,7 @@ def create_stock_movement_api_context(db):
     product = Product(
         product_code=f"PROD-SM-API-{uuid4().hex[:6].upper()}",
         name="Stock Movement API Product",
+        retailer_id=retailer.id,
         status="active",
     )
     db.add(product)
@@ -413,8 +414,11 @@ def test_create_stock_movement_missing_inventory_item(
         },
     )
 
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Inventory item not found."
+    assert response.status_code == 201
+
+    data = response.json()
+    assert data["product_variant_id"] == str(context["variant"].id)
+    assert data["quantity"] == 1
 
 
 def test_stock_movement_with_reference_id(

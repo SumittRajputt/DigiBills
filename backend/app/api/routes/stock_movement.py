@@ -121,6 +121,7 @@ def create_stock_movement_endpoint(
     variant = get_variant_by_sku(
         db,
         request.sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:
@@ -228,6 +229,7 @@ def get_stock_movements_endpoint(
     variant = get_variant_by_sku(
         db,
         sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:

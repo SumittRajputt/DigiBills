@@ -3,6 +3,10 @@ from decimal import Decimal
 
 from app.models.access_control import user_roles
 from app.models.product import Product
+from app.models.retailer import Retailer
+from app.models.subscription import Subscription
+from app.models.subscription_plan import SubscriptionPlan
+from app.services.retailer_plan_service import ensure_retailer_plans
 from app.models.role import Role
 from app.models.user import User
 from app.services.auth_service import create_user_token
@@ -28,8 +32,39 @@ def create_product_variant_api_context(db):
     )
     db.flush()
 
+    retailer = Retailer(
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
+        owner_user_id=user.id,
+        business_name="Product Variant API Retailer",
+        phone_number=user.phone_number,
+        status="active",
+    )
+    db.add(retailer)
+    db.flush()
+
+    ensure_retailer_plans(db)
+
+    plan = db.query(SubscriptionPlan).filter(
+        SubscriptionPlan.plan_id == "retailer_pro"
+    ).one()
+
+    subscription = Subscription(
+        subscription_id=f"SUB-VAR-{uuid.uuid4().hex[:8].upper()}",
+        plan_id=plan.id,
+        retailer_id=retailer.id,
+        customer_id=None,
+        status="active",
+        started_at=plan.created_at,
+        current_period_start=plan.created_at,
+        current_period_end=plan.created_at,
+        trial_ends_at=None,
+        auto_renew=True,
+    )
+    db.add(subscription)
+
     product = Product(
         product_code=f"PROD-VAR-API-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=retailer.id,
         name="Variant API Product",
         brand="Test Brand",
         category="Electronics",
@@ -38,10 +73,12 @@ def create_product_variant_api_context(db):
         status="active",
     )
     db.add(product)
+
     db.commit()
 
     return {
         "user": user,
+        "retailer": retailer,
         "product": product,
         "token": create_user_token(user),
     }

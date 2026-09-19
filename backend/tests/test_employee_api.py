@@ -37,7 +37,7 @@ def create_retailer_owner_context(db):
     )
 
     retailer = Retailer(
-        retailer_id=f"RET-EMP-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Employee Test Retailer",
         phone_number=user.phone_number,

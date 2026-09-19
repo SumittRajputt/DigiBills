@@ -12,70 +12,96 @@ from app.models.product_variant import ProductVariant
 def get_variant_by_id(
     db: Session,
     variant_id: uuid.UUID,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[ProductVariant]:
-    statement = select(ProductVariant).where(
-        ProductVariant.id == variant_id
+    statement = (
+        select(ProductVariant)
+        .join(Product, Product.id == ProductVariant.product_id)
+        .where(ProductVariant.id == variant_id)
     )
 
-    return db.execute(
-        statement
-    ).scalar_one_or_none()
+    if retailer_id is not None:
+        statement = statement.where(Product.retailer_id == retailer_id)
+
+    return db.execute(statement).scalar_one_or_none()
 
 
 def get_variant_by_sku(
     db: Session,
     sku: str,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[ProductVariant]:
-    statement = select(ProductVariant).where(
-        ProductVariant.sku == sku
+    statement = (
+        select(ProductVariant)
+        .join(Product, Product.id == ProductVariant.product_id)
+        .where(ProductVariant.sku == sku)
     )
 
-    return db.execute(
-        statement
-    ).scalar_one_or_none()
+    if retailer_id is not None:
+        statement = statement.where(Product.retailer_id == retailer_id)
+
+    return db.execute(statement).scalar_one_or_none()
 
 
 def get_variant_by_barcode(
     db: Session,
     barcode: str,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[ProductVariant]:
-    statement = select(ProductVariant).where(
-        ProductVariant.barcode == barcode
+    statement = (
+        select(ProductVariant)
+        .join(Product, Product.id == ProductVariant.product_id)
+        .where(ProductVariant.barcode == barcode)
     )
 
-    return db.execute(
-        statement
-    ).scalar_one_or_none()
+    if retailer_id is not None:
+        statement = statement.where(Product.retailer_id == retailer_id)
+
+    return db.execute(statement).scalar_one_or_none()
 
 
 def get_product_by_code(
     db: Session,
     product_code: str,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[Product]:
     statement = select(Product).where(
         Product.product_code == product_code
     )
 
-    return db.execute(
-        statement
-    ).scalar_one_or_none()
+    if retailer_id is not None:
+        statement = statement.where(
+            Product.retailer_id == retailer_id
+        )
+
+    return db.execute(statement).scalar_one_or_none()
 
 
 def get_all_product_variants(
     db: Session,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> list[ProductVariant]:
     statement = (
         select(ProductVariant)
-        .order_by(ProductVariant.created_at.desc())
+        .join(Product, Product.id == ProductVariant.product_id)
+    )
+
+    if retailer_id is not None:
+        statement = statement.where(
+            Product.retailer_id == retailer_id
+        )
+
+    statement = statement.order_by(
+        ProductVariant.created_at.desc()
     )
 
     return list(
         db.execute(statement).scalars().all()
     )
 
+
 def create_product_variant(
     db: Session,
-
     product_code: str,
     sku: str,
     variant_name: str,
@@ -85,11 +111,13 @@ def create_product_variant(
     tax_rate: Decimal = Decimal("0"),
     track_inventory: bool = True,
     requires_serial_number: bool = False,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> ProductVariant:
 
     product = get_product_by_code(
         db,
         product_code,
+        retailer_id=retailer_id,
     )
 
     if product is None:
@@ -100,6 +128,7 @@ def create_product_variant(
     existing_sku = get_variant_by_sku(
         db,
         sku,
+        retailer_id=retailer_id,
     )
 
     if existing_sku:
@@ -111,6 +140,7 @@ def create_product_variant(
         existing_barcode = get_variant_by_barcode(
             db,
             barcode,
+            retailer_id=retailer_id,
         )
 
         if existing_barcode:

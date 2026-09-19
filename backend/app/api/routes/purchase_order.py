@@ -227,6 +227,7 @@ def add_purchase_order_item_endpoint(
     variant = get_variant_by_sku(
         db,
         request.sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:
@@ -400,17 +401,19 @@ def receive_purchase_order_item_endpoint(
             detail="Inventory location not found.",
         )
 
-    variant_statement = select(
-        __import__(
-            "app.models.product_variant",
-            fromlist=["ProductVariant"],
-        ).ProductVariant
-    ).where(
-        __import__(
-            "app.models.product_variant",
-            fromlist=["ProductVariant"],
-        ).ProductVariant.id
-        == item.product_variant_id
+    from app.models.product import Product
+    from app.models.product_variant import ProductVariant
+
+    variant_statement = (
+        select(ProductVariant)
+        .join(
+            Product,
+            Product.id == ProductVariant.product_id,
+        )
+        .where(
+            ProductVariant.id == item.product_variant_id,
+            Product.retailer_id == retailer.id,
+        )
     )
 
     product_variant = db.execute(

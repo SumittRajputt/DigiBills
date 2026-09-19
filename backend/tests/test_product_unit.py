@@ -6,11 +6,33 @@ import pytest
 from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.product_unit import ProductUnit
+from app.models.retailer import Retailer
+from app.models.user import User
 from app.services.product_unit_service import create_product_unit
 
 
-def create_serialized_variant(db):
+def create_serialized_variant(db, retailer=None):
+    if retailer is None:
+        user = User(
+            phone_number=f"999{uuid.uuid4().hex[:7]}",
+            email=f"unit-{uuid.uuid4().hex[:8]}@example.com",
+            status="active",
+        )
+        db.add(user)
+        db.flush()
+
+        retailer = Retailer(
+            retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
+            owner_user_id=user.id,
+            business_name="Product Unit Test Retailer",
+            phone_number=user.phone_number,
+            status="active",
+        )
+        db.add(retailer)
+        db.flush()
+
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-UNIT-{uuid.uuid4().hex[:8].upper()}",
         name="Test Serialized Product",
         status="active",
@@ -72,7 +94,26 @@ def test_duplicate_serial_number_is_rejected(db):
 
 
 def test_product_unit_requires_serialized_variant(db):
+    user = User(
+        phone_number=f"999{uuid.uuid4().hex[:7]}",
+        email=f"nonserial-{uuid.uuid4().hex[:8]}@example.com",
+        status="active",
+    )
+    db.add(user)
+    db.flush()
+
+    retailer = Retailer(
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
+        owner_user_id=user.id,
+        business_name="Non Serialized Test Retailer",
+        phone_number=user.phone_number,
+        status="active",
+    )
+    db.add(retailer)
+    db.flush()
+
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-NONSERIAL-{uuid.uuid4().hex[:8].upper()}",
         name="Test Non Serialized Product",
         status="active",
@@ -124,7 +165,7 @@ def test_serialized_invoice_sells_selected_units_and_creates_ownership(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Serialized Test Retailer",
         phone_number=user.phone_number,
@@ -150,7 +191,7 @@ def test_serialized_invoice_sells_selected_units_and_creates_ownership(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Serialized Test Customer",
         phone_number=customer_user.phone_number,
@@ -159,7 +200,7 @@ def test_serialized_invoice_sells_selected_units_and_creates_ownership(db):
     db.add(customer)
     db.flush()
 
-    variant = create_serialized_variant(db)
+    variant = create_serialized_variant(db, retailer)
 
     inventory = InventoryItem(
         retailer_id=retailer.id,
@@ -256,7 +297,7 @@ def test_serialized_invoice_rejects_already_sold_unit(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Serialized Reuse Retailer",
         phone_number=user.phone_number,
@@ -282,7 +323,7 @@ def test_serialized_invoice_rejects_already_sold_unit(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Reuse Test Customer",
         phone_number=customer_user.phone_number,
@@ -291,7 +332,7 @@ def test_serialized_invoice_rejects_already_sold_unit(db):
     db.add(customer)
     db.flush()
 
-    variant = create_serialized_variant(db)
+    variant = create_serialized_variant(db, retailer)
 
     inventory = InventoryItem(
         retailer_id=retailer.id,
@@ -366,7 +407,7 @@ def test_serialized_sales_return_releases_unit_and_restores_inventory(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Serialized Return Retailer",
         phone_number=user.phone_number,
@@ -392,7 +433,7 @@ def test_serialized_sales_return_releases_unit_and_restores_inventory(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Serialized Return Customer",
         phone_number=customer_user.phone_number,
@@ -401,7 +442,7 @@ def test_serialized_sales_return_releases_unit_and_restores_inventory(db):
     db.add(customer)
     db.flush()
 
-    variant = create_serialized_variant(db)
+    variant = create_serialized_variant(db, retailer)
 
     inventory = InventoryItem(
         retailer_id=retailer.id,

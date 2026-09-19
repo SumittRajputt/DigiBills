@@ -399,7 +399,7 @@ def register_retailer(
         )
 
         retailer = Retailer(
-            retailer_id=generate_retailer_id(),
+            retailer_id=generate_retailer_id(db),
             owner_user_id=user.id,
             business_name=business_name.strip(),
             business_type=business_type.strip(),

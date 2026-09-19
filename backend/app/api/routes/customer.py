@@ -10,10 +10,11 @@ from app.schemas.customer import (
     CustomerUpdateRequest,
 )
 from app.services.profile_image_service import save_profile_image
+from app.services.retailer_service import get_retailer_by_owner
 from app.services.customer_service import (
     create_customer,
     create_customer_for_retailer,
-    get_all_customers,
+    get_retailer_customers,
     get_customer_by_user_id,
     update_customer,
 )
@@ -118,7 +119,21 @@ def list_customers(
     ),
     db: Session = Depends(get_db),
 ):
-    customers = get_all_customers(db)
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found.",
+        )
+
+    customers = get_retailer_customers(
+        db,
+        retailer.id,
+    )
 
     return [
         customer_to_response(customer)

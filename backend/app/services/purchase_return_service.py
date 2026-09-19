@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
+from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.purchase_order import PurchaseOrder
 from app.models.purchase_order_item import PurchaseOrderItem
@@ -190,6 +191,18 @@ def add_purchase_return_item(
             "Product variant does not match the purchase order item."
         )
 
+    product = db.execute(
+        select(Product).where(
+            Product.id == product_variant.product_id,
+            Product.retailer_id == purchase_return.retailer_id,
+        )
+    ).scalar_one_or_none()
+
+    if product is None:
+        raise ValueError(
+            "Product variant does not belong to this retailer."
+        )
+
     if quantity > purchase_order_item.received_quantity:
         raise ValueError(
             "Return quantity cannot exceed received quantity."
@@ -328,11 +341,17 @@ def process_purchase_return(
                     f"SKU {return_item.sku}."
                 )
 
-            variant_statement = select(
-                ProductVariant
-            ).where(
-                ProductVariant.id
-                == return_item.product_variant_id
+            variant_statement = (
+                select(ProductVariant)
+                .join(
+                    Product,
+                    Product.id == ProductVariant.product_id,
+                )
+                .where(
+                    ProductVariant.id
+                    == return_item.product_variant_id,
+                    Product.retailer_id == retailer.id,
+                )
             )
 
             product_variant = db.execute(
@@ -400,21 +419,6 @@ def process_purchase_return(
     except Exception:
         db.rollback()
         raise
-
-def get_all_purchase_returns(
-    db: Session,
-) -> list[PurchaseReturn]:
-    statement = (
-        select(PurchaseReturn)
-        .order_by(
-            PurchaseReturn.created_at.desc()
-        )
-    )
-
-    return list(
-        db.execute(statement).scalars().all()
-    )
-
 
 def get_all_purchase_returns(
     db: Session,

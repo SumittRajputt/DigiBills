@@ -42,7 +42,7 @@ def create_ownership_api_context(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Ownership API Customer",
         phone_number=customer_user.phone_number,
@@ -51,7 +51,18 @@ def create_ownership_api_context(db):
     db.add(customer)
     db.flush()
 
+    retailer = Retailer(
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
+        owner_user_id=user.id,
+        business_name="Ownership API Retailer",
+        phone_number=user.phone_number,
+        status="active",
+    )
+    db.add(retailer)
+    db.flush()
+
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-OWN-{uuid4().hex[:8].upper()}",
         name="Ownership API Product",
         status="active",
@@ -71,16 +82,6 @@ def create_ownership_api_context(db):
         status="active",
     )
     db.add(variant)
-    db.flush()
-
-    retailer = Retailer(
-        retailer_id=f"RET-OWN-{uuid4().hex[:8].upper()}",
-        owner_user_id=user.id,
-        business_name="Ownership API Retailer",
-        phone_number=user.phone_number,
-        status="active",
-    )
-    db.add(retailer)
     db.flush()
 
     invoice = Invoice(

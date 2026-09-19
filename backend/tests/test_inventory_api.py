@@ -33,7 +33,7 @@ def create_inventory_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-INV-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Inventory API Retailer",
         phone_number=user.phone_number,
@@ -53,6 +53,7 @@ def create_inventory_api_context(db):
 
     product = Product(
         product_code=f"PROD-INV-API-{uuid4().hex[:6].upper()}",
+        retailer_id=retailer.id,
         name="Inventory API Product",
         status="active",
     )

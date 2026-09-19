@@ -28,7 +28,7 @@ def create_inventory_location_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-LOC-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Inventory Location API Retailer",
         phone_number=user.phone_number,
@@ -251,7 +251,7 @@ def test_create_inventory_location_api_does_not_leak_other_retailer(
     db.flush()
 
     other_retailer = Retailer(
-        retailer_id=f"RET-OTHER-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=other_user.id,
         business_name="Other Retailer",
         phone_number=other_user.phone_number,

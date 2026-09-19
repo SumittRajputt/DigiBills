@@ -18,10 +18,10 @@ from app.schemas.product_ownership import (
 )
 from app.services.product_ownership_service import (
     create_product_ownership,
-    get_ownership_by_product_unit,
     get_ownership_by_serial_number,
     get_product_ownership,
 )
+from app.services.retailer_service import get_retailer_by_owner
 
 
 router = APIRouter(
@@ -61,9 +61,27 @@ def create_product_ownership_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
+    if retailer.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer is not active.",
+        )
+
     invoice = db.execute(
         select(Invoice).where(
-            Invoice.invoice_id == request.invoice_id
+            Invoice.invoice_id == request.invoice_id,
+            Invoice.retailer_id == retailer.id,
         )
     ).scalar_one_or_none()
 
@@ -158,6 +176,7 @@ def create_product_ownership_endpoint(
             db=db,
             invoice=invoice,
             invoice_item=invoice_item,
+            retailer_id=retailer.id,
             product_unit=product_unit,
             customer=customer,
             source="invoice",
@@ -187,9 +206,21 @@ def get_product_ownership_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
     ownership = get_product_ownership(
         db=db,
         ownership_id=ownership_id,
+        retailer_id=retailer.id,
     )
 
     if ownership is None:
@@ -212,9 +243,21 @@ def get_ownership_by_serial_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(
+        db,
+        current_user.id,
+    )
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Retailer not found for this user.",
+        )
+
     ownership = get_ownership_by_serial_number(
         db=db,
         serial_number=serial_number,
+        retailer_id=retailer.id,
     )
 
     if ownership is None:

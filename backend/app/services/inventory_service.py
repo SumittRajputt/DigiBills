@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
+from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.retailer import Retailer
 
@@ -47,6 +48,18 @@ def create_inventory_item(
     if not location.is_active:
         raise ValueError(
             "Inventory location is not active."
+        )
+
+    product = db.execute(
+        select(Product).where(
+            Product.id == product_variant.product_id,
+            Product.retailer_id == retailer.id,
+        )
+    ).scalar_one_or_none()
+
+    if product is None:
+        raise ValueError(
+            "Product variant does not belong to this retailer."
         )
 
     existing_item = get_inventory_item(

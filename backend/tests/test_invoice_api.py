@@ -50,7 +50,7 @@ def create_invoice_api_context(db, stock_quantity=5):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-INV-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Invoice API Retailer",
         phone_number=user.phone_number,
@@ -110,7 +110,7 @@ def create_invoice_api_context(db, stock_quantity=5):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-INV-{uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Invoice API Customer",
         phone_number=customer_user.phone_number,
@@ -120,6 +120,7 @@ def create_invoice_api_context(db, stock_quantity=5):
     db.flush()
 
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-INV-{uuid4().hex[:8].upper()}",
         name="Invoice API Product",
         status="active",
@@ -147,6 +148,7 @@ def create_invoice_api_context(db, stock_quantity=5):
         quantity_on_hand=stock_quantity,
         quantity_reserved=0,
         average_cost=25000,
+        tax_rate=18,
     )
     db.add(inventory)
     db.flush()
@@ -186,7 +188,7 @@ def test_create_invoice_api(client, db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="API Test Retailer",
         phone_number=user.phone_number,
@@ -246,7 +248,7 @@ def test_create_invoice_api(client, db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="API Test Customer",
         phone_number=customer_user.phone_number,
@@ -359,8 +361,8 @@ def test_get_invoice_api(client, db):
     data = response.json()
 
     assert data["invoice_id"] == invoice_id
-    assert data["retailer_id"] == str(context["retailer"].id)
-    assert data["customer_id"] == str(context["customer"].id)
+    assert data["retailer_id"] == context["retailer"].retailer_id
+    assert data["customer_id"] == context["customer"].customer_id
     assert data["status"] == "active"
     assert data["payment_status"] == "unpaid"
 
@@ -524,11 +526,13 @@ def test_create_invoice_api_calculates_tax_and_invoice_discount(
     # Invoice-level discount
     assert data["discount_amount"] == "5000.00"
 
-    # Tax is calculated on the item net amount before invoice-level discount.
-    assert data["tax_amount"] == "10800.00"
+    # Selling price is GST-inclusive.
+    # GST = 60,000 × 18 / 118 = 9,152.54
+    assert data["tax_amount"] == "9152.54"
 
-    # 60,000 - 5,000 + 10,800 = 65,800
-    assert data["total_amount"] == "65800.00"
+    # Invoice-level discount is applied to the GST-inclusive subtotal.
+    # 60,000 - 5,000 = 55,000
+    assert data["total_amount"] == "55000.00"
 
     assert data["invoice_number"] == "INV-API-001"
     assert data["notes"] == "Financial calculation test"
@@ -565,13 +569,13 @@ def test_create_invoice_api_supports_custom_item_price_and_discount(
 
     # 2 × 28,000 = 56,000
     # Item discount = 2,000
-    # Net = 54,000
-    # Tax = 54,000 × 18% = 9,720
-    # Total = 63,720
+    # GST-inclusive net amount = 54,000
+    # GST = 54,000 × 18 / 118 = 8,237.29
+    # Total remains GST-inclusive at 54,000.
     assert data["subtotal"] == "54000.00"
     assert data["discount_amount"] == "0.00"
-    assert data["tax_amount"] == "9720.00"
-    assert data["total_amount"] == "63720.00"
+    assert data["tax_amount"] == "8237.29"
+    assert data["total_amount"] == "54000.00"
 
     assert len(data["items"]) == 1
 
@@ -580,8 +584,8 @@ def test_create_invoice_api_supports_custom_item_price_and_discount(
     assert item["unit_price"] == "28000.00"
     assert item["discount_amount"] == "2000.00"
     assert item["tax_rate"] == "18.00"
-    assert item["tax_amount"] == "9720.00"
-    assert item["line_total"] == "63720.00"
+    assert item["tax_amount"] == "8237.29"
+    assert item["line_total"] == "54000.00"
 
 
 def test_create_invoice_api_rejects_item_discount_above_amount(
@@ -985,7 +989,7 @@ def test_get_invoice_api_rejects_invoice_from_another_retailer(
     db.flush()
 
     other_retailer = Retailer(
-        retailer_id=f"RET-OTHER-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=other_user.id,
         business_name="Other Retailer",
         phone_number=other_user.phone_number,

@@ -33,7 +33,7 @@ def create_purchase_return_context(db, ordered_quantity=10):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-PR-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Purchase Return Test Retailer",
         phone_number=user.phone_number,
@@ -62,6 +62,7 @@ def create_purchase_return_context(db, ordered_quantity=10):
     db.flush()
 
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-PR-{uuid4().hex[:8].upper()}",
         name="Purchase Return Test Product",
         status="active",

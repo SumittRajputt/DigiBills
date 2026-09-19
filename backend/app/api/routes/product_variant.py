@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -15,6 +13,7 @@ from app.services.product_variant_service import (
     get_variant_by_sku,
     get_all_product_variants,
 )
+from app.services.retailer_service import get_retailer_by_owner
 
 
 router = APIRouter(
@@ -51,6 +50,14 @@ def create_product_variant_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(db, current_user.id)
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer account not found.",
+        )
+
     try:
         variant = create_product_variant(
             db=db,
@@ -63,6 +70,7 @@ def create_product_variant_endpoint(
             tax_rate=request.tax_rate,
             track_inventory=request.track_inventory,
             requires_serial_number=request.requires_serial_number,
+            retailer_id=retailer.id,
         )
 
         return variant_to_response(variant)
@@ -90,7 +98,18 @@ def list_product_variants(
     ),
     db: Session = Depends(get_db),
 ):
-    variants = get_all_product_variants(db)
+    retailer = get_retailer_by_owner(db, current_user.id)
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer account not found.",
+        )
+
+    variants = get_all_product_variants(
+        db,
+        retailer_id=retailer.id,
+    )
 
     return [
         variant_to_response(variant)
@@ -109,9 +128,18 @@ def get_product_variant_endpoint(
     ),
     db: Session = Depends(get_db),
 ):
+    retailer = get_retailer_by_owner(db, current_user.id)
+
+    if retailer is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Retailer account not found.",
+        )
+
     variant = get_variant_by_sku(
         db,
         sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:

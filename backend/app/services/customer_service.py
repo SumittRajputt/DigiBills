@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.customer import Customer
+from app.models.invoice import Invoice
 from app.models.access_control import user_roles
 from app.models.user import User
 from app.models.role import Role
@@ -70,6 +71,28 @@ def get_all_customers(
 ) -> list[Customer]:
     statement = (
         select(Customer)
+        .order_by(Customer.created_at.desc())
+    )
+
+    return list(
+        db.execute(statement).scalars().all()
+    )
+
+
+def get_retailer_customers(
+    db: Session,
+    retailer_id: uuid.UUID,
+) -> list[Customer]:
+    statement = (
+        select(Customer)
+        .join(
+            Invoice,
+            Invoice.customer_id == Customer.id,
+        )
+        .where(
+            Invoice.retailer_id == retailer_id,
+        )
+        .distinct()
         .order_by(Customer.created_at.desc())
     )
 

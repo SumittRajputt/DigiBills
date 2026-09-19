@@ -37,7 +37,7 @@ def create_sales_return_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-SR-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Sales Return API Retailer",
         phone_number=user.phone_number,
@@ -63,7 +63,7 @@ def create_sales_return_api_context(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-SR-API-{uuid4().hex[:6].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Sales Return API Customer",
         phone_number=customer_user.phone_number,
@@ -170,15 +170,9 @@ def test_create_sales_return_api(client, db):
     data = response.json()
 
     assert data["status"] == "requested"
-    assert data["invoice_id"] == str(
-        context["invoice"].id
-    )
-    assert data["retailer_id"] == str(
-        context["retailer"].id
-    )
-    assert data["customer_id"] == str(
-        context["customer"].id
-    )
+    assert data["invoice_id"] == context["invoice"].invoice_id
+    assert data["retailer_id"] == context["retailer"].retailer_id
+    assert data["customer_id"] == context["customer"].customer_id
     assert data["return_amount"] == "0.00"
     assert data["refund_amount"] == "0.00"
     assert data["refund_method"] is None

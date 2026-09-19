@@ -71,13 +71,13 @@ def get_customer(
     db: Session,
     customer_id: str,
 ) -> Optional[Customer]:
-    try:
-        parsed_id = uuid.UUID(customer_id)
-    except ValueError:
+    customer_id = customer_id.strip()
+
+    if len(customer_id) != 11 or not customer_id.isdigit():
         return None
 
     statement = select(Customer).where(
-        Customer.id == parsed_id
+        Customer.customer_id == customer_id
     )
 
     return db.execute(
@@ -209,10 +209,17 @@ def get_product_units(
 
 def get_all_invoices(
     db: Session,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> list[Invoice]:
-    statement = (
-        select(Invoice)
-        .order_by(Invoice.created_at.desc())
+    statement = select(Invoice)
+
+    if retailer_id is not None:
+        statement = statement.where(
+            Invoice.retailer_id == retailer_id
+        )
+
+    statement = statement.order_by(
+        Invoice.created_at.desc()
     )
 
     return list(
@@ -629,6 +636,7 @@ def create_invoice(
             assign_product_ownership(
                 db=db,
                 invoice=invoice,
+                retailer_id=retailer.id,
                 invoice_item=invoice_item,
                 customer=customer,
                 product_unit=product_unit,

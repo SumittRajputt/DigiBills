@@ -30,7 +30,7 @@ def create_retailer_with_plan(
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-ENT-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Entitlement Test Retailer",
         phone_number=f"9{uuid4().hex[:9]}",

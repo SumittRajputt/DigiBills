@@ -29,7 +29,7 @@ def create_sales_return_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-SR-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Sales Return Test Retailer",
         phone_number=user.phone_number,
@@ -55,7 +55,7 @@ def create_sales_return_context(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-SR-{uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Sales Return Customer",
         phone_number=customer_user.phone_number,
@@ -288,7 +288,7 @@ def test_create_sales_return_rejects_wrong_retailer(db):
     db.flush()
 
     other_retailer = Retailer(
-        retailer_id=f"RET-OTHER-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=other_user.id,
         business_name="Other Retailer",
         phone_number=other_user.phone_number,

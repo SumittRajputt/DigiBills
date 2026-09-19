@@ -236,7 +236,14 @@ def get_retailer_dashboard(
     # ---------------------------------------------------------
 
     recent_invoices = db.execute(
-        select(Invoice)
+        select(
+            Invoice,
+            Customer.customer_id.label("customer_business_id"),
+        )
+        .join(
+            Customer,
+            Customer.id == Invoice.customer_id,
+        )
         .where(
             Invoice.retailer_id == retailer_id
         )
@@ -244,12 +251,12 @@ def get_retailer_dashboard(
             Invoice.created_at.desc()
         )
         .limit(5)
-    ).scalars().all()
+    ).all()
 
     recent_invoice_data = [
         {
             "invoice_id": invoice.invoice_id,
-            "customer_id": str(invoice.customer_id),
+            "customer_id": customer_business_id,
             "invoice_number": invoice.invoice_number,
             "total_amount": str(
                 invoice.total_amount
@@ -258,7 +265,7 @@ def get_retailer_dashboard(
             "status": invoice.status,
             "invoice_date": invoice.invoice_date,
         }
-        for invoice in recent_invoices
+        for invoice, customer_business_id in recent_invoices
     ]
 
     # ---------------------------------------------------------
@@ -283,9 +290,12 @@ def get_retailer_dashboard(
     recent_payment_data = [
         {
             "payment_id": payment.payment_id,
-            "invoice_id": str(
-                payment.invoice_id
-            ),
+            "invoice_id": db.execute(
+                select(Invoice.invoice_id).where(
+                    Invoice.id == payment.invoice_id
+                )
+            ).scalar_one_or_none()
+            or str(payment.invoice_id),
             "amount": str(payment.amount),
             "payment_method": payment.payment_method,
             "payment_status": payment.payment_status,

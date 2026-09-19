@@ -37,7 +37,7 @@ def create_warranty_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-WAR-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Warranty API Retailer",
         phone_number=user.phone_number,
@@ -63,7 +63,7 @@ def create_warranty_api_context(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-WAR-API-{uuid4().hex[:6].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Warranty API Customer",
         phone_number=customer_user.phone_number,
@@ -80,7 +80,7 @@ def create_warranty_api_context(db):
     db.flush()
 
     second_customer = Customer(
-        customer_id=f"CUS-WAR-API-2-{uuid4().hex[:6].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=second_customer_user.id,
         full_name="Second Warranty Customer",
         phone_number=second_customer_user.phone_number,
@@ -190,13 +190,11 @@ def test_create_warranty_api(client, db):
 
     data = response.json()
 
-    assert data["invoice_id"] == str(context["invoice"].id)
+    assert data["invoice_id"] == context["invoice"].invoice_id
     assert data["product_variant_id"] == str(
         context["variant"].id
     )
-    assert data["customer_id"] == str(
-        context["customer"].id
-    )
+    assert data["customer_id"] == context["customer"].customer_id
     assert data["start_date"] == date.today().isoformat()
     assert data["end_date"] == (
         date.today() + timedelta(days=365)
@@ -204,7 +202,7 @@ def test_create_warranty_api(client, db):
     assert data["duration_months"] == 12
     assert data["is_transferable"] is True
     assert data["status"] == "active"
-    assert data["warranty_id"].startswith("WAR-")
+    assert data["warranty_id"].isdigit() and len(data["warranty_id"]) == 16
     assert data["id"]
 
 
@@ -375,13 +373,11 @@ def test_get_warranty_api(client, db):
     data = response.json()
 
     assert data["warranty_id"] == warranty_id
-    assert data["invoice_id"] == str(context["invoice"].id)
+    assert data["invoice_id"] == context["invoice"].invoice_id
     assert data["product_variant_id"] == str(
         context["variant"].id
     )
-    assert data["customer_id"] == str(
-        context["customer"].id
-    )
+    assert data["customer_id"] == context["customer"].customer_id
     assert data["status"] == "active"
 
 
@@ -499,9 +495,7 @@ def test_transfer_warranty_api(client, db):
     data = response.json()
 
     assert data["warranty_id"] == warranty_id
-    assert data["customer_id"] == str(
-        context["second_customer"].id
-    )
+    assert data["customer_id"] == context["second_customer"].customer_id
     assert data["status"] == "active"
 
 

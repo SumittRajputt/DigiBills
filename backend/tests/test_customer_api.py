@@ -63,7 +63,7 @@ def test_create_customer_api(client, db):
     assert data["full_name"] == "API Test Customer"
     assert data["email"] == "customer@example.com"
     assert data["status"] == "active"
-    assert data["customer_id"].startswith("CUST-")
+    assert len(data["customer_id"]) == 11 and data["customer_id"].isdigit()
 
 
 def test_get_my_customer_api(client, db):

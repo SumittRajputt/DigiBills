@@ -17,7 +17,7 @@ class Retailer(Base):
     )
 
     retailer_id: Mapped[str] = mapped_column(
-        String(30),
+        String(11),
         unique=True,
         index=True,
         nullable=False,

@@ -42,7 +42,7 @@ def create_purchase_return_api_context(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-PR-API-{uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Purchase Return API Retailer",
         phone_number=user.phone_number,
@@ -71,6 +71,7 @@ def create_purchase_return_api_context(db):
     db.flush()
 
     product = Product(
+        retailer_id=retailer.id,
         product_code=f"PROD-PR-API-{uuid4().hex[:6].upper()}",
         name="Purchase Return API Product",
         status="active",

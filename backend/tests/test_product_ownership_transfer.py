@@ -29,7 +29,7 @@ def create_customer(db, name):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=user.id,
         full_name=name,
         phone_number=user.phone_number,
@@ -84,7 +84,7 @@ def create_invoice_context(db, customer, variant):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=retailer_user.id,
         business_name="Transfer Test Retailer",
         phone_number=retailer_user.phone_number,

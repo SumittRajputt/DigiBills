@@ -25,7 +25,7 @@ def create_customer(db, name):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=user.id,
         full_name=name,
         phone_number=user.phone_number,
@@ -92,7 +92,7 @@ def create_retailer_owner(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-TRF-API-{uuid.uuid4().hex[:6].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Product Transfer API Retailer",
         phone_number=user.phone_number,

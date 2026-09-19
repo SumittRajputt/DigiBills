@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
-from app.models.invoice import Invoice
 from app.models.user import User
 from app.schemas.payment import (
     PaymentCreateRequest,
@@ -29,21 +27,11 @@ router = APIRouter(
 )
 
 
-def payment_to_response(payment, db):
-    invoice = db.execute(
-        select(Invoice).where(
-            Invoice.id == payment.invoice_id
-        )
-    ).scalar_one_or_none()
-
+def payment_to_response(payment):
     return PaymentDetailResponse(
         id=str(payment.id),
         payment_id=payment.payment_id,
-        invoice_id=(
-            invoice.invoice_id
-            if invoice is not None
-            else str(payment.invoice_id)
-        ),
+        invoice_id=str(payment.invoice_id),
         amount=payment.amount,
         payment_method=payment.payment_method,
         payment_status=payment.payment_status,
@@ -115,7 +103,7 @@ def create_payment_endpoint(
             user_id=current_user.id,
         )
 
-        return payment_to_response(payment, db)
+        return payment_to_response(payment)
 
     except ValueError as exc:
         db.rollback()
@@ -153,7 +141,7 @@ def list_payments(
     )
 
     return [
-        payment_to_response(payment, db)
+        payment_to_response(payment)
         for payment in payments
     ]
 
@@ -203,7 +191,7 @@ def get_invoice_payments_endpoint(
     )
 
     return [
-        payment_to_response(payment, db)
+        payment_to_response(payment)
         for payment in payments
     ]
 
@@ -262,7 +250,7 @@ def get_payment_endpoint(
             detail="Payment not found.",
         )
 
-    return payment_to_response(payment, db)
+    return payment_to_response(payment)
 
 
 @router.post(
@@ -330,7 +318,7 @@ def refund_payment_endpoint(
             user_id=current_user.id,
         )
 
-        return payment_to_response(payment, db)
+        return payment_to_response(payment)
 
     except ValueError as exc:
         db.rollback()
@@ -403,7 +391,7 @@ def cancel_payment_endpoint(
             user_id=current_user.id,
         )
 
-        return payment_to_response(payment, db)
+        return payment_to_response(payment)
 
     except ValueError as exc:
         db.rollback()

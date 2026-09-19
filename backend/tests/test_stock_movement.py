@@ -24,7 +24,7 @@ def test_stock_purchase_increases_inventory(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id="RET-TEST-001",
+        retailer_id="10000000001",
         owner_user_id=user.id,
         business_name="Test Retailer",
         phone_number="9999999999",
@@ -107,7 +107,7 @@ def test_stock_sale_decreases_inventory(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id="RET-TEST-002",
+        retailer_id="10000000001",
         owner_user_id=user.id,
         business_name="Test Retailer Sale",
         phone_number="9999999998",
@@ -190,7 +190,7 @@ def test_stock_sale_rejects_insufficient_available_stock(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id="RET-TEST-003",
+        retailer_id="10000000001",
         owner_user_id=user.id,
         business_name="Test Retailer Insufficient",
         phone_number="9999999997",
@@ -275,7 +275,7 @@ def test_stock_sale_can_use_only_available_quantity(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id="RET-TEST-004",
+        retailer_id="10000000001",
         owner_user_id=user.id,
         business_name="Test Retailer Reserved",
         phone_number="9999999996",
@@ -358,7 +358,7 @@ def test_invoice_creation_decreases_stock_and_creates_audit_log(db):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-TEST-{uuid.uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Test Invoice Retailer",
         phone_number="9999999995",
@@ -368,7 +368,7 @@ def test_invoice_creation_decreases_stock_and_creates_audit_log(db):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUST-TEST-{uuid.uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid.uuid4().int % 100000000000:011d}",
         user_id=user.id,
         full_name="Test Customer",
         phone_number="9999999994",
@@ -417,6 +417,7 @@ def test_invoice_creation_decreases_stock_and_creates_audit_log(db):
         quantity_on_hand=10,
         quantity_reserved=0,
         average_cost=Decimal("100.00"),
+        tax_rate=Decimal("18.00"),
     )
     db.add(inventory_item)
     db.flush()
@@ -430,6 +431,7 @@ def test_invoice_creation_decreases_stock_and_creates_audit_log(db):
     invoice_item.product_unit_ids = []
     invoice_item.unit_price = Decimal("150.00")
     invoice_item.discount_amount = Decimal("0.00")
+    invoice_item.tax_rate = Decimal("18.00")
 
     invoice = create_invoice(
         db=db,
@@ -446,7 +448,8 @@ def test_invoice_creation_decreases_stock_and_creates_audit_log(db):
 
     assert invoice.payment_status == "unpaid"
     assert invoice.status == "active"
-    assert invoice.total_amount == Decimal("354.00")
+    assert invoice.total_amount == Decimal("300.00")
+    assert invoice.tax_amount == Decimal("45.76")
 
     assert inventory_item.quantity_on_hand == 8
 

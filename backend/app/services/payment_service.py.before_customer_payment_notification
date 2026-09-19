@@ -10,9 +10,6 @@ from app.models.invoice import Invoice
 from app.models.payment import Payment
 from app.models.subscription import Subscription
 from app.services.audit_log_service import create_audit_log
-from app.services.customer_notification_service import (
-    create_customer_notification,
-)
 from app.services.salesman_commission_service import (
     create_salesman_commission_for_subscription,
 )
@@ -253,19 +250,6 @@ def create_payment(
             f"amount {payment.amount:.2f} "
             f"via {payment.payment_method}."
         ),
-    )
-
-    create_customer_notification(
-        db=db,
-        customer_id=invoice.customer_id,
-        notification_type="payment",
-        title="Payment Received",
-        message=(
-            f"Payment of ₹{payment.amount:.2f} has been recorded "
-            f"for bill {invoice.invoice_id}."
-        ),
-        reference_type="payment",
-        reference_id=str(payment.id),
     )
 
     db.commit()

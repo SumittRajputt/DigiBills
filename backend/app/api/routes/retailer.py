@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.authorization import require_permission
+from app.api.authorization import (
+    require_permission,
+    require_role,
+)
 from app.api.dependencies import get_db
 from app.models.user import User
 from app.schemas.retailer import (
@@ -62,7 +65,7 @@ def retailer_to_response(retailer):
 def create_retailer_endpoint(
     request: RetailerCreateRequest,
     current_user: User = Depends(
-        require_permission("retailer.manage")
+        require_role("super_admin")
     ),
     db: Session = Depends(get_db),
 ):
@@ -92,7 +95,7 @@ def create_retailer_endpoint(
 )
 def list_retailers(
     current_user: User = Depends(
-        require_permission("retailer.view")
+        require_role("super_admin")
     ),
     db: Session = Depends(get_db),
 ):
@@ -110,7 +113,7 @@ def list_retailers(
 )
 def get_my_retailer(
     current_user: User = Depends(
-        require_permission("retailer.view")
+        require_role("retailer_owner")
     ),
     db: Session = Depends(get_db),
 ):
@@ -135,7 +138,7 @@ def get_my_retailer(
 def update_my_retailer(
     request: RetailerUpdateRequest,
     current_user: User = Depends(
-        require_permission("retailer.view")
+        require_role("retailer_owner")
     ),
     db: Session = Depends(get_db),
 ):
@@ -176,7 +179,7 @@ def update_my_retailer(
 def approve_retailer_endpoint(
     retailer_id: str,
     current_user: User = Depends(
-        require_permission("retailer.manage")
+        require_role("super_admin")
     ),
     db: Session = Depends(get_db),
 ):
@@ -215,7 +218,7 @@ def reject_retailer_endpoint(
     retailer_id: str,
     request: RetailerRejectRequest,
     current_user: User = Depends(
-        require_permission("retailer.manage")
+        require_role("super_admin")
     ),
     db: Session = Depends(get_db),
 ):

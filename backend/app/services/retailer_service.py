@@ -47,8 +47,23 @@ def get_retailer_by_owner(
     ).scalar_one_or_none()
 
 
-def generate_retailer_id() -> str:
-    return f"RET-{uuid.uuid4().hex[:10].upper()}"
+def generate_retailer_id(db: Session) -> str:
+    import secrets
+
+    while True:
+        retailer_id = str(
+            secrets.randbelow(90_000_000_000)
+            + 10_000_000_000
+        )
+
+        existing = db.execute(
+            select(Retailer).where(
+                Retailer.retailer_id == retailer_id
+            )
+        ).scalar_one_or_none()
+
+        if existing is None:
+            return retailer_id
 
 
 def create_retailer(
@@ -72,7 +87,7 @@ def create_retailer(
         )
 
     retailer = Retailer(
-        retailer_id=generate_retailer_id(),
+        retailer_id=generate_retailer_id(db),
         owner_user_id=owner_user.id,
         business_name=business_name,
         business_type=business_type,

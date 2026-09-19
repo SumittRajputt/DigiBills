@@ -19,9 +19,11 @@ def test_register_api(client):
     response = client.post(
         "/auth/register",
         json={
+            "full_name": "Test User",
             "phone_number": phone,
             "email": f"{uuid4().hex[:8]}@example.com",
             "password": "TestPassword123",
+            "confirm_password": "TestPassword123",
         },
     )
 
@@ -40,6 +42,7 @@ def test_register_api_rejects_duplicate_phone(client, db):
 
     register_user(
         db=db,
+        full_name="Test User",
         phone_number=phone,
         email=None,
         password="TestPassword123",
@@ -48,14 +51,16 @@ def test_register_api_rejects_duplicate_phone(client, db):
     response = client.post(
         "/auth/register",
         json={
+            "full_name": "Test User",
             "phone_number": phone,
             "password": "AnotherPassword123",
+            "confirm_password": "AnotherPassword123",
         },
     )
 
     assert response.status_code == 409
     assert response.json()["detail"] == (
-        "A user with this phone number already exists."
+        "A customer account with this phone number already exists."
     )
 
 
@@ -66,7 +71,8 @@ def test_register_api_rejects_duplicate_email(client, db):
 
     register_user(
         db=db,
-        phone_number=phone1,
+        full_name="Test User",
+            phone_number=phone1,
         email=email,
         password="TestPassword123",
     )
@@ -74,9 +80,11 @@ def test_register_api_rejects_duplicate_email(client, db):
     response = client.post(
         "/auth/register",
         json={
+            "full_name": "Test User",
             "phone_number": phone2,
             "email": email,
             "password": "AnotherPassword123",
+            "confirm_password": "AnotherPassword123",
         },
     )
 
@@ -90,6 +98,7 @@ def test_register_api_rejects_invalid_password(client):
     response = client.post(
         "/auth/register",
         json={
+            "full_name": "Test User",
             "phone_number": f"7{uuid4().hex[:9]}",
             "password": "short",
         },
@@ -103,7 +112,8 @@ def test_login_api(client, db):
 
     register_user(
         db=db,
-        phone_number=phone,
+        full_name="Test User",
+            phone_number=phone,
         email=None,
         password="TestPassword123",
     )
@@ -113,6 +123,7 @@ def test_login_api(client, db):
         json={
             "phone_number": phone,
             "password": "TestPassword123",
+                "account_type": "customer",
         },
     )
 
@@ -129,7 +140,8 @@ def test_login_api_rejects_wrong_password(client, db):
 
     register_user(
         db=db,
-        phone_number=phone,
+        full_name="Test User",
+            phone_number=phone,
         email=None,
         password="TestPassword123",
     )
@@ -139,6 +151,7 @@ def test_login_api_rejects_wrong_password(client, db):
         json={
             "phone_number": phone,
             "password": "WrongPassword123",
+            "account_type": "customer",
         },
     )
 
@@ -154,6 +167,7 @@ def test_login_api_rejects_unknown_user(client):
         json={
             "phone_number": f"7{uuid4().hex[:9]}",
             "password": "TestPassword123",
+            "account_type": "customer",
         },
     )
 
@@ -168,7 +182,8 @@ def test_login_api_rejects_inactive_user(client, db):
 
     user = register_user(
         db=db,
-        phone_number=phone,
+        full_name="Test User",
+            phone_number=phone,
         email=None,
         password="TestPassword123",
     )
@@ -181,6 +196,7 @@ def test_login_api_rejects_inactive_user(client, db):
         json={
             "phone_number": phone,
             "password": "TestPassword123",
+                "account_type": "customer",
         },
     )
 

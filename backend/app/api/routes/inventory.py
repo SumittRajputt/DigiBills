@@ -118,6 +118,7 @@ def create_inventory_endpoint(
     variant = get_variant_by_sku(
         db,
         request.sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:
@@ -245,6 +246,7 @@ def get_reorder_status_endpoint(
     variant = get_variant_by_sku(
         db,
         sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:
@@ -307,6 +309,7 @@ def get_inventory_endpoint(
     variant = get_variant_by_sku(
         db,
         sku,
+        retailer_id=retailer.id,
     )
 
     if variant is None:

@@ -11,20 +11,40 @@ from app.models.invoice_item import InvoiceItem
 from app.models.product_ownership import ProductOwnership
 from app.models.product_unit import ProductUnit
 from app.models.product_variant import ProductVariant
+from app.models.product import Product
 
 
 def get_product_ownership(
     db: Session,
     ownership_id: str,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[ProductOwnership]:
     try:
         parsed_id = uuid.UUID(ownership_id)
     except ValueError:
         return None
 
-    statement = select(ProductOwnership).where(
-        ProductOwnership.id == parsed_id
+    statement = (
+        select(ProductOwnership)
+        .join(
+            ProductUnit,
+            ProductUnit.id == ProductOwnership.product_unit_id,
+        )
+        .join(
+            ProductVariant,
+            ProductVariant.id == ProductUnit.product_variant_id,
+        )
+        .join(
+            Product,
+            Product.id == ProductVariant.product_id,
+        )
+        .where(ProductOwnership.id == parsed_id)
     )
+
+    if retailer_id is not None:
+        statement = statement.where(
+            Product.retailer_id == retailer_id
+        )
 
     return db.execute(statement).scalar_one_or_none()
 
@@ -97,6 +117,7 @@ def get_ownership_by_product_unit(
 def get_ownership_by_serial_number(
     db: Session,
     serial_number: str,
+    retailer_id: Optional[uuid.UUID] = None,
 ) -> Optional[ProductOwnership]:
     statement = (
         select(ProductOwnership)
@@ -104,11 +125,24 @@ def get_ownership_by_serial_number(
             ProductUnit,
             ProductUnit.id == ProductOwnership.product_unit_id,
         )
+        .join(
+            ProductVariant,
+            ProductVariant.id == ProductUnit.product_variant_id,
+        )
+        .join(
+            Product,
+            Product.id == ProductVariant.product_id,
+        )
         .where(
             ProductUnit.serial_number == serial_number,
             ProductOwnership.ownership_status == "active",
         )
     )
+
+    if retailer_id is not None:
+        statement = statement.where(
+            Product.retailer_id == retailer_id
+        )
 
     return db.execute(statement).scalar_one_or_none()
 
@@ -119,8 +153,14 @@ def assign_product_ownership(
     invoice_item: InvoiceItem,
     customer: Customer,
     product_unit: ProductUnit,
+    retailer_id: Optional[uuid.UUID] = None,
     source: str = "invoice",
 ) -> ProductOwnership:
+
+    if retailer_id is not None and invoice.retailer_id != retailer_id:
+        raise ValueError(
+            "Invoice does not belong to this retailer."
+        )
 
     if invoice.customer_id != customer.id:
         raise ValueError(
@@ -151,6 +191,19 @@ def assign_product_ownership(
         raise ValueError(
             "Product unit does not belong to the invoice item product variant."
         )
+
+    if retailer_id is not None:
+        product = db.execute(
+            select(Product).where(
+                Product.id == product_variant.product_id,
+                Product.retailer_id == retailer_id,
+            )
+        ).scalar_one_or_none()
+
+        if product is None:
+            raise ValueError(
+                "Product does not belong to this retailer."
+            )
 
     if not product_variant.track_inventory:
         raise ValueError(
@@ -205,12 +258,14 @@ def create_product_ownership(
     invoice_item: InvoiceItem,
     customer: Customer,
     product_unit: ProductUnit,
+    retailer_id: Optional[uuid.UUID] = None,
     source: str = "invoice",
 ) -> ProductOwnership:
 
     ownership = assign_product_ownership(
         db=db,
         invoice=invoice,
+        retailer_id=retailer_id,
         invoice_item=invoice_item,
         customer=customer,
         product_unit=product_unit,

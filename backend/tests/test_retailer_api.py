@@ -15,16 +15,18 @@ def create_retailer_api_context(db):
     db.add(user)
     db.flush()
 
-    role = db.query(Role).filter(
-        Role.name == "retailer_owner"
-    ).one()
+    for role_name in ("super_admin", "retailer_owner"):
+        role = db.query(Role).filter(
+            Role.name == role_name
+        ).one()
 
-    db.execute(
-        user_roles.insert().values(
-            user_id=user.id,
-            role_id=role.id,
+        db.execute(
+            user_roles.insert().values(
+                user_id=user.id,
+                role_id=role.id,
+            )
         )
-    )
+
     db.commit()
 
     return {
@@ -68,7 +70,8 @@ def test_create_retailer_api(client, db):
     assert data["approved_at"] is None
     assert data["approved_by"] is None
     assert data["rejection_reason"] is None
-    assert data["retailer_id"].startswith("RET-")
+    assert data["retailer_id"].isdigit()
+    assert len(data["retailer_id"]) == 11
 
 
 def test_create_retailer_api_with_optional_fields_omitted(

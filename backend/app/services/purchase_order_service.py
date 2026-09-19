@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.inventory_item import InventoryItem
 from app.models.inventory_location import InventoryLocation
+from app.models.product import Product
 from app.models.product_variant import ProductVariant
 from app.models.purchase_order import PurchaseOrder
 from app.models.purchase_order_item import PurchaseOrderItem
@@ -172,6 +173,18 @@ def add_purchase_order_item(
     if purchase_order.status != "draft":
         raise ValueError(
             "Items can only be added to a draft purchase order."
+        )
+
+    product = db.execute(
+        select(Product).where(
+            Product.id == product_variant.product_id,
+            Product.retailer_id == purchase_order.retailer_id,
+        )
+    ).scalar_one_or_none()
+
+    if product is None:
+        raise ValueError(
+            "Product variant does not belong to this retailer."
         )
 
     if ordered_quantity <= 0:
@@ -348,6 +361,18 @@ def receive_purchase_order_item(
     if product_variant.id != purchase_order_item.product_variant_id:
         raise ValueError(
             "Product variant does not match the purchase order item."
+        )
+
+    product = db.execute(
+        select(Product).where(
+            Product.id == product_variant.product_id,
+            Product.retailer_id == retailer.id,
+        )
+    ).scalar_one_or_none()
+
+    if product is None:
+        raise ValueError(
+            "Product variant does not belong to this retailer."
         )
 
     if purchase_order.status not in {

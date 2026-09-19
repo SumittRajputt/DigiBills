@@ -121,6 +121,8 @@ def test_super_admin_can_update_payment_configuration(
         headers=auth_headers(token),
         json={
             "per_bill_charge": "10.00",
+            "customer_bill_charge": "5.00",
+            "customer_transfer_fee": "9.00",
             "max_cash_due_invoices": 25,
             "annual_subscription_price": "999.00",
             "salesman_commission_percent": "20.00",
@@ -155,6 +157,8 @@ def test_updated_payment_configuration_persists(
         headers=auth_headers(token),
         json={
             "per_bill_charge": "12.50",
+            "customer_bill_charge": "5.00",
+            "customer_transfer_fee": "9.00",
             "max_cash_due_invoices": 30,
             "annual_subscription_price": "1499.00",
             "salesman_commission_percent": "18.00",

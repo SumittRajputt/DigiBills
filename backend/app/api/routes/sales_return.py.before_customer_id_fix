@@ -1,13 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
 from app.models.user import User
-from app.models.customer import Customer
-from app.models.invoice import Invoice
-from app.models.retailer import Retailer
 from app.schemas.sales_return import (
     SalesReturnCreateRequest,
     SalesReturnDetailResponse,
@@ -35,45 +31,13 @@ router = APIRouter(
 )
 
 
-def get_customer_display_id(
-    sales_return,
-    db: Session,
-) -> str:
-    customer = db.execute(
-        select(Customer).where(
-            Customer.id == sales_return.customer_id
-        )
-    ).scalar_one_or_none()
-
-    return customer.customer_id if customer is not None else ""
-
-
-def get_retailer_display_id(
-    sales_return,
-    db: Session,
-) -> str:
-    retailer = db.execute(
-        select(Retailer).where(
-            Retailer.id == sales_return.retailer_id
-        )
-    ).scalar_one_or_none()
-
-    return retailer.retailer_id if retailer is not None else ""
-
-
-def sales_return_to_response(sales_return, db: Session):
+def sales_return_to_response(sales_return):
     return SalesReturnResponse(
         id=str(sales_return.id),
         return_id=sales_return.return_id,
-        invoice_id=(
-            db.execute(
-                select(Invoice).where(
-                    Invoice.id == sales_return.invoice_id
-                )
-            ).scalar_one().invoice_id
-        ),
-        retailer_id=get_retailer_display_id(sales_return, db),
-        customer_id=get_customer_display_id(sales_return, db),
+        invoice_id=str(sales_return.invoice_id),
+        retailer_id=str(sales_return.retailer_id),
+        customer_id=str(sales_return.customer_id),
         processed_by_user_id=(
             str(sales_return.processed_by_user_id)
             if sales_return.processed_by_user_id
@@ -115,20 +79,13 @@ def sales_return_item_to_response(item):
 def sales_return_detail_to_response(
     sales_return,
     items,
-    db: Session,
 ):
     return SalesReturnDetailResponse(
         id=str(sales_return.id),
         return_id=sales_return.return_id,
-        invoice_id=(
-            db.execute(
-                select(Invoice).where(
-                    Invoice.id == sales_return.invoice_id
-                )
-            ).scalar_one().invoice_id
-        ),
-        retailer_id=get_retailer_display_id(sales_return, db),
-        customer_id=get_customer_display_id(sales_return, db),
+        invoice_id=str(sales_return.invoice_id),
+        retailer_id=str(sales_return.retailer_id),
+        customer_id=str(sales_return.customer_id),
         processed_by_user_id=(
             str(sales_return.processed_by_user_id)
             if sales_return.processed_by_user_id
@@ -215,7 +172,6 @@ def create_sales_return_endpoint(
         return sales_return_detail_to_response(
             sales_return,
             items,
-            db,
         )
 
     except ValueError as exc:
@@ -290,7 +246,6 @@ def add_sales_return_item_endpoint(
         return sales_return_detail_to_response(
             sales_return,
             items,
-            db,
         )
 
     except ValueError as exc:
@@ -359,7 +314,6 @@ def process_sales_return_endpoint(
         return sales_return_detail_to_response(
             sales_return,
             items,
-            db,
         )
 
     except ValueError as exc:
@@ -397,7 +351,7 @@ def get_all_sales_returns_endpoint(
         sales_returns = get_all_sales_returns(db)
 
     return [
-        sales_return_to_response(sales_return, db)
+        sales_return_to_response(sales_return)
         for sales_return in sales_returns
     ]
 
@@ -448,5 +402,4 @@ def get_sales_return_endpoint(
     return sales_return_detail_to_response(
         sales_return,
         items,
-        db,
     )

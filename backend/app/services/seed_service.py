@@ -164,9 +164,15 @@ ROLE_PERMISSIONS: Dict[str, List[str]] = {
     "retailer_owner": [
         permission["name"]
         for permission in PERMISSIONS
+        if permission["name"] not in {
+            "user.view",
+            "user.manage",
+            "retailer.view",
+            "retailer.manage",
+        }
     ],
     "retailer_manager": [
-        "retailer.view",
+        "product.view",
         "product.view",
         "product.manage",
         "inventory.view",

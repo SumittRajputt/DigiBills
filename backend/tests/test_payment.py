@@ -23,7 +23,7 @@ def create_payment_context(db, total_amount=Decimal("10000.00")):
     db.flush()
 
     retailer = Retailer(
-        retailer_id=f"RET-PAY-{uuid4().hex[:8].upper()}",
+        retailer_id=f"{uuid4().int % 100000000000:011d}",
         owner_user_id=user.id,
         business_name="Payment Test Retailer",
         phone_number=user.phone_number,
@@ -40,7 +40,7 @@ def create_payment_context(db, total_amount=Decimal("10000.00")):
     db.flush()
 
     customer = Customer(
-        customer_id=f"CUS-PAY-{uuid4().hex[:8].upper()}",
+        customer_id=f"{uuid4().int % 100000000000:011d}",
         user_id=customer_user.id,
         full_name="Payment Test Customer",
         phone_number=customer_user.phone_number,
