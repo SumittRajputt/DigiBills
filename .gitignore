@@ -15,3 +15,12 @@ web/dist/
 *.backup
 *.backup-*
 *.before-*
+
+# Runtime uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/uploads/profile-images/*
+!backend/uploads/profile-images/.gitkeep
+
+# Temporary source backups
+*.before_*
