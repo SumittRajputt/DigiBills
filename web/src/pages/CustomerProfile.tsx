@@ -157,7 +157,7 @@ export default function CustomerProfile() {
                 src={
                   customer.profile_image_url.startsWith("http")
                     ? customer.profile_image_url
-                    : `${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"}${customer.profile_image_url}`
+                    : `${import.meta.env.VITE_API_BASE_URL || ""}${customer.profile_image_url}`
                 }
                 alt="Profile"
               />

@@ -1347,7 +1347,7 @@ function DashboardFrame({
     customerSidebarProfile?.profile_image_url
       ? customerSidebarProfile.profile_image_url.startsWith("http")
         ? customerSidebarProfile.profile_image_url
-        : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}${customerSidebarProfile.profile_image_url}`
+        : `${import.meta.env.VITE_API_BASE_URL || ""}${customerSidebarProfile.profile_image_url}`
       : "";
 
   return (
