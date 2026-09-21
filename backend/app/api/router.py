@@ -22,6 +22,7 @@ from app.api.routes.admin_purchase_return import (
 from app.api.routes.auth import (
     router as auth_router,
 )
+from app.api.routes.customer_uploaded_bills import router as customer_uploaded_bills_router
 from app.api.routes.customer_invoices import (
     router as customer_invoices_router,
 )
@@ -280,4 +281,8 @@ api_router.include_router(
 
 api_router.include_router(
     user_router
+)
+
+api_router.include_router(
+    customer_uploaded_bills_router
 )

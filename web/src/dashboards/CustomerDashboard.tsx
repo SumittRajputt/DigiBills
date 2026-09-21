@@ -780,6 +780,20 @@ export default function CustomerDashboard() {
 
           <button
             type="button"
+            onClick={() => navigate("/customer/bills")}
+          >
+            <span className="customer-dashboard-quick-action-icon blue">
+              <Receipt size={19} />
+            </span>
+            <span>
+              <strong>Upload Your Bill</strong>
+              <small>Save a PDF bill to your locker</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+
+          <button
+            type="button"
             onClick={() => navigate("/customer/warranty")}
           >
             <span className="customer-dashboard-quick-action-icon purple">

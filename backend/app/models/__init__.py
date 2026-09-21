@@ -42,3 +42,7 @@ from app.models.salesman_commission import SalesmanCommission
 from app.models.brand_settings import BrandSettings
 
 from app.models.password_reset_token import PasswordResetToken
+
+from app.models.customer_uploaded_bill import CustomerUploadedBill
+from app.models.customer_bill_extraction import CustomerBillExtraction
+from app.models.customer_digibill import CustomerDigiBill

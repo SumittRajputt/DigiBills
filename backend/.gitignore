@@ -1,0 +1,23 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Uploaded customer files
+uploads/customer-bills/
+
+# Temporary / backup files
+*.bak
+*.bak2
+*.zip
+
+# Local test artifacts
+test-customer-bill.pdf
+test_razorpay.py
+test_razorpay_order.py

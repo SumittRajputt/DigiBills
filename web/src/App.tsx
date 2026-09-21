@@ -41,6 +41,7 @@ import RetailerEmployees from "./pages/RetailerEmployees";
 import RetailerPurchases from "./pages/RetailerPurchases";
 import CustomerDashboard from "./dashboards/CustomerDashboard";
 import CustomerInvoices from "./pages/CustomerInvoices";
+import CustomerBills from "./pages/CustomerBills";
 import CustomerPayments from "./pages/CustomerPayments";
 import CustomerWarranty from "./pages/CustomerWarranty";
 import CustomerTransfers from "./pages/CustomerTransfers";
@@ -491,6 +492,11 @@ function App() {
                 <Route
                   path="invoices"
                   element={<CustomerInvoices />}
+                />
+
+                <Route
+                  path="bills"
+                  element={<CustomerBills />}
                 />
 
                 <Route
@@ -1202,6 +1208,7 @@ function DashboardFrame({
       "Dashboard",
       "My Profile",
       "My Invoices",
+      "My Bills",
       "My Payments",
       "My Orders",
       "My Warranty",
@@ -1411,6 +1418,8 @@ function DashboardFrame({
                         location.pathname === "/customer/profile") ||
                       (item === "My Invoices" &&
                         location.pathname.startsWith("/customer/invoices")) ||
+                      (item === "My Bills" &&
+                        location.pathname.startsWith("/customer/bills")) ||
                       (item === "My Payments" &&
                         location.pathname === "/customer/payments") ||
                       (item === "My Orders" &&
@@ -1464,6 +1473,11 @@ function DashboardFrame({
                     item === "My Invoices"
                   ) {
                     navigate("/customer/invoices");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Bills"
+                  ) {
+                    navigate("/customer/bills");
                   } else if (
                     role === "customer" &&
                     item === "My Payments"
@@ -1621,6 +1635,8 @@ function DashboardFrame({
                     location.pathname === "/customer/profile") ||
                   (item === "My Invoices" &&
                     location.pathname.startsWith("/customer/invoices")) ||
+                  (item === "My Bills" &&
+                    location.pathname.startsWith("/customer/bills")) ||
                   (item === "My Payments" &&
                     location.pathname === "/customer/payments") ||
                   (item === "My Warranty" &&
@@ -1733,6 +1749,11 @@ function DashboardFrame({
                     item === "My Invoices"
                   ) {
                     navigate("/customer/invoices");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Bills"
+                  ) {
+                    navigate("/customer/bills");
                   } else if (
                     role === "customer" &&
                     item === "My Payments"

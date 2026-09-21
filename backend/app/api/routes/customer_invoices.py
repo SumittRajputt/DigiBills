@@ -150,6 +150,7 @@ def list_customer_invoices(
                 invoice,
                 payment_status=summary["payment_status"],
                 item_names=item_names,
+                db=db,
             )
         )
 
