@@ -17,3 +17,5 @@ python-multipart==0.0.20
 reportlab==5.0.1
 resend==2.43.0
 uvicorn[standard]==0.39.0
+
+razorpay==2.0.1
