@@ -48,6 +48,24 @@ function formatDate(value: string | null | undefined) {
   });
 }
 
+function shortProductName(value: string | null | undefined) {
+  if (!value) return "—";
+
+  let shortName = value.split("|")[0].trim();
+
+  // Remove trailing colour/variant text such as "(Black)".
+  shortName = shortName
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim();
+
+  // Remove a trailing model/SKU-style token such as "AquaSpin0075P".
+  shortName = shortName
+    .replace(/\s+[A-Za-z]+\d+[A-Za-z0-9]*$/, "")
+    .trim();
+
+  return shortName || value;
+}
+
 function label(value: string | null | undefined) {
   if (!value) return "—";
 
@@ -301,8 +319,9 @@ export default function CustomerWarranty() {
                     <div>
                       <span>E-WARRANTY</span>
                       <strong>
-                        {warranty.product_name ||
-                          "Digital Warranty"}
+                        {shortProductName(
+                          warranty.product_name
+                        )}
                       </strong>
                     </div>
                   </div>
@@ -319,13 +338,10 @@ export default function CustomerWarranty() {
                 <div className="customer-ewarranty-product">
                   <span>PRODUCT</span>
                   <strong>
-                    {warranty.product_name ||
-                      "Warranty Coverage"}
+                    {shortProductName(
+                      warranty.product_name
+                    )}
                   </strong>
-
-                  {warranty.variant_name && (
-                    <small>{warranty.variant_name}</small>
-                  )}
                 </div>
 
                 <div className="customer-ewarranty-info">
