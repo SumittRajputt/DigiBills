@@ -159,7 +159,7 @@ def list_customer_warranties(
             digibill.warranty_evidence or {}
         ).get("final") or {}
 
-        if final_warranty.get("has_warranty") is not True:
+        if final_warranty.get("has_warranty") not in (True, "yes"):
             continue
 
         duration_value = final_warranty.get("duration_value")
@@ -215,7 +215,7 @@ def list_customer_warranties(
         responses.append(
             WarrantyResponse(
                 id=str(digibill.id),
-                warranty_id=f"W-{digibill.digibill_id}",
+                warranty_id=final_warranty.get("warranty_number"),
                 invoice_id=(
                     digibill.invoice_number
                     or digibill.digibill_id

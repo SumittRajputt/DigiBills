@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.models.customer_bill_extraction import CustomerBillExtraction
 from app.models.customer_digibill import CustomerDigiBill
+from app.models.warranty import Warranty
 from app.models.customer_uploaded_bill import CustomerUploadedBill
 from app.services.customer_warranty_confirmation_service import (
     prepare_warranty_confirmation,
@@ -19,6 +21,35 @@ from app.schemas.customer_bill_extraction import (
 
 def generate_digibill_id() -> str:
     return f"DB-{uuid.uuid4().hex[:12].upper()}"
+
+
+def generate_customer_warranty_number(db: Session) -> str:
+    while True:
+        warranty_number = "2" + "".join(
+            str(secrets.randbelow(10))
+            for _ in range(15)
+        )
+
+        existing_digibill = db.execute(
+            select(CustomerDigiBill).where(
+                CustomerDigiBill.warranty_evidence[
+                    "final"
+                ]["warranty_number"].as_string()
+                == warranty_number
+            )
+        ).scalar_one_or_none()
+
+        existing_retailer_warranty = db.execute(
+            select(Warranty).where(
+                Warranty.warranty_id == warranty_number
+            )
+        ).scalar_one_or_none()
+
+        if (
+            existing_digibill is None
+            and existing_retailer_warranty is None
+        ):
+            return warranty_number
 
 
 def get_digibill_by_uploaded_bill_id(
@@ -110,6 +141,13 @@ def create_customer_digibill(
 
     now = datetime.now(timezone.utc)
 
+    customer_warranty_number = None
+
+    if warranty_confirmation.has_warranty == "yes":
+        customer_warranty_number = (
+            generate_customer_warranty_number(db)
+        )
+
     digibill = CustomerDigiBill(
         digibill_id=generate_digibill_id(),
         uploaded_bill_id=uploaded_bill.id,
@@ -156,8 +194,9 @@ def create_customer_digibill(
                     if warranty_confirmation.end_date is not None
                     else None
                 ),
-                "warranty_number": warranty_confirmation.warranty_number,
                 "important_terms": warranty_confirmation.important_terms,
+                "warranty_number": customer_warranty_number,
+                "source": "customer_self_upload",
             },
         },
         confidence_scores={
