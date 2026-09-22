@@ -1,3 +1,4 @@
+from typing import Optional
 from decimal import Decimal
 from uuid import uuid4
 
@@ -16,6 +17,9 @@ from app.models.customer_bill_extraction import CustomerBillExtraction
 from app.models.user import User
 from app.services.customer_digibill_service import create_customer_digibill
 from app.schemas.customer_digibill_response import CustomerDigiBillResponse
+from app.schemas.customer_digibill_confirmation import (
+    CustomerDigiBillConfirmationRequest,
+)
 from app.schemas.customer_uploaded_bill import CustomerUploadedBillResponse
 from app.schemas.customer_bill_validation_response import (
     CustomerBillValidationResponse,
@@ -502,6 +506,7 @@ def get_customer_warranty_confirmation(
 )
 def confirm_customer_uploaded_bill(
     bill_id: str,
+    confirmation: Optional[CustomerDigiBillConfirmationRequest] = None,
     current_user: User = Depends(
         require_permission("customer.view")
     ),
@@ -539,11 +544,42 @@ def confirm_customer_uploaded_bill(
             detail="Uploaded bill not found.",
         )
 
+    if confirmation is None:
+        confirmation = CustomerDigiBillConfirmationRequest()
+
+    if confirmation.customer_has_warranty == "yes":
+        if (
+            confirmation.duration_value is None
+            or confirmation.duration_unit is None
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    "Warranty duration is required when the customer "
+                    "confirms that the product has a warranty."
+                ),
+            )
+
+    duration_value = (
+        confirmation.duration_value
+        if confirmation.customer_has_warranty == "yes"
+        else None
+    )
+
+    duration_unit = (
+        confirmation.duration_unit
+        if confirmation.customer_has_warranty == "yes"
+        else None
+    )
+
     try:
         digibill = create_customer_digibill(
             db=db,
             uploaded_bill=uploaded_bill,
             customer_id=customer.id,
+            customer_has_warranty=confirmation.customer_has_warranty,
+            duration_value=duration_value,
+            duration_unit=duration_unit,
         )
         db.commit()
         db.refresh(digibill)

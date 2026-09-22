@@ -126,6 +126,13 @@ export default function CustomerBills() {
     useState<DigiBill | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  const [customerWarrantyAnswer, setCustomerWarrantyAnswer] =
+    useState<"yes" | "no" | "unknown">("unknown");
+  const [warrantyDurationValue, setWarrantyDurationValue] =
+    useState("");
+  const [warrantyDurationUnit, setWarrantyDurationUnit] =
+    useState<"months" | "years">("years");
+
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
@@ -523,6 +530,9 @@ export default function CustomerBills() {
     setSuccess("");
     setSelectedBill(bill);
     setBillConfirmation(null);
+    setCustomerWarrantyAnswer("unknown");
+    setWarrantyDurationValue("");
+    setWarrantyDurationUnit("years");
 
     try {
       const response = await fetch(
@@ -593,6 +603,18 @@ export default function CustomerBills() {
       return;
     }
 
+    if (customerWarrantyAnswer === "yes") {
+      const duration = Number(warrantyDurationValue);
+
+      if (
+        !Number.isFinite(duration) ||
+        duration <= 0
+      ) {
+        setError("Please enter a valid warranty duration.");
+        return;
+      }
+    }
+
     setError("");
     setSuccess("");
     setCreatingDigiBill(true);
@@ -608,6 +630,17 @@ export default function CustomerBills() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            customer_has_warranty: customerWarrantyAnswer,
+            duration_value:
+              customerWarrantyAnswer === "yes"
+                ? Number(warrantyDurationValue)
+                : null,
+            duration_unit:
+              customerWarrantyAnswer === "yes"
+                ? warrantyDurationUnit
+                : null,
+          }),
         }
       );
 
@@ -1163,6 +1196,103 @@ export default function CustomerBills() {
                     Warranty / Registration No.:{" "}
                     {String(billConfirmation.warranty.registration_number)}
                   </span>
+                )}
+            </div>
+
+            <div className="customer-bills-warranty-confirmation">
+              <strong>
+                {billConfirmation.warranty.mentioned === "yes"
+                  ? "Warranty information was found on this bill. Is this information correct?"
+                  : billConfirmation.warranty.mentioned === "no"
+                    ? "No warranty information was found on this bill. Does this product have a warranty?"
+                    : "Does this product have a warranty?"}
+              </strong>
+
+              <div className="customer-bills-warranty-options">
+                <label>
+                  <input
+                    type="radio"
+                    name="customer-warranty-answer"
+                    value="yes"
+                    checked={customerWarrantyAnswer === "yes"}
+                    onChange={() => setCustomerWarrantyAnswer("yes")}
+                  />
+                  <span>
+                    {billConfirmation.warranty.mentioned === "yes"
+                      ? "Yes, this information is correct"
+                      : "Yes, it has a warranty"}
+                  </span>
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="customer-warranty-answer"
+                    value="no"
+                    checked={customerWarrantyAnswer === "no"}
+                    onChange={() => {
+                      setCustomerWarrantyAnswer("no");
+                      setWarrantyDurationValue("");
+                    }}
+                  />
+                  <span>
+                    {billConfirmation.warranty.mentioned === "yes"
+                      ? "No, this information is not correct"
+                      : "No, it doesn't have a warranty"}
+                  </span>
+                </label>
+
+                {billConfirmation.warranty.mentioned !== "yes" && (
+                  <label>
+                    <input
+                      type="radio"
+                      name="customer-warranty-answer"
+                      value="unknown"
+                      checked={customerWarrantyAnswer === "unknown"}
+                      onChange={() => {
+                        setCustomerWarrantyAnswer("unknown");
+                        setWarrantyDurationValue("");
+                      }}
+                    />
+                    <span>I'm not sure</span>
+                  </label>
+                )}
+              </div>
+
+              {customerWarrantyAnswer === "yes" &&
+                (billConfirmation.warranty.duration_value == null ||
+                  billConfirmation.warranty.duration_unit == null) && (
+                  <div className="customer-bills-warranty-duration">
+                    <label htmlFor="warranty-duration">
+                      Warranty duration
+                    </label>
+
+                    <div className="customer-bills-warranty-duration-inputs">
+                      <input
+                        id="warranty-duration"
+                        type="number"
+                        min="0.1"
+                        step="0.1"
+                        value={warrantyDurationValue}
+                        onChange={(event) =>
+                          setWarrantyDurationValue(event.target.value)
+                        }
+                        placeholder="Enter duration"
+                      />
+
+                      <select
+                        value={warrantyDurationUnit}
+                        onChange={(event) =>
+                          setWarrantyDurationUnit(
+                            event.target.value as "months" | "years"
+                          )
+                        }
+                      >
+                        <option value="months">Months</option>
+                        <option value="years">Years</option>
+                      </select>
+                    </div>
+                  </div>
                 )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from uuid import uuid4
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -55,3 +56,26 @@ def client(db):
         yield test_client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def mock_razorpay_order(monkeypatch):
+    class MockOrder:
+        def create(self, payload):
+            return {
+                "id": f"order_test_{uuid4().hex[:16]}",
+                "amount": payload["amount"],
+                "currency": payload["currency"],
+                "receipt": payload["receipt"],
+            }
+
+    class MockRazorpayClient:
+        def __init__(self):
+            self.order = MockOrder()
+
+    monkeypatch.setattr(
+        "app.api.routes.customer_uploaded_bills._get_razorpay_client",
+        lambda: MockRazorpayClient(),
+    )
+
+    return MockRazorpayClient
