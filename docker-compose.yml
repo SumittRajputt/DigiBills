@@ -7,13 +7,63 @@ services:
     environment:
       POSTGRES_DB: digibills
       POSTGRES_USER: digibills
-      POSTGRES_PASSWORD: digibills_dev_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
 
-    ports:
-      - "5432:5432"
+    secrets:
+      - postgres_password
 
     volumes:
       - digibills_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U digibills -d digibills"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: digibills-backend
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+    expose:
+      - "8000"
+
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+    container_name: digibills-frontend
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+
+secrets:
+  postgres_password:
+    file: ./.db_password
 
 volumes:
   digibills_postgres_data:

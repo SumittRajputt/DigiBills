@@ -24,3 +24,7 @@ backend/uploads/profile-images/*
 
 # Temporary source backups
 *.before_*
+
+# Production secrets and TLS certificates
+.db_password
+ssl/
