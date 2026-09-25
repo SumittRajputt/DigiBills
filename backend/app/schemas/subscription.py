@@ -62,6 +62,12 @@ class SubscriptionPaymentRequest(BaseModel):
     notes: Optional[str] = None
 
 
+class SubscriptionRazorpayVerificationRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
 class SubscriptionCancelResponse(BaseModel):
     subscription_id: str
     status: str

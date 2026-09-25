@@ -775,10 +775,9 @@ export default function CustomerBills() {
     <section className="dashboard customer-bills-page">
       <div className="customer-bills-header">
         <div>
-          <h1>My Bills</h1>
+          <h1>Add a Bill</h1>
           <p>
-            Upload and securely keep your personal PDF bills in your DigiBills
-            locker.
+            Upload your purchase bill and add it to your DigiBills locker.
           </p>
         </div>
 
@@ -789,7 +788,7 @@ export default function CustomerBills() {
           disabled={uploading || verifyingPayment}
         >
           <Upload size={17} />
-          Upload Your Bill
+          Choose PDF Bill
         </button>
 
         <input
@@ -1333,7 +1332,7 @@ export default function CustomerBills() {
       )}
 
       <div className="customer-bills-list-card">
-        <h2>Uploaded Bills</h2>
+        <h2>Recent Uploads</h2>
 
         {loading ? (
           <div className="customer-bills-empty">

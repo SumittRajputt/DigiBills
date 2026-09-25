@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.authorization import require_permission
 from app.api.dependencies import get_db
 from app.models.customer import Customer
+from app.models.customer_digibill import CustomerDigiBill
 from app.models.invoice import Invoice
 from app.models.payment import Payment
 from app.models.product import Product
@@ -22,8 +23,13 @@ from app.schemas.customer_transfer import (
     CustomerTransferCreateRequest,
     CustomerTransferPayRequest,
     CustomerTransferRejectRequest,
+    CustomerTransferSerialVerifyRequest,
+    CustomerTransferSerialVerifyResponse,
 )
 from app.services.customer_service import get_customer_by_user_id
+from app.services.customer_transfer_serial_service import (
+    verify_customer_digibill_serial,
+)
 from app.services.invoice_service import generate_invoice_id
 from app.services.payment_configuration_service import (
     get_payment_configuration,
@@ -133,36 +139,90 @@ def transfer_to_response(
 
     product_data = None
 
-    product_row = db.execute(
-        select(
-            ProductUnit,
-            ProductVariant,
-            Product,
-        )
-        .join(
-            ProductVariant,
-            ProductVariant.id == ProductUnit.product_variant_id,
-        )
-        .join(
-            Product,
-            Product.id == ProductVariant.product_id,
-        )
-        .where(
-            ProductUnit.id == transfer.product_unit_id
-        )
-    ).first()
+    if transfer.transfer_source == "registered_product":
+        if transfer.product_unit_id is not None:
+            product_row = db.execute(
+                select(
+                    ProductUnit,
+                    ProductVariant,
+                    Product,
+                )
+                .join(
+                    ProductVariant,
+                    ProductVariant.id
+                    == ProductUnit.product_variant_id,
+                )
+                .join(
+                    Product,
+                    Product.id == ProductVariant.product_id,
+                )
+                .where(
+                    ProductUnit.id
+                    == transfer.product_unit_id
+                )
+            ).first()
 
-    if product_row:
-        unit, variant, product = product_row
+            if product_row:
+                unit, variant, product = product_row
 
-        product_data = {
-            "product_unit_id": str(unit.id),
-            "serial_number": unit.serial_number,
-            "product_variant_id": str(variant.id),
-            "sku": variant.sku,
-            "variant_name": variant.variant_name,
-            "product_name": product.name,
-        }
+                product_data = {
+                    "source": "registered_product",
+                    "product_unit_id": str(unit.id),
+                    "serial_number": unit.serial_number,
+                    "product_variant_id": str(variant.id),
+                    "sku": variant.sku,
+                    "variant_name": variant.variant_name,
+                    "product_name": product.name,
+                    "brand": product.brand,
+                }
+
+    elif transfer.transfer_source == "uploaded_bill":
+        digibill = None
+
+        if transfer.digibill_id:
+            digibill = db.execute(
+                select(CustomerDigiBill).where(
+                    CustomerDigiBill.digibill_id
+                    == transfer.digibill_id
+                )
+            ).scalar_one_or_none()
+
+        if digibill is not None:
+            products = digibill.products or []
+            product = (
+                products[0]
+                if products
+                and isinstance(products[0], dict)
+                else {}
+            )
+
+            product_data = {
+                "source": "uploaded_bill",
+                "digibill_id": digibill.digibill_id,
+                "uploaded_bill_id": str(
+                    digibill.uploaded_bill_id
+                ),
+                "serial_number": (
+                    transfer.verified_serial_number
+                    or digibill.verified_serial_number
+                ),
+                "product_name": product.get(
+                    "product_name"
+                ),
+                "brand": product.get("brand"),
+                "model_number": product.get(
+                    "model_number"
+                ),
+                "quantity": product.get("quantity"),
+                "unit_price": product.get(
+                    "unit_price"
+                ),
+                "total_amount": product.get(
+                    "total_amount"
+                ),
+                "invoice_number": digibill.invoice_number,
+                "invoice_date": digibill.invoice_date,
+            }
 
     payment_invoice = None
 
@@ -176,7 +236,16 @@ def transfer_to_response(
     return {
         "id": str(transfer.id),
         "transfer_id": transfer.transfer_id,
-        "product_unit_id": str(transfer.product_unit_id),
+        "product_unit_id": (
+            str(transfer.product_unit_id)
+            if transfer.product_unit_id
+            else None
+        ),
+        "digibill_id": transfer.digibill_id,
+        "verified_serial_number": (
+            transfer.verified_serial_number
+        ),
+        "transfer_source": transfer.transfer_source,
         "from_customer_id": (
             from_customer.customer_id
             if from_customer
@@ -396,6 +465,73 @@ def list_incoming_transfers(
     ]
 
 
+@router.post(
+    "/verify-serial",
+    response_model=CustomerTransferSerialVerifyResponse,
+)
+def verify_customer_transfer_serial(
+    request: CustomerTransferSerialVerifyRequest,
+    current_user: User = Depends(
+        require_permission("customer.view")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_current_customer(
+        db,
+        current_user,
+    )
+
+    digibill = db.execute(
+        select(CustomerDigiBill).where(
+            CustomerDigiBill.digibill_id == request.digibill_id.strip()
+        )
+    ).scalar_one_or_none()
+
+    if digibill is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="DigiBill not found.",
+        )
+
+    if digibill.customer_id != customer.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this DigiBill.",
+        )
+
+    try:
+        result = verify_customer_digibill_serial(
+            db=db,
+            digibill=digibill,
+            customer=customer,
+            serial_number=request.serial_number,
+        )
+    except ValueError as exc:
+        message = str(exc)
+
+        if (
+            "already associated with another" in message
+            or "cannot be transferred" in message
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=message,
+            )
+
+        if "does not belong to you" in message:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=message,
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=message,
+        )
+
+    return result
+
+
 @router.get(
     "/{transfer_id}",
     response_model=dict,
@@ -455,49 +591,16 @@ def create_customer_transfer(
             detail="Payment payer must be sender or receiver.",
         )
 
-    try:
-        product_unit_id = uuid.UUID(
-            request.product_unit_id
-        )
-    except ValueError:
+    has_product_unit = bool(request.product_unit_id)
+    has_digibill = bool(request.digibill_id)
+
+    if has_product_unit == has_digibill:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product unit not found.",
-        )
-
-    product_unit = db.execute(
-        select(ProductUnit).where(
-            ProductUnit.id == product_unit_id
-        )
-    ).scalar_one_or_none()
-
-    if product_unit is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product unit not found.",
-        )
-
-    if product_unit.status != "sold":
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Only sold products can be transferred.",
-        )
-
-    ownership = db.execute(
-        select(ProductOwnership).where(
-            ProductOwnership.product_unit_id
-            == product_unit.id,
-            ProductOwnership.customer_id
-            == sender.id,
-            ProductOwnership.ownership_status
-            == "active",
-        )
-    ).scalar_one_or_none()
-
-    if ownership is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not currently own this product.",
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                "Provide exactly one transfer source: "
+                "product_unit_id or digibill_id."
+            ),
         )
 
     recipient_customer_id = (
@@ -536,41 +639,158 @@ def create_customer_transfer(
             detail="Destination customer is not active.",
         )
 
-    existing_pending = db.execute(
-        select(ProductTransfer).where(
-            ProductTransfer.product_unit_id
-            == product_unit.id,
-            ProductTransfer.status
-            == "pending_acceptance",
-        )
-    ).scalar_one_or_none()
+    product_unit = None
+    ownership = None
+    digibill = None
+    transfer_source = None
+    verified_serial_number = None
 
-    if existing_pending is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This product already has a pending transfer.",
+    if has_product_unit:
+        transfer_source = "registered_product"
+
+        try:
+            product_unit_id = uuid.UUID(
+                request.product_unit_id
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product unit not found.",
+            )
+
+        product_unit = db.execute(
+            select(ProductUnit).where(
+                ProductUnit.id == product_unit_id
+            )
+        ).scalar_one_or_none()
+
+        if product_unit is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Product unit not found.",
+            )
+
+        if product_unit.status != "sold":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Only sold products can be transferred.",
+            )
+
+        ownership = db.execute(
+            select(ProductOwnership).where(
+                ProductOwnership.product_unit_id
+                == product_unit.id,
+                ProductOwnership.customer_id
+                == sender.id,
+                ProductOwnership.ownership_status
+                == "active",
+            )
+        ).scalar_one_or_none()
+
+        if ownership is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not currently own this product.",
+            )
+
+        existing_pending = db.execute(
+            select(ProductTransfer).where(
+                ProductTransfer.product_unit_id
+                == product_unit.id,
+                ProductTransfer.status
+                == "pending_acceptance",
+            )
+        ).scalar_one_or_none()
+
+        if existing_pending is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This product already has a pending transfer.",
+            )
+
+        existing_active = db.execute(
+            select(ProductOwnership).where(
+                ProductOwnership.product_unit_id
+                == product_unit.id,
+                ProductOwnership.ownership_status
+                == "active",
+            )
+        ).scalar_one_or_none()
+
+        if (
+            existing_active is None
+            or existing_active.customer_id != sender.id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Product ownership changed. Refresh and try again.",
+            )
+
+    else:
+        transfer_source = "uploaded_bill"
+
+        digibill = db.execute(
+            select(CustomerDigiBill).where(
+                CustomerDigiBill.digibill_id
+                == request.digibill_id.strip()
+            )
+        ).scalar_one_or_none()
+
+        if digibill is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="DigiBill not found.",
+            )
+
+        if digibill.customer_id != sender.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this DigiBill.",
+            )
+
+        if digibill.status != "confirmed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Only confirmed DigiBills can be transferred.",
+            )
+
+        if digibill.serial_verification_status != "verified":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Serial number must be verified before "
+                    "this DigiBill can be transferred."
+                ),
+            )
+
+        verified_serial_number = (
+            digibill.verified_serial_number
         )
 
-    existing_active = db.execute(
-        select(ProductOwnership).where(
-            ProductOwnership.product_unit_id
-            == product_unit.id,
-            ProductOwnership.ownership_status
-            == "active",
-        )
-    ).scalar_one_or_none()
+        if not verified_serial_number:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Verified serial number is missing. "
+                    "Verify the serial number again."
+                ),
+            )
 
-    if (
-        existing_active is None
-        or existing_active.customer_id != sender.id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Product ownership changed. Refresh and try again.",
-        )
+        existing_pending = db.execute(
+            select(ProductTransfer).where(
+                ProductTransfer.digibill_id
+                == digibill.digibill_id,
+                ProductTransfer.status
+                == "pending_acceptance",
+            )
+        ).scalar_one_or_none()
 
-    # The transfer fee is waived if the payer has an active
-    # subscription. Otherwise the configured transfer fee applies.
+        if existing_pending is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This DigiBill already has a pending transfer.",
+            )
+
     payer_customer = (
         sender
         if request.payment_payer == "sender"
@@ -603,7 +823,18 @@ def create_customer_transfer(
         transfer_id=(
             f"TRF-{uuid.uuid4().hex[:10].upper()}"
         ),
-        product_unit_id=product_unit.id,
+        product_unit_id=(
+            product_unit.id
+            if product_unit is not None
+            else None
+        ),
+        digibill_id=(
+            digibill.digibill_id
+            if digibill is not None
+            else None
+        ),
+        verified_serial_number=verified_serial_number,
+        transfer_source=transfer_source,
         from_customer_id=sender.id,
         to_customer_id=receiver.id,
         requested_by_user_id=current_user.id,
@@ -831,6 +1062,93 @@ def accept_customer_transfer(
                 detail="Transfer fee must be paid before acceptance.",
             )
 
+    now = __import__(
+        "datetime"
+    ).datetime.now(
+        __import__("datetime").timezone.utc
+    )
+
+    if transfer.transfer_source == "uploaded_bill":
+        if not transfer.digibill_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Uploaded-bill transfer is missing its DigiBill reference.",
+            )
+
+        digibill = db.execute(
+            select(CustomerDigiBill)
+            .where(
+                CustomerDigiBill.digibill_id
+                == transfer.digibill_id
+            )
+            .with_for_update()
+        ).scalar_one_or_none()
+
+        if digibill is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="DigiBill not found.",
+            )
+
+        if digibill.customer_id != transfer.from_customer_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="DigiBill ownership changed. This transfer can no longer be accepted.",
+            )
+
+        if digibill.status != "confirmed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Only confirmed DigiBills can be transferred.",
+            )
+
+        if digibill.serial_verification_status != "verified":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="DigiBill serial verification is no longer valid.",
+            )
+
+        if not digibill.verified_serial_number:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Verified serial number is missing.",
+            )
+
+        if (
+            transfer.verified_serial_number
+            != digibill.verified_serial_number
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Verified serial number changed. This transfer can no longer be accepted.",
+            )
+
+        digibill.customer_id = transfer.to_customer_id
+
+        transfer.status = "completed"
+        transfer.accepted_at = now
+        transfer.completed_at = now
+
+        db.commit()
+        db.refresh(transfer)
+
+        return transfer_to_response(
+            db,
+            transfer,
+        )
+
+    if transfer.transfer_source != "registered_product":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Unsupported transfer source.",
+        )
+
+    if transfer.product_unit_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Registered-product transfer is missing its product unit.",
+        )
+
     product_unit = db.execute(
         select(ProductUnit)
         .where(
@@ -874,12 +1192,6 @@ def accept_customer_transfer(
         )
         .with_for_update()
     ).scalar_one_or_none()
-
-    now = __import__(
-        "datetime"
-    ).datetime.now(
-        __import__("datetime").timezone.utc
-    )
 
     if destination_ownership is not None:
         destination_ownership.ownership_status = "released"

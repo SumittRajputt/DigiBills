@@ -4,7 +4,15 @@ from pydantic import BaseModel, Field
 
 
 class CustomerTransferCreateRequest(BaseModel):
-    product_unit_id: str = Field(min_length=1)
+    product_unit_id: Optional[str] = Field(
+        default=None,
+        min_length=1,
+    )
+    digibill_id: Optional[str] = Field(
+        default=None,
+        min_length=1,
+        max_length=20,
+    )
     to_customer_identifier: str = Field(
         min_length=1,
         max_length=255,
@@ -37,3 +45,23 @@ class CustomerTransferRejectRequest(BaseModel):
         min_length=1,
         max_length=1000,
     )
+
+
+class CustomerTransferSerialVerifyRequest(BaseModel):
+    digibill_id: str = Field(
+        min_length=1,
+        max_length=20,
+    )
+    serial_number: str = Field(
+        min_length=1,
+        max_length=255,
+    )
+
+
+class CustomerTransferSerialVerifyResponse(BaseModel):
+    verified: bool
+    status: str
+    digibill_id: str
+    serial_number: str
+    message: str
+    product: Optional[dict] = None

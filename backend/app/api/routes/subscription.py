@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,11 +19,17 @@ from app.schemas.subscription import (
     SubscriptionCreateRequest,
     SubscriptionPlanResponse,
     SubscriptionPaymentRequest,
+    SubscriptionRazorpayVerificationRequest,
     SubscriptionResponse,
 )
 from app.services.retailer_service import get_retailer_by_owner
 from app.services.customer_service import (
     get_customer_by_user_id,
+)
+
+from app.services.razorpay_service import (
+    create_razorpay_order,
+    verify_razorpay_payment,
 )
 
 from app.services.payment_service import (
@@ -407,6 +414,213 @@ def create_billing_usage_endpoint(
             amount=usage.amount,
             created_at=usage.created_at,
         )
+
+    except ValueError as exc:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/invoices/{invoice_id}/razorpay-order",
+)
+def create_subscription_razorpay_order_endpoint(
+    invoice_id: str,
+    current_user: User = Depends(
+        require_permission("subscription.manage")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_customer_by_user_id(
+        db,
+        current_user.id,
+    )
+
+    if customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer account not found.",
+        )
+
+    invoice = db.execute(
+        select(Invoice).where(
+            Invoice.invoice_id == invoice_id,
+        )
+    ).scalar_one_or_none()
+
+    if invoice is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invoice not found.",
+        )
+
+    if invoice.subscription_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is not a subscription invoice.",
+        )
+
+    if invoice.customer_id != customer.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invoice not found.",
+        )
+
+    if invoice.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is not active.",
+        )
+
+    if invoice.payment_status == "paid":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is already paid.",
+        )
+
+    amount = Decimal(invoice.total_amount)
+
+    if amount <= Decimal("0.00"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice amount must be greater than zero.",
+        )
+
+    razorpay_amount = int(amount * Decimal("100"))
+
+    try:
+        order = create_razorpay_order(
+            amount=razorpay_amount,
+            receipt=invoice.invoice_id,
+            notes={
+                "purpose": "Customer Subscription",
+                "invoice_id": invoice.invoice_id,
+                "customer_id": str(customer.id),
+                "subscription_id": str(invoice.subscription_id),
+            },
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Unable to create Razorpay payment order.",
+        ) from exc
+
+    return {
+        "invoice_id": invoice.invoice_id,
+        "razorpay_order_id": order["id"],
+        "amount": amount,
+        "currency": "INR",
+    }
+
+
+@router.post(
+    "/invoices/{invoice_id}/verify-razorpay-payment",
+)
+def verify_subscription_razorpay_payment_endpoint(
+    invoice_id: str,
+    request: SubscriptionRazorpayVerificationRequest,
+    current_user: User = Depends(
+        require_permission("subscription.manage")
+    ),
+    db: Session = Depends(get_db),
+):
+    customer = get_customer_by_user_id(
+        db,
+        current_user.id,
+    )
+
+    if customer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Customer account not found.",
+        )
+
+    invoice = db.execute(
+        select(Invoice).where(
+            Invoice.invoice_id == invoice_id,
+        )
+    ).scalar_one_or_none()
+
+    if invoice is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invoice not found.",
+        )
+
+    if invoice.subscription_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is not a subscription invoice.",
+        )
+
+    if invoice.customer_id != customer.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invoice not found.",
+        )
+
+    if invoice.status != "active":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is not active.",
+        )
+
+    if invoice.payment_status == "paid":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice is already paid.",
+        )
+
+    amount = Decimal(invoice.total_amount)
+
+    if amount <= Decimal("0.00"):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Invoice amount must be greater than zero.",
+        )
+
+    razorpay_amount = int(amount * Decimal("100"))
+
+    try:
+        payment_data = verify_razorpay_payment(
+            razorpay_order_id=request.razorpay_order_id,
+            razorpay_payment_id=request.razorpay_payment_id,
+            razorpay_signature=request.razorpay_signature,
+            expected_amount=razorpay_amount,
+            expected_currency="INR",
+            expected_receipt=invoice.invoice_id,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    try:
+        payment = create_subscription_payment(
+            db=db,
+            invoice=invoice,
+            amount=amount,
+            payment_method="razorpay",
+            transaction_reference=request.razorpay_payment_id,
+            notes="Razorpay subscription payment",
+            customer_id=customer.id,
+            razorpay_order_id=request.razorpay_order_id,
+            razorpay_payment_id=request.razorpay_payment_id,
+        )
+
+        return {
+            "payment_id": payment.payment_id,
+            "invoice_id": invoice.invoice_id,
+            "amount": payment.amount,
+            "payment_status": payment.payment_status,
+            "invoice_status": invoice.payment_status,
+            "razorpay_order_id": payment.razorpay_order_id,
+            "razorpay_payment_id": payment.razorpay_payment_id,
+        }
 
     except ValueError as exc:
         db.rollback()

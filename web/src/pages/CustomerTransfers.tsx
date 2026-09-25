@@ -15,25 +15,36 @@ import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../api";
 
 type CustomerProduct = {
-  ownership_id: string;
-  product_unit_id: string;
-  product_variant_id: string;
-  product_id: string;
+  ownership_id: string | null;
+  product_unit_id: string | null;
+  product_variant_id: string | null;
+  product_id: string | null;
   product_name: string | null;
   product_code: string | null;
   brand: string | null;
   category: string | null;
+  description: string | null;
   variant_name: string | null;
   sku: string | null;
   barcode: string | null;
   serial_number: string | null;
-  product_unit_status: string;
+  product_unit_status: string | null;
   ownership_status: string;
   acquired_at: string;
   released_at: string | null;
   source: string | null;
   invoice_id: string | null;
   invoice_date: string | null;
+  invoice_number: string | null;
+  digibill_id: string | null;
+  uploaded_bill_id: string | null;
+  model_number: string | null;
+  quantity: number | null;
+  unit_price: number | null;
+  total_amount: number | null;
+  transfer_eligible: boolean;
+  transfer_status: string | null;
+  transfer_reason: string | null;
 };
 
 type VerifiedRecipient = {
@@ -52,7 +63,10 @@ type CurrentCustomer = {
 type CustomerTransfer = {
   id: string;
   transfer_id: string;
-  product_unit_id: string;
+  product_unit_id: string | null;
+  digibill_id: string | null;
+  verified_serial_number: string | null;
+  transfer_source: "registered_product" | "uploaded_bill";
   from_customer_id: string;
   to_customer_id: string;
   requested_by_user_id: string;
@@ -89,12 +103,22 @@ type CustomerTransfer = {
   } | null;
 
   product?: {
-    product_unit_id: string;
+    source: "registered_product" | "uploaded_bill";
+    product_unit_id?: string | null;
+    digibill_id?: string | null;
+    uploaded_bill_id?: string | null;
     serial_number: string | null;
-    product_variant_id: string;
-    sku: string | null;
-    variant_name: string | null;
+    product_variant_id?: string | null;
+    sku?: string | null;
+    variant_name?: string | null;
     product_name: string | null;
+    brand?: string | null;
+    model_number?: string | null;
+    quantity?: string | number | null;
+    unit_price?: string | number | null;
+    total_amount?: string | number | null;
+    invoice_number?: string | null;
+    invoice_date?: string | null;
   } | null;
 };
 
@@ -146,6 +170,20 @@ export default function CustomerTransfers() {
 
   const [customerProducts, setCustomerProducts] = useState<CustomerProduct[]>([]);
   const [selectedProductUnitId, setSelectedProductUnitId] = useState("");
+  const [transferSource, setTransferSource] = useState<
+    "registered_product" | "uploaded_bill"
+  >("registered_product");
+  const [selectedDigiBillId, setSelectedDigiBillId] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [serialVerificationStatus, setSerialVerificationStatus] =
+    useState<"not_required" | "pending" | "verified" | "blocked">(
+      "not_required"
+    );
+  const [serialVerificationMessage, setSerialVerificationMessage] =
+    useState("");
+  const [paymentPayer, setPaymentPayer] = useState<
+    "sender" | "receiver"
+  >("receiver");
   const [productsLoading, setProductsLoading] = useState(false);
   const [verifiedRecipient, setVerifiedRecipient] =
     useState<VerifiedRecipient | null>(null);
@@ -211,6 +249,60 @@ export default function CustomerTransfers() {
     }
   }
 
+  async function verifyUploadedDigiBillSerial() {
+    if (!selectedDigiBillId || !serialNumber.trim()) {
+      setSerialVerificationStatus("blocked");
+      setSerialVerificationMessage(
+        "Enter the product serial number before verification."
+      );
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      setError("");
+      setSerialVerificationStatus("pending");
+      setSerialVerificationMessage("Verifying serial number...");
+
+      const result = await apiFetch<{
+        verified: boolean;
+        status: string;
+        digibill_id: string;
+        serial_number: string;
+        message: string;
+        product?: Record<string, unknown> | null;
+      }>("/customer/transfers/verify-serial", {
+        method: "POST",
+        body: JSON.stringify({
+          digibill_id: selectedDigiBillId,
+          serial_number: serialNumber.trim(),
+        }),
+      });
+
+      if (result.verified) {
+        setSerialVerificationStatus("verified");
+        setSerialNumber(result.serial_number);
+        setSerialVerificationMessage(
+          result.message || "Serial number verified successfully."
+        );
+      } else {
+        setSerialVerificationStatus("blocked");
+        setSerialVerificationMessage(
+          result.message || "Serial number verification failed."
+        );
+      }
+    } catch (err) {
+      setSerialVerificationStatus("blocked");
+      setSerialVerificationMessage(
+        err instanceof Error
+          ? err.message
+          : "Unable to verify serial number."
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
   async function verifyRecipientCustomerId(
     customerId: string
   ) {
@@ -269,8 +361,18 @@ export default function CustomerTransfers() {
   ).length;
 
   async function sendTransferRequest() {
+    const registeredProductReady =
+      transferSource === "registered_product" &&
+      !!selectedProductUnitId;
+
+    const uploadedBillReady =
+      transferSource === "uploaded_bill" &&
+      !!selectedDigiBillId &&
+      serialVerificationStatus === "verified" &&
+      !!serialNumber.trim();
+
     if (
-      !selectedProductUnitId ||
+      (!registeredProductReady && !uploadedBillReady) ||
       recipientCustomerId.length !== 11 ||
       !verifiedRecipient
     ) {
@@ -281,15 +383,26 @@ export default function CustomerTransfers() {
       setActionLoading(true);
       setError("");
 
+      const payload =
+        transferSource === "uploaded_bill"
+          ? {
+              digibill_id: selectedDigiBillId,
+              to_customer_identifier: verifiedRecipient.customer_id,
+              reason: transferReason.trim() || null,
+              payment_payer: paymentPayer,
+            }
+          : {
+              product_unit_id: selectedProductUnitId,
+              to_customer_identifier: verifiedRecipient.customer_id,
+              reason: transferReason.trim() || null,
+              payment_payer: paymentPayer,
+            };
+
       const createdTransfer = await apiFetch<CustomerTransfer>(
         "/customer/transfers",
         {
           method: "POST",
-          body: JSON.stringify({
-            product_unit_id: selectedProductUnitId,
-            to_customer_identifier: verifiedRecipient.customer_id,
-            reason: transferReason.trim() || null,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -297,6 +410,12 @@ export default function CustomerTransfers() {
       setTransferFormOpen(false);
 
       setSelectedProductUnitId("");
+      setSelectedDigiBillId("");
+      setTransferSource("registered_product");
+      setSerialNumber("");
+      setSerialVerificationStatus("not_required");
+      setSerialVerificationMessage("");
+      setPaymentPayer("receiver");
       setRecipientCustomerId("");
       setVerifiedRecipient(null);
       setRecipientVerificationError("");
@@ -650,6 +769,46 @@ export default function CustomerTransfers() {
                   <strong>Bill / Product</strong>
                 </div>
 
+                <div className="customer-transfer-source-selector">
+                  <button
+                    type="button"
+                    className={`secondary-button${
+                      transferSource === "registered_product"
+                        ? " customer-transfer-source-selected"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setTransferSource("registered_product");
+                      setSelectedDigiBillId("");
+                      setSerialNumber("");
+                      setSerialVerificationStatus("not_required");
+                      setSerialVerificationMessage("");
+                    }}
+                  >
+                    <Package size={16} />
+                    Registered Product
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`secondary-button${
+                      transferSource === "uploaded_bill"
+                        ? " customer-transfer-source-selected"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      setTransferSource("uploaded_bill");
+                      setSelectedProductUnitId("");
+                      setSerialNumber("");
+                      setSerialVerificationStatus("not_required");
+                      setSerialVerificationMessage("");
+                    }}
+                  >
+                    <Send size={16} />
+                    Uploaded DigiBill
+                  </button>
+                </div>
+
                 {productsLoading ? (
                   <div className="customer-transfer-placeholder">
                     <RefreshCw size={22} className="spin" />
@@ -660,83 +819,251 @@ export default function CustomerTransfers() {
                       </span>
                     </div>
                   </div>
-                ) : customerProducts.length === 0 ? (
-                  <div className="customer-transfer-placeholder">
-                    <Package size={22} />
-                    <div>
-                      <strong>No eligible products found</strong>
-                      <span>
-                        Products available for transfer will appear here.
-                      </span>
-                    </div>
-                  </div>
                 ) : (
                   <div className="customer-transfer-product-list">
-                    {customerProducts.map((product) => {
-                      const selected =
-                        selectedProductUnitId === product.product_unit_id;
+                    {customerProducts
+                      .filter((product) =>
+                        transferSource === "uploaded_bill"
+                          ? product.source === "uploaded_bill"
+                          : product.source !== "uploaded_bill"
+                      )
+                      .map((product) => {
+                        const selected =
+                          transferSource === "uploaded_bill"
+                            ? selectedDigiBillId === product.digibill_id
+                            : selectedProductUnitId === product.product_unit_id;
 
-                      return (
-                        <button
-                          key={product.product_unit_id}
-                          type="button"
-                          className={`customer-transfer-product-option${
-                            selected
-                              ? " customer-transfer-product-option-selected"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            setSelectedProductUnitId(
-                              product.product_unit_id
-                            )
-                          }
-                        >
-                          <span className="customer-transfer-product-check">
-                            {selected && <Check size={15} />}
+                        const itemKey =
+                          transferSource === "uploaded_bill"
+                            ? product.digibill_id || product.product_name || "uploaded-bill"
+                            : product.product_unit_id || product.product_name || "registered-product";
+
+                        return (
+                          <button
+                            key={itemKey}
+                            type="button"
+                            className={`customer-transfer-product-option${
+                              selected
+                                ? " customer-transfer-product-option-selected"
+                                : ""
+                            }`}
+                            onClick={() => {
+                              if (transferSource === "uploaded_bill") {
+                                setSelectedDigiBillId(
+                                  product.digibill_id ?? ""
+                                );
+                                setSelectedProductUnitId("");
+                                setSerialNumber(
+                                  product.serial_number ?? ""
+                                );
+                                setSerialVerificationStatus(
+                                  product.serial_number
+                                    ? "pending"
+                                    : "blocked"
+                                );
+                                setSerialVerificationMessage(
+                                  product.serial_number
+                                    ? "Serial number found. Verification is required before transfer."
+                                    : "A unique serial number is required before this DigiBill can be transferred."
+                                );
+                              } else {
+                                setSelectedProductUnitId(
+                                  product.product_unit_id ?? ""
+                                );
+                                setSelectedDigiBillId("");
+                                setSerialNumber("");
+                                setSerialVerificationStatus(
+                                  "not_required"
+                                );
+                                setSerialVerificationMessage("");
+                              }
+                            }}
+                          >
+                            <span className="customer-transfer-product-check">
+                              {selected && <Check size={15} />}
+                            </span>
+
+                            <span className="customer-transfer-product-icon">
+                              <Package size={21} />
+                            </span>
+
+                            <span className="customer-transfer-product-copy">
+                              <strong>
+                                {product.product_name || "Purchased Product"}
+                              </strong>
+
+                              {product.source === "uploaded_bill" ? (
+                                <>
+                                  {product.brand && (
+                                    <small>
+                                      Brand: {product.brand}
+                                    </small>
+                                  )}
+
+                                  {product.model_number && (
+                                    <small>
+                                      Model: {product.model_number}
+                                    </small>
+                                  )}
+
+                                  {product.digibill_id && (
+                                    <small>
+                                      DigiBill: {product.digibill_id}
+                                    </small>
+                                  )}
+
+                                  {product.invoice_number && (
+                                    <small>
+                                      Bill: {product.invoice_number}
+                                    </small>
+                                  )}
+
+                                  {product.invoice_date && (
+                                    <small>
+                                      Purchased: {formatDate(product.invoice_date)}
+                                    </small>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {product.variant_name && (
+                                    <small>{product.variant_name}</small>
+                                  )}
+
+                                  <small>
+                                    {product.sku
+                                      ? `SKU: ${product.sku}`
+                                      : product.serial_number
+                                        ? `Serial No: ${product.serial_number}`
+                                        : "Purchased product"}
+                                  </small>
+
+                                  {product.invoice_id && (
+                                    <small>
+                                      Bill: {product.invoice_id}
+                                    </small>
+                                  )}
+
+                                  {product.invoice_date && (
+                                    <small>
+                                      Purchased: {formatDate(product.invoice_date)}
+                                    </small>
+                                  )}
+                                </>
+                              )}
+                            </span>
+
+                            <span className="customer-transfer-product-action">
+                              {selected ? "Selected" : "Select"}
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                    {customerProducts.filter((product) =>
+                      transferSource === "uploaded_bill"
+                        ? product.source === "uploaded_bill"
+                        : product.source !== "uploaded_bill"
+                    ).length === 0 && (
+                      <div className="customer-transfer-placeholder">
+                        <Package size={22} />
+                        <div>
+                          <strong>
+                            {transferSource === "uploaded_bill"
+                              ? "No uploaded DigiBills found"
+                              : "No registered products found"}
+                          </strong>
+                          <span>
+                            {transferSource === "uploaded_bill"
+                              ? "Confirmed uploaded bills available for transfer will appear here."
+                              : "Registered products available for transfer will appear here."}
                           </span>
-
-                          <span className="customer-transfer-product-icon">
-                            <Package size={21} />
-                          </span>
-
-                          <span className="customer-transfer-product-copy">
-                            <strong>
-                              {product.product_name || "Purchased Product"}
-                            </strong>
-
-                            {product.variant_name && (
-                              <small>{product.variant_name}</small>
-                            )}
-
-                            <small>
-                              {product.sku
-                                ? `SKU: ${product.sku}`
-                                : product.serial_number
-                                  ? `Serial No: ${product.serial_number}`
-                                  : "Purchased product"}
-                            </small>
-
-                            {product.invoice_id && (
-                              <small>
-                                Bill: {product.invoice_id}
-                              </small>
-                            )}
-
-                            {product.invoice_date && (
-                              <small>
-                                Purchased: {formatDate(product.invoice_date)}
-                              </small>
-                            )}
-                          </span>
-
-                          <span className="customer-transfer-product-action">
-                            {selected ? "Selected" : "Select"}
-                          </span>
-                        </button>
-                      );
-                    })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
+
+                {transferSource === "uploaded_bill" &&
+                  selectedDigiBillId && (
+                    <div className="customer-transfer-serial-verification">
+                      <label className="customer-transfer-field">
+                        <span>
+                          Product Serial Number <b>*</b>
+                        </span>
+
+                        <input
+                          type="text"
+                          value={serialNumber}
+                          onChange={(event) => {
+                            setSerialNumber(event.target.value);
+                            setSerialVerificationStatus("not_required");
+                            setSerialVerificationMessage("");
+                          }}
+                          placeholder="Enter the product serial number"
+                          disabled={actionLoading}
+                        />
+
+                        <small>
+                          Enter the serial number printed on the physical
+                          product or its packaging.
+                        </small>
+                      </label>
+
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={verifyUploadedDigiBillSerial}
+                        disabled={
+                          !serialNumber.trim() ||
+                          actionLoading ||
+                          serialVerificationStatus === "verified"
+                        }
+                      >
+                        {serialVerificationStatus === "verified" ? (
+                          <Check size={16} />
+                        ) : actionLoading ? (
+                          <RefreshCw size={16} className="spin" />
+                        ) : (
+                          <Search size={16} />
+                        )}
+                        {serialVerificationStatus === "verified"
+                          ? "Serial Verified"
+                          : actionLoading
+                            ? "Verifying..."
+                            : "Verify Serial Number"}
+                      </button>
+
+                      {serialVerificationMessage && (
+                        <div
+                          className={`customer-transfer-placeholder${
+                            serialVerificationStatus === "verified"
+                              ? " customer-transfer-serial-verified"
+                              : serialVerificationStatus === "blocked"
+                                ? " customer-transfer-serial-blocked"
+                                : ""
+                          }`}
+                        >
+                          {serialVerificationStatus === "verified" ? (
+                            <Check size={22} />
+                          ) : (
+                            <X size={22} />
+                          )}
+
+                          <div>
+                            <strong>
+                              {serialVerificationStatus === "verified"
+                                ? "Serial number verified"
+                                : serialVerificationStatus === "blocked"
+                                  ? "Serial verification failed"
+                                  : "Serial verification"}
+                            </strong>
+                            <span>{serialVerificationMessage}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
 
               <div className="customer-transfer-form-section">
@@ -819,6 +1146,43 @@ export default function CustomerTransfers() {
                   <strong>Transfer Details</strong>
                 </div>
 
+                <div className="customer-transfer-field">
+                  <span>Transfer Fee</span>
+
+                  <div className="customer-transfer-fee-info">
+                    <strong>₹9 transfer fee</strong>
+                    <small>
+                      Customers with an eligible active subscription may have
+                      the transfer fee waived.
+                    </small>
+                  </div>
+                </div>
+
+                <label className="customer-transfer-field">
+                  <span>Who pays the transfer fee?</span>
+
+                  <select
+                    value={paymentPayer}
+                    onChange={(event) =>
+                      setPaymentPayer(
+                        event.target.value as "sender" | "receiver"
+                      )
+                    }
+                  >
+                    <option value="receiver">
+                      Receiver pays
+                    </option>
+                    <option value="sender">
+                      Sender pays
+                    </option>
+                  </select>
+
+                  <small>
+                    The selected customer will be responsible for the transfer
+                    fee if a fee applies.
+                  </small>
+                </label>
+
                 <label className="customer-transfer-field">
                   <span>Message / Reason</span>
 
@@ -848,7 +1212,13 @@ export default function CustomerTransfers() {
                 className="primary-button"
                 onClick={sendTransferRequest}
                 disabled={
-                  selectedProductUnitId.length === 0 ||
+                  (
+                    transferSource === "registered_product"
+                      ? !selectedProductUnitId
+                      : !selectedDigiBillId ||
+                        serialVerificationStatus !== "verified" ||
+                        !serialNumber.trim()
+                  ) ||
                   recipientCustomerId.length !== 11 ||
                   !verifiedRecipient ||
                   recipientVerifying ||
@@ -937,7 +1307,7 @@ export default function CustomerTransfers() {
               <thead>
                 <tr>
                   <th>Transfer ID</th>
-                  <th>Product Unit</th>
+                  <th>Bill / Product</th>
                   <th>Direction</th>
                   <th>Requested</th>
                   <th>Status</th>
@@ -956,6 +1326,14 @@ export default function CustomerTransfers() {
                       <strong>
                         {transfer.product?.product_name || "—"}
                       </strong>
+
+                      {transfer.transfer_source === "uploaded_bill" &&
+                        transfer.digibill_id && (
+                          <span className="customer-transfer-detail-secondary">
+                            DigiBill: {transfer.digibill_id}
+                          </span>
+                        )}
+
                       {transfer.product?.serial_number && (
                         <span className="customer-transfer-detail-secondary">
                           Serial: {transfer.product.serial_number}

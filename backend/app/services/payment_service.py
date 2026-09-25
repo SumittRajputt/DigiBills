@@ -186,6 +186,8 @@ def create_payment(
         payment_method=payment_method,
         payment_status="completed",
         transaction_reference=transaction_reference,
+        razorpay_order_id=razorpay_order_id,
+        razorpay_payment_id=razorpay_payment_id,
         paid_at=datetime.now(timezone.utc),
         refund_amount=Decimal("0.00"),
         refund_status=None,
@@ -283,6 +285,8 @@ def create_subscription_payment(
     transaction_reference: Optional[str] = None,
     notes: Optional[str] = None,
     customer_id: Optional[uuid.UUID] = None,
+    razorpay_order_id: Optional[str] = None,
+    razorpay_payment_id: Optional[str] = None,
 ) -> Payment:
     if invoice.status != "active":
         raise ValueError(
@@ -346,6 +350,8 @@ def create_subscription_payment(
         payment_method=payment_method,
         payment_status="completed",
         transaction_reference=transaction_reference,
+        razorpay_order_id=razorpay_order_id,
+        razorpay_payment_id=razorpay_payment_id,
         paid_at=datetime.now(timezone.utc),
         refund_amount=Decimal("0.00"),
         refund_status=None,

@@ -26,6 +26,9 @@ from app.api.routes.customer_uploaded_bills import router as customer_uploaded_b
 from app.api.routes.customer_invoices import (
     router as customer_invoices_router,
 )
+from app.api.routes.customer_bills import (
+    router as customer_bills_router,
+)
 from app.api.routes.customer_payments import (
     router as customer_payments_router,
 )
@@ -149,6 +152,10 @@ api_router.include_router(
 
 api_router.include_router(
     customer_invoices_router
+)
+
+api_router.include_router(
+    customer_bills_router
 )
 
 api_router.include_router(

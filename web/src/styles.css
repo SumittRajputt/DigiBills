@@ -28574,6 +28574,104 @@ button {
    CUSTOMER INVOICES — MOBILE CARD LAYOUT
    ========================================================= */
 
+
+
+.customer-invoices-desktop-table td:first-child strong {
+  font-weight: 750;
+  color: var(--db-text);
+}
+
+.customer-invoices-desktop-table td:nth-child(3) {
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-invoices-desktop-table .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 13px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+
+.customer-bills-empty-state {
+  min-height: 260px;
+  padding: 36px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.customer-bills-empty-icon {
+  width: 54px;
+  height: 54px;
+  margin-bottom: 4px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f6fb;
+  color: var(--db-primary);
+}
+
+.customer-bills-empty-state strong {
+  color: var(--db-text);
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.customer-bills-empty-state span {
+  max-width: 420px;
+  color: var(--db-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.customer-bills-empty-state .primary-button {
+  margin-top: 8px;
+}
+
+.customer-invoices-desktop-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.customer-invoices-desktop-controls .customer-invoices-mobile-search {
+  flex: 1;
+  max-width: 520px;
+}
+
+.customer-invoices-desktop-controls select {
+  min-width: 150px;
+  height: 42px;
+  padding: 0 36px 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  outline: none;
+}
+
+.customer-invoices-desktop-controls select:focus {
+  border-color: #9ca3af;
+}
+
 .customer-invoices-mobile-content {
   display: none;
 }
@@ -31729,5 +31827,540 @@ button {
 
   .customer-bills-review-actions button {
     width: 100%;
+  }
+}
+
+/* =========================================================
+   CUSTOMER DIGIBILL DETAILS
+   Keeps self-uploaded DigiBills visually consistent with
+   the existing customer Bill Details design.
+   ========================================================= */
+
+.customer-digibill-products {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.customer-digibill-product {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 220px);
+  gap: 24px;
+  align-items: start;
+  padding: 18px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customer-digibill-product:last-child {
+  border-bottom: 0;
+}
+
+.customer-digibill-product-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.customer-digibill-product-price {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  text-align: right;
+}
+
+.customer-digibill-product-meta {
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.customer-digibill-summary {
+  padding: 0 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.customer-digibill-summary-total {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.customer-digibill-summary-total span {
+  color: #718096;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.customer-digibill-summary-total strong {
+  color: #172033;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.customer-digibill-payment {
+  padding: 0 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.customer-digibill-warranty {
+  padding: 0 24px 24px;
+}
+
+.customer-digibill-warranty-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customer-digibill-warranty-status strong {
+  color: #172033;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.customer-digibill-warranty-grid {
+  padding-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 700px) {
+  .customer-digibill-products {
+    padding: 0 16px 16px;
+    gap: 0;
+  }
+
+  .customer-digibill-product {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 16px 0;
+  }
+
+  .customer-digibill-product-price {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .customer-digibill-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 14px;
+    padding: 0 16px 18px;
+  }
+
+  .customer-digibill-summary-total {
+    grid-column: 1 / -1;
+  }
+
+  .customer-digibill-payment {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 16px 18px;
+  }
+
+  .customer-digibill-warranty {
+    padding: 0 16px 18px;
+  }
+
+  .customer-digibill-warranty-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .customer-digibill-warranty-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* =========================================================
+   CUSTOMER — UNIFIED MY PRODUCTS
+   ========================================================= */
+
+.customer-products-page .customer-products-heading {
+  margin-bottom: 22px;
+}
+
+.customer-products-heading h1 {
+  margin: 5px 0 6px;
+  font-size: 26px;
+  line-height: 1.15;
+  color: #172033;
+}
+
+.customer-products-heading p {
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.customer-product-stats {
+  margin-bottom: 20px;
+}
+
+.customer-products-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.customer-products-panel .panel-header {
+  padding: 20px 22px 16px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.customer-products-panel .panel-header h3 {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.customer-products-panel .panel-header span {
+  font-size: 11px;
+  color: #7d8998;
+}
+
+.customer-products-list {
+  padding: 10px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customer-product-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(280px, 1.6fr) minmax(420px, 2fr) 38px;
+  align-items: center;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e7ecf3;
+  border-radius: 10px;
+  background: #fff;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.customer-product-card:hover {
+  border-color: #d7e0eb;
+  box-shadow: 0 5px 18px rgba(20, 35, 55, 0.06);
+  transform: translateY(-1px);
+}
+
+.customer-product-card-main {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.customer-product-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #eef5ff;
+  color: #1769ff;
+}
+
+.customer-product-card-info {
+  min-width: 0;
+}
+
+.customer-product-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.customer-product-title-row h4 {
+  margin: 0;
+  color: #172033;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.customer-product-source {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.customer-product-source.uploaded {
+  background: #e5fbfa;
+  color: #108f8c;
+}
+
+.customer-product-source.registered {
+  background: #eaf2ff;
+  color: #1769ff;
+}
+
+.customer-product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+  color: #718096;
+  font-size: 10px;
+}
+
+.customer-product-meta strong {
+  color: #354155;
+  font-weight: 650;
+}
+
+.customer-product-card-details {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+
+.customer-product-card-details > div {
+  min-width: 0;
+}
+
+.customer-product-card-details small {
+  display: block;
+  margin-bottom: 5px;
+  color: #8994a4;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.customer-product-card-details strong {
+  display: block;
+  color: #253047;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.customer-product-transfer {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.customer-product-transfer.eligible {
+  background: #e7faf1;
+  color: #129562;
+}
+
+.customer-product-transfer.verification {
+  background: #fff4df;
+  color: #b56d08;
+}
+
+.customer-product-view-button {
+  align-self: center;
+}
+
+.customer-products-note {
+  margin-top: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #dfe8f3;
+  border-radius: 9px;
+  background: #f8fbff;
+  color: #536176;
+}
+
+.customer-products-note > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #1769ff;
+}
+
+.customer-products-note strong {
+  display: block;
+  color: #253047;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.customer-products-note p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Product details modal */
+
+.customer-product-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(7, 29, 53, 0.58);
+  backdrop-filter: blur(3px);
+}
+
+.customer-product-modal {
+  width: min(820px, 100%);
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(7, 29, 53, 0.24);
+}
+
+.customer-product-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e7ecf3;
+  background: #fff;
+}
+
+.customer-product-modal-header h2 {
+  margin: 6px 0 0;
+  color: #172033;
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+.customer-product-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: #e7ecf3;
+  border-bottom: 1px solid #e7ecf3;
+}
+
+.customer-product-detail-grid > div {
+  min-width: 0;
+  padding: 17px 20px;
+  background: #fff;
+}
+
+.customer-product-detail-grid > div.customer-product-detail-full {
+  grid-column: 1 / -1;
+}
+
+.customer-product-detail-grid small {
+  display: block;
+  margin-bottom: 7px;
+  color: #8994a4;
+  font-size: 8px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.customer-product-detail-grid strong {
+  display: block;
+  color: #253047;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .customer-product-card {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .customer-product-card-details {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-left: 55px;
+  }
+
+  .customer-product-view-button {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+  }
+}
+
+@media (max-width: 700px) {
+  .customer-products-heading h1 {
+    font-size: 22px;
+  }
+
+  .customer-product-card {
+    padding: 15px;
+  }
+
+  .customer-product-card-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-left: 0;
+    padding-right: 38px;
+  }
+
+  .customer-product-title-row h4 {
+    font-size: 13px;
+  }
+
+  .customer-product-modal-backdrop {
+    padding: 12px;
+  }
+
+  .customer-product-modal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .customer-product-modal-header {
+    padding: 18px;
+  }
+
+  .customer-product-modal-header h2 {
+    font-size: 17px;
+  }
+
+  .customer-product-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-product-detail-grid > div.customer-product-detail-full {
+    grid-column: auto;
   }
 }

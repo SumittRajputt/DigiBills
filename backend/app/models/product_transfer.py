@@ -24,11 +24,33 @@ class ProductTransfer(Base):
         nullable=False,
     )
 
-    product_unit_id: Mapped[uuid.UUID] = mapped_column(
+    product_unit_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         ForeignKey(
             "product_units.id",
             ondelete="RESTRICT",
         ),
+        nullable=True,
+    )
+
+    digibill_id: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        ForeignKey(
+            "customer_digibills.digibill_id",
+            ondelete="RESTRICT",
+        ),
+        index=True,
+        nullable=True,
+    )
+
+    verified_serial_number: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    transfer_source: Mapped[str] = mapped_column(
+        String(30),
+        default="registered_product",
+        server_default="registered_product",
         nullable=False,
     )
 

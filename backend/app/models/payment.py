@@ -50,6 +50,18 @@ class Payment(Base):
         nullable=True,
     )
 
+    razorpay_order_id: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        index=True,
+    )
+
+    razorpay_payment_id: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        index=True,
+    )
+
     paid_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=datetime.utcnow,

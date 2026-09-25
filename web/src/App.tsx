@@ -51,6 +51,7 @@ import CustomerAccountSecurity from "./pages/CustomerAccountSecurity";
 import CustomerSubscription from "./pages/CustomerSubscription";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerOrders from "./pages/CustomerOrders";
+import CustomerProducts from "./pages/CustomerProducts";
 import CustomerNotifications from "./pages/CustomerNotifications";
 import CustomerNotificationDetails from "./pages/CustomerNotificationDetails";
 import CustomerEditProfile from "./pages/CustomerEditProfile";
@@ -475,6 +476,12 @@ function App() {
           <ProtectedRoute user={user} role="customer">
             <DashboardFrame role="customer" user={user!}>
               <Routes>
+                <Route
+                  path="products"
+                  element={<CustomerProducts />}
+                />
+
+
                 <Route
                   index
                   element={<CustomerDashboard />}
@@ -1205,14 +1212,12 @@ function DashboardFrame({
       "Settings",
     ],
     customer: [
-      "Dashboard",
-      "My Profile",
-      "My Invoices",
+      "Home",
       "My Bills",
-      "My Payments",
-      "My Orders",
+      "Transfers",
       "My Warranty",
-      "Transfer Bills",
+      "My Profile",
+      "Notifications",
       "Subscription",
       "Support",
       "Settings",
@@ -1412,22 +1417,18 @@ function DashboardFrame({
                   (
                     role === "customer" &&
                     (
-                      (item === "Dashboard" &&
+                      (item === "Home" &&
                         location.pathname === "/customer") ||
-                      (item === "My Profile" &&
-                        location.pathname === "/customer/profile") ||
-                      (item === "My Invoices" &&
-                        location.pathname.startsWith("/customer/invoices")) ||
                       (item === "My Bills" &&
-                        location.pathname.startsWith("/customer/bills")) ||
-                      (item === "My Payments" &&
-                        location.pathname === "/customer/payments") ||
-                      (item === "My Orders" &&
-                        location.pathname.startsWith("/customer/orders")) ||
+                        location.pathname.startsWith("/customer/invoices")) ||
+                      (item === "Transfers" &&
+                        location.pathname.startsWith("/customer/transfers")) ||
                       (item === "My Warranty" &&
                         location.pathname === "/customer/warranty") ||
-                      (item === "Transfer Bills" &&
-                        location.pathname === "/customer/transfers") ||
+                      (item === "My Profile" &&
+                        location.pathname.startsWith("/customer/profile")) ||
+                      (item === "Notifications" &&
+                        location.pathname.startsWith("/customer/notifications")) ||
                       (item === "Subscription" &&
                         location.pathname === "/customer/subscription") ||
                       (item === "Support" &&
@@ -1465,29 +1466,19 @@ function DashboardFrame({
                     navigate("/admin/returns");
                   } else if (
                     role === "customer" &&
-                    item === "My Profile"
+                    item === "Home"
                   ) {
-                    navigate("/customer/profile");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Invoices"
-                  ) {
-                    navigate("/customer/invoices");
+                    navigate("/customer");
                   } else if (
                     role === "customer" &&
                     item === "My Bills"
                   ) {
-                    navigate("/customer/bills");
+                    navigate("/customer/invoices");
                   } else if (
                     role === "customer" &&
-                    item === "My Payments"
+                    item === "Transfers"
                   ) {
-                    navigate("/customer/payments");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Orders"
-                  ) {
-                    navigate("/customer/orders");
+                    navigate("/customer/transfers");
                   } else if (
                     role === "customer" &&
                     item === "My Warranty"
@@ -1495,9 +1486,14 @@ function DashboardFrame({
                     navigate("/customer/warranty");
                   } else if (
                     role === "customer" &&
-                    item === "Transfer Bills"
+                    item === "My Profile"
                   ) {
-                    navigate("/customer/transfers");
+                    navigate("/customer/profile");
+                  } else if (
+                    role === "customer" &&
+                    item === "Notifications"
+                  ) {
+                    navigate("/customer/notifications");
                   } else if (
                     role === "customer" &&
                     item === "Subscription"
@@ -1629,26 +1625,22 @@ function DashboardFrame({
                 location.pathname === retailerNavPaths[item]) ||
               (role === "customer" &&
                 (
-                  (item === "Dashboard" &&
+                  (item === "Home" &&
                     location.pathname === "/customer") ||
-                  (item === "My Profile" &&
-                    location.pathname === "/customer/profile") ||
-                  (item === "My Invoices" &&
-                    location.pathname.startsWith("/customer/invoices")) ||
                   (item === "My Bills" &&
-                    location.pathname.startsWith("/customer/bills")) ||
-                  (item === "My Payments" &&
-                    location.pathname === "/customer/payments") ||
+                    location.pathname.startsWith("/customer/invoices")) ||
                   (item === "My Warranty" &&
                     location.pathname === "/customer/warranty") ||
-                  (item === "Transfer Bills" &&
-                    location.pathname === "/customer/transfers") ||
+                  (item === "My Profile" &&
+                    location.pathname.startsWith("/customer/profile")) ||
+                  (item === "Notifications" &&
+                    location.pathname.startsWith("/customer/notifications")) ||
                   (item === "Subscription" &&
                     location.pathname === "/customer/subscription") ||
                   (item === "Support" &&
                     location.pathname === "/customer/support") ||
                   (item === "Settings" &&
-                    location.pathname === "/customer/settings")
+                    location.pathname.startsWith("/customer/settings"))
                 ));
 
             return (
@@ -1696,14 +1688,29 @@ function DashboardFrame({
                     navigate("/admin/returns");
                   } else if (
                     role === "customer" &&
+                    item === "Home"
+                  ) {
+                    navigate("/customer");
+                  } else if (
+                    role === "customer" &&
+                    item === "My Bills"
+                  ) {
+                    navigate("/customer/invoices");
+                  } else if (
+                    role === "customer" &&
                     item === "My Warranty"
                   ) {
                     navigate("/customer/warranty");
                   } else if (
                     role === "customer" &&
-                    item === "Transfer Bills"
+                    item === "My Profile"
                   ) {
-                    navigate("/customer/transfers");
+                    navigate("/customer/profile");
+                  } else if (
+                    role === "customer" &&
+                    item === "Notifications"
+                  ) {
+                    navigate("/customer/notifications");
                   } else if (
                     role === "customer" &&
                     item === "Subscription"
@@ -1739,31 +1746,6 @@ function DashboardFrame({
                     item === "Audit Logs"
                   ) {
                     navigate("/admin/audit-logs");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Profile"
-                  ) {
-                    navigate("/customer/profile");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Invoices"
-                  ) {
-                    navigate("/customer/invoices");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Bills"
-                  ) {
-                    navigate("/customer/bills");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Payments"
-                  ) {
-                    navigate("/customer/payments");
-                  } else if (
-                    role === "customer" &&
-                    item === "My Orders"
-                  ) {
-                    navigate("/customer/orders");
                   } else if (index === 0) {
                     navigate(
                       role === "super_admin"

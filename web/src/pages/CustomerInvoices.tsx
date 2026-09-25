@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Download, Eye, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiFetch } from "../api";
 
@@ -44,12 +44,83 @@ type CustomerInvoiceDetail = CustomerInvoice & {
   items: InvoiceItem[];
 };
 
+type CustomerBillProduct = {
+  product_name: string | null;
+  brand: string | null;
+  model_number: string | null;
+  serial_number: string | null;
+  quantity: string | number | null;
+  unit_price: string | number | null;
+  discount: string | number | null;
+  tax_amount: string | number | null;
+  total_amount: string | number | null;
+};
+
+type CustomerBill = {
+  source: "retailer" | "uploaded";
+  bill_id: string;
+  bill_number: string | null;
+  bill_date: string | null;
+  products: CustomerBillProduct[];
+  subtotal: string | number | null;
+  discount_amount: string | number | null;
+  tax_amount: string | number | null;
+  total_amount: string | number;
+  payment_status: string;
+  status: string;
+  retailer_name: string | null;
+  uploaded_bill_id: string | null;
+  digibill_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type CustomerDigiBill = {
+  digibill_id: string;
+  uploaded_bill_id: string;
+  customer_id: string;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  retailer: Record<string, unknown>;
+  customer: Record<string, unknown>;
+  products: CustomerBillProduct[];
+  totals: Record<string, unknown>;
+  payment: Record<string, unknown>;
+  warranty_evidence: Record<string, unknown>;
+  confidence_scores: Record<string, unknown>;
+  extraction_notes: string[];
+  status: string;
+  confirmed_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
 type CustomerIdentity = {
   customer_id: string;
   full_name: string;
   phone_number: string;
   email: string | null;
   profile_image_url: string | null;
+};
+
+type CustomerWarranty = {
+  id: string;
+  warranty_id: string;
+  invoice_id: string;
+  product_variant_id: string;
+  product_unit_id: string | null;
+  product_name: string | null;
+  variant_name: string | null;
+  sku: string | null;
+  serial_number: string | null;
+  customer_id: string;
+  start_date: string;
+  end_date: string;
+  duration_months: number;
+  is_transferable: boolean;
+  status: string;
+  created_at: string;
+  updated_at: string;
 };
 
 
@@ -96,13 +167,32 @@ export default function CustomerInvoices() {
   const [detail, setDetail] =
     useState<CustomerInvoiceDetail | null>(null);
 
+  const [digiBillDetail, setDigiBillDetail] =
+    useState<CustomerDigiBill | null>(null);
+
   const [customerIdentity, setCustomerIdentity] =
     useState<CustomerIdentity | null>(null);
 
+  const [customerWarranties, setCustomerWarranties] =
+    useState<CustomerWarranty[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [mobileInvoiceSearch, setMobileInvoiceSearch] = useState("");
-  const [mobileInvoiceStatus, setMobileInvoiceStatus] = useState("all");
+  const [invoiceSearch, setInvoiceSearch] = useState("");
+  const [invoiceStatus, setInvoiceStatus] = useState("all");
+
+  async function loadCustomerWarranties() {
+    try {
+      const result =
+        await apiFetch<CustomerWarranty[]>(
+          "/customer/warranty"
+        );
+
+      setCustomerWarranties(result);
+    } catch {
+      setCustomerWarranties([]);
+    }
+  }
 
   async function loadInvoices() {
     try {
@@ -110,19 +200,106 @@ export default function CustomerInvoices() {
       setError("");
 
       const result =
-        await apiFetch<CustomerInvoice[]>(
-          "/customer/invoices"
+        await apiFetch<CustomerBill[]>(
+          "/customer/bills"
         );
 
-      setInvoices(result);
+      setInvoices(
+        result.map((bill) => ({
+          id: bill.bill_id,
+          invoice_id: bill.bill_id,
+          retailer_id: "",
+          employee_id: null,
+          customer_id: "",
+          invoice_number: bill.bill_number,
+          invoice_date: bill.bill_date,
+          item_names: bill.products
+            .map((product) => product.product_name)
+            .filter(
+              (name): name is string =>
+                Boolean(name)
+            ),
+          subtotal: bill.subtotal ?? "0",
+          discount_amount:
+            bill.discount_amount ?? "0",
+          tax_amount: bill.tax_amount ?? "0",
+          total_amount: bill.total_amount,
+          payment_status: bill.payment_status,
+          status: bill.status,
+          notes: null,
+          created_at: bill.created_at,
+          updated_at: bill.updated_at,
+        }))
+      );
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to load your invoices."
+          : "Unable to load your bills."
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function downloadUploadedBill(
+    uploadedBillId: string,
+    filename: string
+  ) {
+    const token = sessionStorage.getItem("digibills_token");
+
+    if (!token) {
+      navigate("/login/customer");
+      return;
+    }
+
+    try {
+      setError("");
+
+      const apiBase =
+        import.meta.env.VITE_API_BASE_URL ??
+        "http://localhost:8000";
+
+      const response = await fetch(
+        `${apiBase}/customer/uploaded-bills/${encodeURIComponent(
+          uploadedBillId
+        )}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        sessionStorage.removeItem("digibills_token");
+        navigate("/login/customer");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (await response.text()) || "Failed to download bill."
+        );
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = filename || `${uploadedBillId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to download bill."
+      );
     }
   }
 
@@ -193,22 +370,43 @@ export default function CustomerInvoices() {
       setLoading(true);
       setError("");
       setDetail(null);
+      setDigiBillDetail(null);
+      setCustomerWarranties([]);
 
-      const [result, customerResult] =
+      const [customerResult, warrantyResult] =
         await Promise.all([
-          apiFetch<CustomerInvoiceDetail>(
-            `/customer/invoices/${encodeURIComponent(detailReference)}`
-          ),
           apiFetch<CustomerIdentity>("/customers/me"),
+          apiFetch<CustomerWarranty[]>("/customer/warranty"),
         ]);
 
-      setDetail(result);
       setCustomerIdentity(customerResult);
+      setCustomerWarranties(warrantyResult);
+
+      try {
+        const result =
+          await apiFetch<CustomerInvoiceDetail>(
+            `/customer/invoices/${encodeURIComponent(
+              detailReference
+            )}`
+          );
+
+        setDetail(result);
+        return;
+      } catch {
+        const digiBill =
+          await apiFetch<CustomerDigiBill>(
+            `/customer/bills/${encodeURIComponent(
+              detailReference
+            )}`
+          );
+
+        setDigiBillDetail(digiBill);
+      }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to load invoice details."
+          : "Unable to load bill details."
       );
     } finally {
       setLoading(false);
@@ -223,8 +421,16 @@ export default function CustomerInvoices() {
     }
   }, [detailReference]);
 
-  const filteredMobileInvoices = invoices.filter((invoice) => {
-    const search = mobileInvoiceSearch.trim().toLowerCase();
+  const billWarranty = detail
+    ? customerWarranties.find(
+        (warranty) =>
+          warranty.invoice_id === detail.invoice_id ||
+          warranty.invoice_id === detail.id
+      ) || null
+    : null;
+
+  const filteredInvoices = invoices.filter((invoice) => {
+    const search = invoiceSearch.trim().toLowerCase();
 
     const matchesSearch =
       !search ||
@@ -236,8 +442,8 @@ export default function CustomerInvoices() {
         .includes(search);
 
     const matchesStatus =
-      mobileInvoiceStatus === "all" ||
-      invoice.payment_status?.toLowerCase() === mobileInvoiceStatus;
+      invoiceStatus === "all" ||
+      invoice.payment_status?.toLowerCase() === invoiceStatus;
 
     return matchesSearch && matchesStatus;
   });
@@ -249,7 +455,7 @@ export default function CustomerInvoices() {
           <div className="page-heading">
             
             <h1>
-              {isOrderDetails ? "Order Details" : "Invoice Details"}
+              {"Bill Details"}
             </h1>
             <p>
               {isOrderDetails
@@ -267,7 +473,7 @@ export default function CustomerInvoices() {
           <div className="page-heading">
             
             <h1>
-              {isOrderDetails ? "Order Details" : "Invoice Details"}
+              {"Bill Details"}
             </h1>
             <p>{error}</p>
           </div>
@@ -282,10 +488,467 @@ export default function CustomerInvoices() {
                 }
               >
                 <ArrowLeft size={16} />
-                Back to My Invoices
+                Back to My Bills
               </button>
             </div>
           </div>
+        </section>
+      );
+    }
+
+    if (digiBillDetail) {
+      const totals = digiBillDetail.totals || {};
+      const payment = digiBillDetail.payment || {};
+      const warranty = digiBillDetail.warranty_evidence || {};
+
+      const warrantyFinal =
+        typeof warranty.final === "object" &&
+        warranty.final !== null
+          ? (warranty.final as Record<string, unknown>)
+          : {};
+
+      const hasWarranty =
+        warrantyFinal.has_warranty === "yes";
+
+      const billNumber =
+        digiBillDetail.invoice_number ||
+        digiBillDetail.digibill_id;
+
+      const paymentStatus = String(
+        payment.payment_status ||
+          digiBillDetail.status ||
+          ""
+      );
+
+      return (
+        <section className="dashboard customer-dashboard-page customer-order-details-page">
+          <div
+            className="page-heading"
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+              gap: "20px",
+            }}
+          >
+            <div>
+              <h1>Bill Details</h1>
+              <p>Your purchase and bill details</p>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              {digiBillDetail.uploaded_bill_id && (
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() =>
+                    downloadUploadedBill(
+                      digiBillDetail.uploaded_bill_id!,
+                      `${billNumber}.pdf`
+                    )
+                  }
+                >
+                  <Download size={16} />
+                  Download Bill
+                </button>
+              )}
+
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() =>
+                  navigate("/customer/invoices")
+                }
+              >
+                <ArrowLeft size={16} />
+                Back to My Bills
+              </button>
+            </div>
+          </div>
+
+          {/* Bill identity */}
+          <div className="panel">
+            <div
+              style={{
+                padding: "24px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: "#64748b",
+                    marginBottom: "6px",
+                  }}
+                >
+                  BILL
+                </div>
+
+                <h2
+                  style={{
+                    margin: 0,
+                    fontSize: "26px",
+                  }}
+                >
+                  {billNumber}
+                </h2>
+
+                <div
+                  style={{
+                    marginTop: "8px",
+                    color: "#64748b",
+                  }}
+                >
+                  Purchase date:{" "}
+                  <strong>
+                    {formatDate(
+                      digiBillDetail.invoice_date
+                    )}
+                  </strong>
+                </div>
+              </div>
+
+              <span className={statusClass(paymentStatus)}>
+                {["paid", "completed", "captured"].includes(
+                  paymentStatus.toLowerCase()
+                )
+                  ? "✓ Payment Completed"
+                  : statusLabel(paymentStatus)}
+              </span>
+            </div>
+
+            <div
+              style={{
+                borderTop: "1px solid #e5e7eb",
+                padding: "22px 24px",
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(180px, 1fr))",
+                gap: "18px",
+              }}
+            >
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Purchase Date
+                </span>
+                <strong className="customer-order-detail-value">
+                  {formatDate(
+                    digiBillDetail.invoice_date
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Bill Number
+                </span>
+                <strong className="customer-order-detail-value">
+                  {billNumber}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Bill Status
+                </span>
+                <strong className="customer-order-detail-value">
+                  {statusLabel(
+                    digiBillDetail.status
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Payment Status
+                </span>
+                <strong className="customer-order-detail-value">
+                  {statusLabel(paymentStatus)}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Products */}
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Products</h3>
+                <p>
+                  {digiBillDetail.products.length} product
+                  {digiBillDetail.products.length === 1
+                    ? ""
+                    : "s"} in this bill
+                </p>
+              </div>
+            </div>
+
+            <div className="customer-digibill-products">
+              {digiBillDetail.products.length === 0 ? (
+                <div className="customer-invoice-empty">
+                  No product details are available.
+                </div>
+              ) : (
+                digiBillDetail.products.map(
+                  (product, index) => (
+                    <article
+                      key={`${product.product_name || "product"}-${index}`}
+                      className="customer-digibill-product"
+                    >
+                      <div className="customer-digibill-product-main">
+                        <span className="customer-order-detail-label">
+                          PRODUCT
+                        </span>
+
+                        <strong className="customer-order-detail-value">
+                          {product.product_name ||
+                            "Product"}
+                        </strong>
+
+                        {product.brand && (
+                          <span className="customer-digibill-product-meta">
+                            Brand: {product.brand}
+                          </span>
+                        )}
+
+                        {product.model_number && (
+                          <span className="customer-digibill-product-meta">
+                            Model: {product.model_number}
+                          </span>
+                        )}
+
+                        {product.serial_number && (
+                          <span className="customer-digibill-product-meta">
+                            Serial: {product.serial_number}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="customer-digibill-product-price">
+                        <span className="customer-order-detail-label">
+                          LINE TOTAL
+                        </span>
+
+                        <strong className="customer-order-detail-value">
+                          {money(
+                            product.total_amount
+                          )}
+                        </strong>
+
+                        {product.quantity != null && (
+                          <span className="customer-digibill-product-meta">
+                            Quantity:{" "}
+                            {String(product.quantity)}
+                          </span>
+                        )}
+                      </div>
+                    </article>
+                  )
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Bill summary */}
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Bill Summary</h3>
+                <p>Price breakdown</p>
+              </div>
+            </div>
+
+            <div className="customer-digibill-summary">
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Subtotal
+                </span>
+                <strong className="customer-order-detail-value">
+                  {money(
+                    totals.subtotal as
+                      | string
+                      | number
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Discount
+                </span>
+                <strong className="customer-order-detail-value">
+                  {money(
+                    totals.discount as
+                      | string
+                      | number
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Tax
+                </span>
+                <strong className="customer-order-detail-value">
+                  {money(
+                    totals.tax_amount as
+                      | string
+                      | number
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-digibill-summary-total">
+                <span>Total Amount</span>
+                <strong>
+                  {money(
+                    totals.total_amount as
+                      | string
+                      | number
+                  )}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment */}
+          <div className="panel">
+            <div className="panel-header">
+              <div>
+                <h3>Payment Details</h3>
+                <p>Payment information for this bill</p>
+              </div>
+            </div>
+
+            <div className="customer-digibill-payment">
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Payment Status
+                </span>
+                <strong className="customer-order-detail-value">
+                  {statusLabel(paymentStatus)}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Payment Method
+                </span>
+                <strong className="customer-order-detail-value">
+                  {String(
+                    payment.payment_method || "—"
+                  )}
+                </strong>
+              </div>
+
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Amount Paid
+                </span>
+                <strong className="customer-order-detail-value">
+                  {money(
+                    payment.paid_amount as
+                      | string
+                      | number
+                  )}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          {/* Warranty */}
+          {hasWarranty && (
+            <div className="panel">
+              <div className="panel-header">
+                <div>
+                  <h3>Warranty Protection</h3>
+                  <p>
+                    Warranty coverage for this purchase
+                  </p>
+                </div>
+              </div>
+
+              <div className="customer-digibill-warranty">
+                <div className="customer-digibill-warranty-status">
+                  <strong>Warranty confirmed</strong>
+                  <span className="customer-invoice-status customer-invoice-status-paid">
+                    Active
+                  </span>
+                </div>
+
+                <div className="customer-digibill-warranty-grid">
+                  {Boolean(warrantyFinal.provider) && (
+                    <div className="customer-order-detail-field">
+                      <span className="customer-order-detail-label">
+                        PROVIDER
+                      </span>
+                      <strong className="customer-order-detail-value">
+                        {String(
+                          warrantyFinal.provider
+                        )}
+                      </strong>
+                    </div>
+                  )}
+
+                  {Boolean(
+                    warrantyFinal.warranty_number
+                  ) && (
+                    <div className="customer-order-detail-field">
+                      <span className="customer-order-detail-label">
+                        WARRANTY NUMBER
+                      </span>
+                      <strong className="customer-order-detail-value">
+                        {String(
+                          warrantyFinal.warranty_number
+                        )}
+                      </strong>
+                    </div>
+                  )}
+
+                  {Boolean(warrantyFinal.warranty_type) && (
+                    <div className="customer-order-detail-field">
+                      <span className="customer-order-detail-label">
+                        WARRANTY TYPE
+                      </span>
+                      <strong className="customer-order-detail-value">
+                        {String(
+                          warrantyFinal.warranty_type
+                        )}
+                      </strong>
+                    </div>
+                  )}
+
+                  {Boolean(warrantyFinal.end_date) && (
+                    <div className="customer-order-detail-field">
+                      <span className="customer-order-detail-label">
+                        VALID UNTIL
+                      </span>
+                      <strong className="customer-order-detail-value">
+                        {formatDate(
+                          String(
+                            warrantyFinal.end_date
+                          )
+                        )}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       );
     }
@@ -306,7 +969,7 @@ export default function CustomerInvoices() {
           <div>
             
             <h1>
-              {isOrderDetails ? "Order Details" : "Invoice Details"}
+              {"Bill Details"}
             </h1>
             <p>
               {isOrderDetails
@@ -327,7 +990,7 @@ export default function CustomerInvoices() {
             }
           >
             <ArrowLeft size={16} />
-            {isOrderDetails ? "Back to My Orders" : "Back to My Invoices"}
+            {isOrderDetails ? "Back to My Orders" : "Back to My Bills"}
           </button>
         </div>
 
@@ -360,7 +1023,7 @@ export default function CustomerInvoices() {
                   fontSize: "26px",
                 }}
               >
-                {detail.invoice_id}
+                  {detail.invoice_number || detail.invoice_id}
               </h2>
 
               <div
@@ -377,8 +1040,12 @@ export default function CustomerInvoices() {
             </div>
 
             <span className={statusClass(detail.payment_status)}>
-              {statusLabel(detail.payment_status)}
-            </span>
+                {["paid", "completed", "captured"].includes(
+                  detail.payment_status?.toLowerCase()
+                )
+                  ? "✓ Payment Completed"
+                  : statusLabel(detail.payment_status)}
+              </span>
           </div>
 
           <div
@@ -391,14 +1058,14 @@ export default function CustomerInvoices() {
               gap: "18px",
             }}
           >
-            <div className="customer-order-detail-field">
-              <span className="customer-order-detail-label">
-                Customer ID
-              </span>
-              <strong className="customer-order-detail-value">
-                {customerIdentity?.customer_id || detail.customer_id}
-              </strong>
-            </div>
+              <div className="customer-order-detail-field">
+                <span className="customer-order-detail-label">
+                  Purchase Date
+                </span>
+                <strong className="customer-order-detail-value">
+                  {formatDate(detail.invoice_date)}
+                </strong>
+              </div>
 
             <div className="customer-order-detail-field">
               <span className="customer-order-detail-label">
@@ -432,10 +1099,10 @@ export default function CustomerInvoices() {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h3>Items</h3>
+              <h3>Products</h3>
               <span>
                 {detail.items.length} item
-                {detail.items.length === 1 ? "" : "s"} in this purchase
+                {detail.items.length === 1 ? "" : "s"} in this bill
               </span>
             </div>
           </div>
@@ -474,11 +1141,6 @@ export default function CustomerInvoices() {
                       </div>
 
                       <div>
-                        <span>TAXABLE VALUE</span>
-                        <strong>{money(item.taxable_amount)}</strong>
-                      </div>
-
-                      <div>
                         <span>TAX</span>
                         <strong>
                           {money(item.tax_amount)}
@@ -505,7 +1167,6 @@ export default function CustomerInvoices() {
                   <th>SKU</th>
                   <th>Qty</th>
                   <th>Unit Price</th>
-                  <th>Taxable Value</th>
                   <th>Tax</th>
                   <th>Line Total</th>
                 </tr>
@@ -514,7 +1175,7 @@ export default function CustomerInvoices() {
               <tbody>
                 {detail.items.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>
+                    <td colSpan={6}>
                       No items found for this invoice.
                     </td>
                   </tr>
@@ -531,9 +1192,6 @@ export default function CustomerInvoices() {
 
                       <td>{money(item.unit_price)}</td>
 
-                      <td>
-                        {money(item.taxable_amount)}
-                      </td>
 
                       <td>
                         {money(item.tax_amount)}
@@ -570,24 +1228,162 @@ export default function CustomerInvoices() {
             gap: "20px",
           }}
         >
+          {billWarranty && (
+            <div className="panel customer-bill-warranty-panel">
+              <div className="panel-header">
+                <div>
+                  <h3>Warranty Protection</h3>
+                  <span>Warranty coverage for this purchase</span>
+                </div>
+              </div>
+
+              <div style={{ padding: "24px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "14px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#eef6ff",
+                      color: "#2563eb",
+                      fontSize: "20px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    ✓
+                  </div>
+
+                  <div>
+                    <strong>
+                      {billWarranty.product_name ||
+                        "Product Warranty"}
+                    </strong>
+                    <div style={{ marginTop: "4px" }}>
+                      <span
+                        className={`customer-invoice-status customer-invoice-status-${billWarranty.status}`}
+                      >
+                        {statusLabel(billWarranty.status)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(2, minmax(0, 1fr))",
+                    gap: "16px",
+                  }}
+                >
+                  <div>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      WARRANTY NUMBER
+                    </span>
+                    <strong>{billWarranty.warranty_id}</strong>
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      VALID UNTIL
+                    </span>
+                    <strong>
+                      {formatDate(billWarranty.end_date)}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "12px",
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      DURATION
+                    </span>
+                    <strong>
+                      {billWarranty.duration_months} month
+                      {billWarranty.duration_months === 1
+                        ? ""
+                        : "s"}
+                    </strong>
+                  </div>
+
+                  {billWarranty.variant_name && (
+                    <div>
+                      <span
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          color: "#6b7280",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        VARIANT
+                      </span>
+                      <strong>
+                        {billWarranty.variant_name}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  className="secondary-button"
+                  type="button"
+                  style={{ marginTop: "20px" }}
+                  onClick={() => navigate("/customer/warranty")}
+                >
+                  View Warranty
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="panel">
             <div className="panel-header">
               <div>
-                <h3>Notes</h3>
-                <span>{isOrderDetails ? "Purchase information" : "Invoice information"}</span>
+                <h3>Purchase Notes</h3>
+                <span>Additional information about this bill</span>
               </div>
             </div>
 
             <div style={{ padding: "24px" }}>
-              {detail.notes || "No notes were added to this purchase."}
+              {detail.notes || "No additional notes were added to this bill."}
             </div>
           </div>
 
           <div className="panel">
             <div className="panel-header">
               <div>
-                <h3>{isOrderDetails ? "Order Summary" : "Invoice Summary"}</h3>
-                <span>Amount breakdown</span>
+                <h3>Bill Summary</h3>
+                <span>Price breakdown</span>
               </div>
             </div>
 
@@ -637,7 +1433,7 @@ export default function CustomerInvoices() {
                   fontSize: "20px",
                 }}
               >
-                <strong>Total</strong>
+                <strong>Total Amount</strong>
                 <strong>{money(detail.total_amount)}</strong>
               </div>
             </div>
@@ -659,11 +1455,19 @@ export default function CustomerInvoices() {
         }}
       >
         <div>
-          
-
-          <h1>My Invoices</h1>
-
+          <span className="page-eyebrow">DIGITAL BILL LOCKER</span>
+          <h1>My Bills</h1>
+          <p>All your digital purchase bills, safely stored in one place.</p>
         </div>
+
+        <button
+          className="primary-button"
+          type="button"
+          onClick={() => navigate("/customer/bills")}
+        >
+          <Plus size={16} />
+          Add Bill
+        </button>
       </div>
 
       {loading ? (
@@ -683,47 +1487,103 @@ export default function CustomerInvoices() {
         <div className="panel">
           <div className="panel-header">
             <div>
-              <h3>My Invoices</h3>
+              <h3>Your Bills</h3>
               <span>
-                {invoices.length} invoice
+                {invoices.length} bill
                 {invoices.length === 1 ? "" : "s"} found
               </span>
             </div>
           </div>
 
-          <div className="customer-invoices-desktop-table">
+          <div className="customer-invoices-desktop-controls">
+          <div className="customer-invoices-mobile-search">
+            <span>⌕</span>
+            <input
+              type="search"
+              placeholder="Search bills..."
+              value={invoiceSearch}
+              onChange={(event) =>
+                setInvoiceSearch(event.target.value)
+              }
+              aria-label="Search bills"
+            />
+          </div>
+
+          <select
+            value={invoiceStatus}
+            onChange={(event) =>
+              setInvoiceStatus(event.target.value)
+            }
+            aria-label="Filter bills by status"
+          >
+            <option value="all">All Status</option>
+            <option value="paid">Paid</option>
+            <option value="partial">Partial</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </div>
+
+        <div className="customer-invoices-desktop-table">
             <div style={{ overflowX: "auto" }}>
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th>Date</th>
+                    <th>Bill</th>
+                    <th>Purchase Date</th>
+                    <th>Products</th>
                     <th>Amount</th>
-                    <th>Status</th>
+                    <th>Payment</th>
                     <th>Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {invoices.length === 0 ? (
+                  {filteredInvoices.length === 0 ? (
                     <tr>
-                      <td colSpan={5}>
-                        You do not have any invoices yet.
+                      <td colSpan={6}>
+                        {invoices.length === 0 ? (
+                          <div className="customer-bills-empty-state">
+                            <div className="customer-bills-empty-icon">
+                              <Eye size={22} />
+                            </div>
+                            <strong>No bills yet</strong>
+                            <span>
+                              Your digital purchase bills will appear here
+                              after you add or receive a bill.
+                            </span>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              onClick={() => navigate("/customer/bills")}
+                            >
+                              Add a Bill
+                            </button>
+                          </div>
+                        ) : (
+                          "No bills match your search or filter."
+                        )}
                       </td>
                     </tr>
                   ) : (
-                    invoices.map((invoice) => (
+                    filteredInvoices.map((invoice) => (
                       <tr key={invoice.id}>
+                        <td>
+                          <strong>
+                            #{invoice.invoice_number ||
+                              invoice.invoice_id}
+                          </strong>
+                        </td>
+
+                        <td>
+                          {formatDate(invoice.invoice_date)}
+                        </td>
+
                         <td>
                           <strong>
                             {invoice.item_names?.length
                               ? invoice.item_names.join(", ")
                               : "No items"}
                           </strong>
-                        </td>
-
-                        <td>
-                          {formatDate(invoice.invoice_date)}
                         </td>
 
                         <td>
@@ -749,13 +1609,15 @@ export default function CustomerInvoices() {
                             className="secondary-button"
                             type="button"
                             onClick={() =>
-                              openInvoicePdf(
-                                invoice.invoice_id
+                              navigate(
+                                `/customer/invoices/${encodeURIComponent(
+                                  invoice.invoice_id
+                                )}`
                               )
                             }
                           >
                             <Eye size={15} />
-                            View
+                            View Bill
                           </button>
                         </td>
                       </tr>
@@ -773,19 +1635,19 @@ export default function CustomerInvoices() {
                 <span>⌕</span>
                 <input
                   type="search"
-                  placeholder="Search invoices..."
-                  value={mobileInvoiceSearch}
+                  placeholder="Search bills..."
+                  value={invoiceSearch}
                   onChange={(event) =>
-                    setMobileInvoiceSearch(event.target.value)
+                    setInvoiceSearch(event.target.value)
                   }
-                  aria-label="Search invoices"
+                  aria-label="Search bills"
                 />
               </div>
 
               <select
-                value={mobileInvoiceStatus}
+                value={invoiceStatus}
                 onChange={(event) =>
-                  setMobileInvoiceStatus(event.target.value)
+                  setInvoiceStatus(event.target.value)
                 }
                 aria-label="Filter invoices by status"
               >
@@ -800,13 +1662,13 @@ export default function CustomerInvoices() {
               <div className="customer-invoices-mobile-empty">
                 Loading your invoices...
               </div>
-            ) : filteredMobileInvoices.length === 0 ? (
+            ) : filteredInvoices.length === 0 ? (
               <div className="customer-invoices-mobile-empty">
-                No invoices found.
+                No bills found.
               </div>
             ) : (
               <div className="customer-invoices-mobile-list">
-                {filteredMobileInvoices.map((invoice) => (
+                {filteredInvoices.map((invoice) => (
                   <article
                     className="customer-invoice-mobile-card"
                     key={invoice.id}
@@ -863,13 +1725,15 @@ export default function CustomerInvoices() {
                         type="button"
                         className="customer-invoice-mobile-view"
                         onClick={() =>
-                          openInvoicePdf(
-                            invoice.invoice_id
+                          navigate(
+                            `/customer/invoices/${encodeURIComponent(
+                              invoice.invoice_id
+                            )}`
                           )
                         }
                       >
                         <Eye size={15} />
-                        View Invoice
+                        View Bill
                       </button>
                     </div>
                   </article>

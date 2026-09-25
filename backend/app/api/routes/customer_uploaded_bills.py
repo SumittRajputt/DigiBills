@@ -2,17 +2,17 @@ from typing import Optional
 from decimal import Decimal
 from uuid import uuid4
 
-import razorpay
 
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy import String
 from sqlalchemy.orm import Session
 
 from app.api.authorization import require_permission
-from app.core.config import settings
 from app.api.dependencies import get_db
 from app.models.customer_uploaded_bill import CustomerUploadedBill
+from app.models.customer_digibill import CustomerDigiBill
 from app.models.customer_bill_extraction import CustomerBillExtraction
 from app.models.user import User
 from app.services.customer_digibill_service import create_customer_digibill
@@ -42,29 +42,16 @@ from app.services.customer_warranty_confirmation_service import (
     prepare_warranty_confirmation,
 )
 from app.services.subscription_service import get_active_subscription_for_customer
+from app.services.razorpay_service import (
+    create_razorpay_order,
+    verify_razorpay_payment,
+)
 
 
 router = APIRouter(
     prefix="/customer/uploaded-bills",
     tags=["Customer Uploaded Bills"],
 )
-
-
-def _get_razorpay_client():
-    if (
-        not settings.razorpay_key_id
-        or not settings.razorpay_key_secret
-    ):
-        raise RuntimeError(
-            "Razorpay credentials are not configured."
-        )
-
-    return razorpay.Client(
-        auth=(
-            settings.razorpay_key_id,
-            settings.razorpay_key_secret,
-        )
-    )
 
 
 def _generate_bill_id() -> str:
@@ -143,8 +130,13 @@ def download_customer_uploaded_bill(
     uploaded_bill = (
         db.query(CustomerUploadedBill)
         .filter(
-            CustomerUploadedBill.bill_id == bill_id,
-            CustomerUploadedBill.customer_id == customer.id,
+            (
+                (CustomerUploadedBill.bill_id == bill_id)
+                | (
+                    CustomerUploadedBill.id.cast(String)
+                    == bill_id
+                )
+            )
         )
         .first()
     )
@@ -154,6 +146,23 @@ def download_customer_uploaded_bill(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Uploaded bill not found.",
         )
+
+    if uploaded_bill.customer_id != customer.id:
+        transferred_digibill = (
+            db.query(CustomerDigiBill)
+            .filter(
+                CustomerDigiBill.uploaded_bill_id == uploaded_bill.id,
+                CustomerDigiBill.customer_id == customer.id,
+                CustomerDigiBill.status == "confirmed",
+            )
+            .first()
+        )
+
+        if transferred_digibill is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Uploaded bill not found.",
+            )
 
     file_path = Path(uploaded_bill.storage_path)
 
@@ -684,53 +693,18 @@ async def verify_customer_bill_payment(
         )
 
     try:
-        client = _get_razorpay_client()
-
-        client.utility.verify_payment_signature(
-            {
-                "razorpay_order_id": razorpay_order_id,
-                "razorpay_payment_id": razorpay_payment_id,
-                "razorpay_signature": razorpay_signature,
-            }
+        payment = verify_razorpay_payment(
+            razorpay_order_id=razorpay_order_id,
+            razorpay_payment_id=razorpay_payment_id,
+            razorpay_signature=razorpay_signature,
+            expected_amount=900,
+            expected_currency="INR",
         )
-
-        # Fetch the actual payment from Razorpay.
-        payment = client.payment.fetch(razorpay_payment_id)
-
-
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid Razorpay payment signature.",
+            detail=str(exc),
         ) from exc
-
-    # Payment must belong to this Razorpay order.
-    if payment.get("order_id") != razorpay_order_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay payment does not belong to this order.",
-        )
-
-    # ₹9 = 900 paise.
-    if int(payment.get("amount", 0)) != 900:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay payment amount is invalid.",
-        )
-
-    # Currency must be INR.
-    if payment.get("currency") != "INR":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay payment currency is invalid.",
-        )
-
-    # Payment must be captured.
-    if payment.get("status") != "captured":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Razorpay payment has not been captured.",
-        )
 
     uploaded_bill.razorpay_payment_id = razorpay_payment_id
     uploaded_bill.transaction_reference = razorpay_payment_id
@@ -815,19 +789,14 @@ async def upload_customer_bill(
         bill_status = "payment_pending"
 
         try:
-            client = _get_razorpay_client()
-
-            order = client.order.create(
-                {
-                    "amount": 900,
-                    "currency": "INR",
-                    "receipt": bill_id,
-                    "notes": {
-                        "purpose": "Customer Uploaded Bill",
-                        "bill_id": bill_id,
-                        "customer_id": str(customer.id),
-                    },
-                }
+            order = create_razorpay_order(
+                amount=900,
+                receipt=bill_id,
+                notes={
+                    "purpose": "Customer Uploaded Bill",
+                    "bill_id": bill_id,
+                    "customer_id": str(customer.id),
+                },
             )
 
             razorpay_order_id = order["id"]

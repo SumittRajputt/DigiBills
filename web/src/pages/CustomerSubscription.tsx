@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -10,7 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { apiFetch } from "../api";
+import { API_BASE_URL, apiFetch } from "../api";
 
 type CustomerPlan = {
   id: string;
@@ -26,6 +26,41 @@ type CustomerPlan = {
   features: string | null;
   limits: string | null;
   is_active: boolean;
+};
+
+interface SubscriptionRazorpayPaymentResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+type CustomerInvoice = {
+  id: string;
+  invoice_id: string;
+  retailer_id: string | null;
+  subscription_id: string | null;
+  employee_id: string | null;
+  customer_id: string;
+  invoice_number: string | null;
+  invoice_date: string;
+  item_names: string[];
+  subtotal: string;
+  discount_amount: string;
+  tax_amount: string;
+  customer_bill_charge: string;
+  total_amount: string;
+  payment_status: string;
+  status: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type RazorpayOrderResponse = {
+  invoice_id: string;
+  razorpay_order_id: string;
+  amount: string;
+  currency: string;
 };
 
 type Subscription = {
@@ -44,6 +79,47 @@ type Subscription = {
   created_at: string;
   updated_at: string;
 };
+
+const RAZORPAY_SCRIPT_URL =
+  "https://checkout.razorpay.com/v1/checkout.js";
+
+const RAZORPAY_KEY_ID =
+  import.meta.env.VITE_RAZORPAY_KEY_ID as string | undefined;
+
+async function loadRazorpay(): Promise<boolean> {
+  if (window.Razorpay) {
+    return true;
+  }
+
+  const existingScript =
+    document.querySelector<HTMLScriptElement>(
+      `script[src="${RAZORPAY_SCRIPT_URL}"]`
+    );
+
+  if (existingScript) {
+    return new Promise((resolve) => {
+      existingScript.addEventListener(
+        "load",
+        () => resolve(Boolean(window.Razorpay)),
+        { once: true }
+      );
+      existingScript.addEventListener(
+        "error",
+        () => resolve(false),
+        { once: true }
+      );
+    });
+  }
+
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = RAZORPAY_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve(Boolean(window.Razorpay));
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
 
 export default function CustomerSubscription() {
   const [plans, setPlans] = useState<CustomerPlan[]>([]);
@@ -168,9 +244,6 @@ export default function CustomerSubscription() {
         "/subscriptions",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: JSON.stringify({
             plan_id: plan.plan_id,
           }),
@@ -179,12 +252,129 @@ export default function CustomerSubscription() {
 
       setCurrentSubscription(subscription);
 
-      setSuccess(`${plan.name} subscription started successfully.`);
+      const invoices = await apiFetch<CustomerInvoice[]>(
+        "/customer/invoices"
+      );
+
+      const subscriptionInvoice = invoices.find(
+        (invoice) =>
+          invoice.subscription_id === subscription.id &&
+          ["unpaid", "partial"].includes(
+            invoice.payment_status.toLowerCase()
+          )
+      );
+
+      if (!subscriptionInvoice) {
+        if (subscription.status === "trialing") {
+          setSuccess(
+            `${plan.name} subscription started with a ${plan.trial_days}-day free trial.`
+          );
+          return;
+        }
+
+        throw new Error(
+          "Subscription invoice was not found."
+        );
+      }
+
+      if (!RAZORPAY_KEY_ID) {
+        throw new Error(
+          "Razorpay is not configured in the customer app."
+        );
+      }
+
+      const razorpayLoaded = await loadRazorpay();
+
+      if (!razorpayLoaded || !window.Razorpay) {
+        throw new Error(
+          "Unable to load Razorpay Checkout."
+        );
+      }
+
+      const RazorpayCheckout = window.Razorpay;
+
+      const order = await apiFetch<RazorpayOrderResponse>(
+        `/subscriptions/invoices/${encodeURIComponent(
+          subscriptionInvoice.invoice_id
+        )}/razorpay-order`,
+        {
+          method: "POST",
+        }
+      );
+
+      await new Promise<void>((resolve, reject) => {
+        const checkout = new RazorpayCheckout({
+          key: RAZORPAY_KEY_ID,
+          amount: Math.round(
+            Number(order.amount) * 100
+          ),
+          currency: order.currency,
+          name: "DigiBills",
+          description: `${plan.name} subscription`,
+          order_id: order.razorpay_order_id,
+
+          handler: async (
+            response: SubscriptionRazorpayPaymentResponse
+          ) => {
+            try {
+              await apiFetch(
+                `/subscriptions/invoices/${encodeURIComponent(
+                  subscriptionInvoice.invoice_id
+                )}/verify-razorpay-payment`,
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    razorpay_order_id:
+                      response.razorpay_order_id,
+                    razorpay_payment_id:
+                      response.razorpay_payment_id,
+                    razorpay_signature:
+                      response.razorpay_signature,
+                  }),
+                }
+              );
+
+              const refreshedSubscription =
+                await apiFetch<Subscription>(
+                  "/subscriptions/me"
+                );
+
+              setCurrentSubscription(
+                refreshedSubscription
+              );
+
+              setSuccess(
+                `${plan.name} subscription activated successfully.`
+              );
+
+              resolve();
+            } catch (err) {
+              reject(err);
+            }
+          },
+
+          modal: {
+            ondismiss: () => {
+              reject(
+                new Error(
+                  "Payment was cancelled. Your subscription is still pending payment."
+                )
+              );
+            },
+          },
+
+          theme: {
+            color: "#2563eb",
+          },
+        });
+
+        checkout.open();
+      });
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to create subscription."
+          : "Unable to complete subscription payment."
       );
     } finally {
       setCreatingPlan("");

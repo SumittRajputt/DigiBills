@@ -43,6 +43,24 @@ class CustomerDigiBill(Base):
         nullable=False,
     )
 
+    verified_serial_number: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+        index=True,
+    )
+
+    serial_verification_status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="not_required",
+        server_default="not_required",
+    )
+
+    serial_verified_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     invoice_number: Mapped[Optional[str]] = mapped_column(
         String(100),
         nullable=True,

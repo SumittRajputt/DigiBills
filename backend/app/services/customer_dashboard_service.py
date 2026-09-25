@@ -5,6 +5,7 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.models.customer import Customer
+from app.models.customer_digibill import CustomerDigiBill
 from app.models.invoice import Invoice
 from app.models.invoice_item import InvoiceItem
 from app.models.payment import Payment
@@ -46,13 +47,39 @@ def get_customer_dashboard(
 
     total_invoices = len(invoices)
 
+    digibills = db.execute(
+        select(CustomerDigiBill).where(
+            CustomerDigiBill.customer_id == customer_id,
+            CustomerDigiBill.status == "confirmed",
+        )
+    ).scalars().all()
+
+    digibill_total_purchases = Decimal("0.00")
+
+    for digibill in digibills:
+        totals = (
+            digibill.totals
+            if isinstance(digibill.totals, dict)
+            else {}
+        )
+
+        total_amount = totals.get("total_amount")
+
+        if total_amount is not None:
+            try:
+                digibill_total_purchases += Decimal(
+                    str(total_amount)
+                )
+            except (TypeError, ValueError):
+                pass
+
     total_purchases = sum(
         (
             Decimal(str(invoice.total_amount))
             for invoice in invoices
         ),
         Decimal("0.00"),
-    )
+    ) + digibill_total_purchases
 
     def get_net_paid(invoice_id):
         payments = db.execute(
@@ -121,6 +148,37 @@ def get_customer_dashboard(
             invoice_status["partial"] += 1
         else:
             invoice_status["unpaid"] += 1
+
+    for digibill in digibills:
+        payment = (
+            digibill.payment
+            if isinstance(digibill.payment, dict)
+            else {}
+        )
+
+        payment_status = str(
+            payment.get("payment_status") or ""
+        ).lower()
+
+        if payment_status in {
+            "paid",
+            "completed",
+            "captured",
+        }:
+            paid_amount = payment.get("paid_amount")
+
+            if paid_amount is not None:
+                try:
+                    amount_paid += Decimal(
+                        str(paid_amount)
+                    )
+                except (TypeError, ValueError):
+                    pass
+
+    total_orders = (
+        total_invoices
+        + len(digibills)
+    )
 
     spending_rows = db.execute(
         select(
@@ -261,7 +319,69 @@ def get_customer_dashboard(
         )
     ) or 0
 
-    active_warranties = db.scalar(
+    # Include unique products from confirmed customer-uploaded DigiBills.
+    # Multiple DigiBill records can represent the same underlying purchase
+    # after transfers, so count each purchase/product only once.
+    uploaded_product_keys = set()
+
+    digibills_for_product_count = db.execute(
+        select(CustomerDigiBill)
+        .where(
+            CustomerDigiBill.customer_id == customer_id,
+            CustomerDigiBill.status == "confirmed",
+        )
+        .order_by(
+            CustomerDigiBill.invoice_date.desc(),
+            CustomerDigiBill.created_at.desc(),
+        )
+    ).scalars().all()
+
+    for digibill in digibills_for_product_count:
+        products = (
+            digibill.products
+            if isinstance(digibill.products, list)
+            else []
+        )
+
+        payment = (
+            digibill.payment
+            if isinstance(digibill.payment, dict)
+            else {}
+        )
+
+        transaction_reference = payment.get(
+            "transaction_reference"
+        )
+
+        for product_data in products:
+            if not isinstance(product_data, dict):
+                continue
+
+            if transaction_reference:
+                product_key = (
+                    digibill.invoice_number,
+                    digibill.invoice_date,
+                    transaction_reference,
+                    product_data.get("product_name"),
+                    product_data.get("brand"),
+                    product_data.get("model_number"),
+                    product_data.get("total_amount"),
+                )
+
+                uploaded_product_keys.add(product_key)
+            else:
+                uploaded_product_keys.add(
+                    (
+                        digibill.digibill_id,
+                        product_data.get("product_name"),
+                        product_data.get("brand"),
+                        product_data.get("model_number"),
+                    )
+                )
+
+    my_products += len(uploaded_product_keys)
+
+    active_retailer_warranties = db.scalar(
         select(func.count(Warranty.id))
         .join(
             Invoice,
@@ -273,6 +393,48 @@ def get_customer_dashboard(
             Warranty.status == "active",
         )
     ) or 0
+
+    active_digibill_warranties = 0
+
+    digibills = db.execute(
+        select(CustomerDigiBill).where(
+            CustomerDigiBill.customer_id == customer_id,
+            CustomerDigiBill.status == "confirmed",
+        )
+    ).scalars().all()
+
+    for digibill in digibills:
+        warranty_evidence = (
+            digibill.warranty_evidence
+            if isinstance(digibill.warranty_evidence, dict)
+            else {}
+        )
+
+        final_warranty = warranty_evidence.get("final")
+
+        if not isinstance(final_warranty, dict):
+            continue
+
+        if final_warranty.get("has_warranty") != "yes":
+            continue
+
+        end_date = final_warranty.get("end_date")
+
+        if end_date:
+            try:
+                from datetime import date
+
+                if date.fromisoformat(str(end_date)) < date.today():
+                    continue
+            except (TypeError, ValueError):
+                pass
+
+        active_digibill_warranties += 1
+
+    active_warranties = (
+        active_retailer_warranties
+        + active_digibill_warranties
+    )
 
     my_returns = db.scalar(
         select(func.count(SalesReturn.id)).where(
@@ -353,7 +515,7 @@ def get_customer_dashboard(
         },
         "total_purchases": str(total_purchases),
         "total_invoices": total_invoices,
-        "total_orders": total_invoices,
+        "total_orders": total_orders,
         "amount_paid": str(amount_paid),
         "refunds_received": str(refunds_received),
         "outstanding_amount": str(outstanding_amount),
