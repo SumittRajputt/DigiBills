@@ -136,6 +136,8 @@ def create_payment(
     notes: Optional[str] = None,
     retailer_id: Optional[uuid.UUID] = None,
     user_id: Optional[uuid.UUID] = None,
+    razorpay_order_id: Optional[str] = None,
+    razorpay_payment_id: Optional[str] = None,
 ) -> Payment:
     if invoice.status != "active":
         raise ValueError(
@@ -263,7 +265,7 @@ def create_payment(
         notification_type="payment",
         title="Payment Received",
         message=(
-            f"Payment of ₹{payment.amount:.2f} has been recorded "
+            f"Payment of â‚¹{payment.amount:.2f} has been recorded "
             f"for bill {invoice.invoice_id}."
         ),
         reference_type="payment",

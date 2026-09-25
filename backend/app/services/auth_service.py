@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+﻿from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.security import (
@@ -213,24 +213,47 @@ def authenticate_user(
     if role_name is None:
         return None
 
-    # Find the selected account type for this phone number.
-    # The same phone number may belong to both a retailer
-    # and a customer account.
-    statement = (
-        select(User)
-        .join(
-            user_roles,
-            user_roles.c.user_id == User.id,
+    # Customers can log in using either phone number or email.
+    # Other account types continue to use phone number login.
+    if account_type == "customer":
+        login_identifier = phone_number.strip()
+
+        statement = (
+            select(User)
+            .join(
+                user_roles,
+                user_roles.c.user_id == User.id,
+            )
+            .join(
+                Role,
+                Role.id == user_roles.c.role_id,
+            )
+            .where(
+                or_(
+                    User.phone_number == login_identifier,
+                    User.email == login_identifier,
+                ),
+                Role.name == role_name,
+            )
         )
-        .join(
-            Role,
-            Role.id == user_roles.c.role_id,
+    else:
+        # The same phone number may belong to both a retailer
+        # and a customer account.
+        statement = (
+            select(User)
+            .join(
+                user_roles,
+                user_roles.c.user_id == User.id,
+            )
+            .join(
+                Role,
+                Role.id == user_roles.c.role_id,
+            )
+            .where(
+                User.phone_number == phone_number,
+                Role.name == role_name,
+            )
         )
-        .where(
-            User.phone_number == phone_number,
-            Role.name == role_name,
-        )
-    )
 
     user = db.execute(statement).scalars().first()
 
@@ -421,4 +444,3 @@ def register_retailer(
     except Exception:
         db.rollback()
         raise
-

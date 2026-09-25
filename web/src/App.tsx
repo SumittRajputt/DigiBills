@@ -211,7 +211,7 @@ function App() {
       <div className="launcher">
         <div className="launcher-card">
           <div className="brand large">
-            <span className="brand-mark">✣</span> DigiBills
+            <span className="brand-mark">Ã¢Å“Â£</span> DigiBills
           </div>
           <p>Loading your account...</p>
         </div>
@@ -633,7 +633,7 @@ function AccountTypePage({
     <div className="account-type-page">
       <div className="account-type-card">
         <div className="brand large">
-          <span className="brand-mark">✣</span> DigiBills
+          <span className="brand-mark">Ã¢Å“Â£</span> DigiBills
         </div>
 
         <div className="account-type-heading">
@@ -671,7 +671,7 @@ function AccountTypePage({
               </span>
             </span>
 
-            <span className="account-type-arrow">→</span>
+            <span className="account-type-arrow">Ã¢â€ â€™</span>
           </button>
 
           <button
@@ -692,7 +692,7 @@ function AccountTypePage({
               </span>
             </span>
 
-            <span className="account-type-arrow">→</span>
+            <span className="account-type-arrow">Ã¢â€ â€™</span>
           </button>
 
           {isLogin && (
@@ -728,7 +728,7 @@ function AccountTypePage({
                 <span>Access your assigned work dashboard</span>
               </span>
 
-              <span className="account-type-arrow">→</span>
+              <span className="account-type-arrow">Ã¢â€ â€™</span>
               </button>
             </>
           )}
@@ -832,7 +832,7 @@ function LoginPage({
 
             <div className="customer-login-visual-content">
               <div className="customer-login-visual-logo">
-                <span className="customer-login-visual-logo-mark">✣</span>
+                <span className="customer-login-visual-logo-mark">Ã¢Å“Â£</span>
                 <span>DigiBills</span>
               </div>
 
@@ -860,13 +860,13 @@ function LoginPage({
 
                   <div className="customer-login-illustration-total">
                     <small>Total</small>
-                    <strong>₹24,560</strong>
+                    <strong>Ã¢â€šÂ¹24,560</strong>
                   </div>
                 </div>
 
                 <div className="customer-login-illustration-phone">
                   <div className="customer-login-phone-notch" />
-                  <div className="customer-login-phone-logo">✣</div>
+                  <div className="customer-login-phone-logo">Ã¢Å“Â£</div>
                   <strong>DigiBills</strong>
                   <span>Your bills, always with you</span>
                 </div>
@@ -896,7 +896,7 @@ function LoginPage({
           </button>
 
           <div className="brand large">
-            <span className="brand-mark">✣</span>
+            <span className="brand-mark">Ã¢Å“Â£</span>
             DigiBills
           </div>
 
@@ -1010,7 +1010,7 @@ function LoginPage({
                   }
                 />
                 <span className="customer-login-checkmark">
-                  {rememberMe ? "✓" : ""}
+                  {rememberMe ? "Ã¢Å“â€œ" : ""}
                 </span>
                 <span>Remember me</span>
               </label>
@@ -1179,7 +1179,7 @@ function DashboardFrame({
     return () => {
       cancelled = true;
     };
-  }, [role]);
+  }, [role, location.pathname]);
 
   const nav = {
     super_admin: [
@@ -1362,7 +1362,7 @@ function DashboardFrame({
         style={{ "--accent": meta.color } as React.CSSProperties}
       >
         <div className="brand">
-          <span className="brand-mark">✣</span> DigiBills
+          <span className="brand-mark">Ã¢Å“Â£</span> DigiBills
         </div>
 
         <div className="profile-mini">
@@ -1570,7 +1570,7 @@ function DashboardFrame({
       >
         <div className="mobile-sidebar-header">
           <div className="brand">
-            <span className="brand-mark">✣</span> DigiBills
+            <span className="brand-mark">Ã¢Å“Â£</span> DigiBills
           </div>
 
           <button
@@ -1579,7 +1579,7 @@ function DashboardFrame({
             aria-label="Close menu"
             onClick={closeMobileMenu}
           >
-            ×
+            Ãƒâ€”
           </button>
         </div>
 
